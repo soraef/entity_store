@@ -1,0 +1,9 @@
+name: opendna_corporate_site
+
+packages:
+  - packages/**
+
+scripts:
+  analyze: melos exec -- "dart analyze ."
+  gen: melos exec -- "flutter pub run build_runner watch --delete-conflicting-outputs"
+  get: melos exec -- "flutter pub get" 
