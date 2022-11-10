@@ -5,10 +5,10 @@ abstract class RepositoryGet<Id, R extends Entity<Id>> {
   Future<List<R>> getByIds(List<Id> ids);
 }
 
-abstract class ListParams {}
+abstract class IListParams {}
 
-abstract class RepositoryList<R extends Entity> {
-  Future<List<R>> list(ListParams params);
+abstract class RepositoryList<R extends Entity, Params extends IListParams> {
+  Future<List<R>> list(Params params);
 }
 
 abstract class RepositorySave<E extends Entity> {
@@ -29,10 +29,11 @@ abstract class RepositoryCursor<R extends Entity> {
   Future<List<R>> cursor(CursorParams params);
 }
 
-abstract class RepositoryAll<Id, E extends Entity<Id>>
+abstract class RepositoryAll<Id, E extends Entity<Id>,
+        ListParams extends IListParams>
     with
         RepositoryGet<Id, E>,
-        RepositoryList<E>,
+        RepositoryList<E, ListParams>,
         RepositoryCursor<E>,
         RepositorySave<E>,
         RepositoryDelete<E> {}

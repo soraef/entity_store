@@ -56,7 +56,7 @@ class CustomFirestoreListParams implements IFirestoreListParams {
   }
 }
 
-mixin FirestoreList<Id extends FirestoreId, E extends Entity<Id>>
+mixin FirestoreList<Id, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositoryList<E> {
   @override
   Future<List<E>> list(covariant IFirestoreListParams params) async {
@@ -72,11 +72,7 @@ mixin FirestoreList<Id extends FirestoreId, E extends Entity<Id>>
         .map((data) {
           if (data == null) return null;
 
-          try {
-            return converter.fromJson(data);
-          } catch (e) {
-            return null;
-          }
+          return converter.fromJson(data);
         })
         .whereType<E>()
         .toList();

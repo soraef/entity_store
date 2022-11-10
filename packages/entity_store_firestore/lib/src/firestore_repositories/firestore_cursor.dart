@@ -5,8 +5,7 @@ import 'package:entity_store_firestore/src/firestore_id.dart';
 import 'package:entity_store_firestore/src/firestore_repository.dart';
 import 'package:entity_store_firestore/src/firestore_where.dart';
 
-class CustomFirestoreCursorParams<Id extends FirestoreId>
-    implements CursorParams {
+class CustomFirestoreCursorParams<Id> implements CursorParams {
   final FirestoreCollection collection;
   final FirestoreWhere where;
   final Id? latestId;
@@ -18,7 +17,7 @@ class CustomFirestoreCursorParams<Id extends FirestoreId>
   });
 }
 
-class FirestoreCursorParams<Id extends FirestoreId> implements CursorParams {
+class FirestoreCursorParams<Id> implements CursorParams {
   final FirestoreCollection collection;
   final int? limit;
   final String? orderByField;
@@ -32,7 +31,7 @@ class FirestoreCursorParams<Id extends FirestoreId> implements CursorParams {
   });
 }
 
-mixin FirestoreCursor<Id extends FirestoreId, E extends Entity<Id>>
+mixin FirestoreCursor<Id, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositoryCursor<E> {
   @override
   Future<List<E>> cursor(CursorParams params) async {
@@ -50,7 +49,7 @@ mixin FirestoreCursor<Id extends FirestoreId, E extends Entity<Id>>
 
       if (params.latestId != null) {
         query = colRef.startAfterDocument(
-            await params.collection.documentRef(params.latestId!.value).get());
+            await params.collection.documentRef(params.latestId!).get());
       }
 
       final snapshot = await query.get();
@@ -61,7 +60,7 @@ mixin FirestoreCursor<Id extends FirestoreId, E extends Entity<Id>>
 
       if (params.latestId != null) {
         query = query.startAfterDocument(
-            await params.collection.documentRef(params.latestId!.value).get());
+            await params.collection.documentRef(params.latestId!).get());
       }
 
       final snapshot = await query.get();

@@ -2,14 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 
-mixin FirestoreMapFieldSave<Id extends FirestoreId, E extends Entity<Id>>
+mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositorySave<E> {
   @override
   Future<void> save(E entity) async {
-    await entity.id.collection.collectionRef().doc(batchId(entity)).set(
+    final collection = getCollection(entity.id);
+    await collection.collectionRef().doc(batchId(entity)).set(
       {
         fieldName: {
-          entity.id.value: converter.toJson(entity),
+          collection.toDocumentId(entity.id): converter.toJson(entity),
         },
         ...toJson(entity)
       },
@@ -24,11 +25,13 @@ mixin FirestoreMapFieldSave<Id extends FirestoreId, E extends Entity<Id>>
     }
 
     final entity = entities.first;
+    final collection = getCollection(entity.id);
 
-    await entity.id.collection.collectionRef().doc(batchId(entity)).set(
+    await collection.collectionRef().doc(batchId(entity)).set(
       {
         fieldName: {
-          for (final e in entities) e.id.value: converter.toJson(e),
+          for (final e in entities)
+            collection.toDocumentId(e.id): converter.toJson(e),
         },
         ...toJson(entity)
       },
@@ -41,14 +44,15 @@ mixin FirestoreMapFieldSave<Id extends FirestoreId, E extends Entity<Id>>
   Map<String, dynamic> toJson(E entity);
 }
 
-mixin FirestoreMapFieldDelete<Id extends FirestoreId, E extends Entity<Id>>
+mixin FirestoreMapFieldDelete<Id, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositoryDelete<E> {
   @override
   Future<void> delete(E entity) async {
-    await entity.id.collection.collectionRef().doc(batchId(entity)).set(
+    final collection = getCollection(entity.id);
+    await collection.collectionRef().doc(batchId(entity)).set(
       {
         fieldName: {
-          entity.id.value: FieldValue.delete(),
+          collection.toDocumentId(entity.id): FieldValue.delete(),
         },
       },
       SetOptions(merge: true),
@@ -73,7 +77,7 @@ class MapFieldListParams implements ListParams {
   }
 }
 
-mixin FirestoreMapFieldList<Id extends FirestoreId, E extends Entity<Id>>
+mixin FirestoreMapFieldList<Id, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositoryList<E> {
   @override
   Future<List<E>> list(covariant MapFieldListParams params) async {

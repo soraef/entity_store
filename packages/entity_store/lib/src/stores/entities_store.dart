@@ -26,10 +26,11 @@ mixin GetEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
   }
 }
 
-mixin ListEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
-  RepositoryList<E> get repositoryList;
+mixin ListEntitiesStore<Id, E extends Entity<Id>, Params extends IListParams>
+    on Store<EntityMap<Id, E>> {
+  RepositoryList<E, Params> get repositoryList;
 
-  Future<List<E>> list(ListParams params) async {
+  Future<List<E>> list(Params params) async {
     final entities = await repositoryList.list(params);
     update((prev) => prev.putAll(entities));
     return entities;
@@ -94,16 +95,16 @@ mixin DeleteEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
   }
 }
 
-abstract class EntitiesStore<Id, E extends Entity<Id>>
-    extends Store<EntityMap<Id, E>>
+abstract class EntitiesStore<Id, E extends Entity<Id>,
+        Params extends IListParams> extends Store<EntityMap<Id, E>>
     with
         GetEntitiesStore<Id, E>,
-        ListEntitiesStore<Id, E>,
+        ListEntitiesStore<Id, E, Params>,
         CursorEntitiesStore<Id, E>,
         SaveEntitiesStore<Id, E>,
         DeleteEntitiesStore<Id, E> {
   EntitiesStore(this.repository);
-  final RepositoryAll<Id, E> repository;
+  final RepositoryAll<Id, E, Params> repository;
 
   @override
   RepositoryCursor<E> get repositoryCursor => repository;
@@ -115,7 +116,7 @@ abstract class EntitiesStore<Id, E extends Entity<Id>>
   RepositoryGet<Id, E> get repositoryGet => repository;
 
   @override
-  RepositoryList<E> get repositoryList => repository;
+  RepositoryList<E, Params> get repositoryList => repository;
 
   @override
   RepositorySave<E> get repositorySave => repository;
