@@ -6,7 +6,7 @@ mixin FirestoreMapFieldSave<Id extends FirestoreId, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositorySave<E> {
   @override
   Future<void> save(E entity) async {
-    await entity.id.documentRef().set(
+    await entity.id.collection.collectionRef().doc(batchId(entity)).set(
       {
         fieldName: {
           entity.id.value: converter.toJson(entity),
@@ -17,8 +17,27 @@ mixin FirestoreMapFieldSave<Id extends FirestoreId, E extends Entity<Id>>
     );
   }
 
+  @override
+  Future<void> saveAll(Iterable<E> entities) async {
+    if (entities.isEmpty) {
+      throw Error();
+    }
+
+    final entity = entities.first;
+
+    await entity.id.collection.collectionRef().doc(batchId(entity)).set(
+      {
+        fieldName: {
+          for (final e in entities) e.id.value: converter.toJson(e),
+        },
+        ...toJson(entity)
+      },
+      SetOptions(merge: true),
+    );
+  }
+
   String get fieldName;
-  String documentId(E entity);
+  String batchId(E entity);
   Map<String, dynamic> toJson(E entity);
 }
 
@@ -26,7 +45,7 @@ mixin FirestoreMapFieldDelete<Id extends FirestoreId, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositoryDelete<E> {
   @override
   Future<void> delete(E entity) async {
-    await entity.id.documentRef().set(
+    await entity.id.collection.collectionRef().doc(batchId(entity)).set(
       {
         fieldName: {
           entity.id.value: FieldValue.delete(),
@@ -37,7 +56,7 @@ mixin FirestoreMapFieldDelete<Id extends FirestoreId, E extends Entity<Id>>
   }
 
   String get fieldName;
-  String documentId(E entity);
+  String batchId(E entity);
 }
 
 class MapFieldListParams implements ListParams {
@@ -82,5 +101,4 @@ mixin FirestoreMapFieldList<Id extends FirestoreId, E extends Entity<Id>>
   }
 
   String get fieldName;
-  String documentId(E entity);
 }

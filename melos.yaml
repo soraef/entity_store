@@ -1,4 +1,4 @@
-name: opendna_corporate_site
+name: entity_store
 
 packages:
   - packages/**

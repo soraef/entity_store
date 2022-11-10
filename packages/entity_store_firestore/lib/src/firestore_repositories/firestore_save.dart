@@ -11,6 +11,12 @@ mixin FirestoreSave<Id extends FirestoreId, E extends Entity<Id>>
         .documentRef()
         .set(converter.toJson(entity), SetOptions(merge: true));
   }
+
+  @override
+  Future<void> saveAll(Iterable<E> entities) async {
+    final futureList = entities.map((e) => save(e));
+    await Future.wait(futureList);
+  }
 }
 
 mixin FirestorePartialSave<Id extends FirestoreId, E extends Entity<Id>>
