@@ -23,8 +23,8 @@ class TodoStore extends RiverpodStore<Todos>
   RepositoryDelete<TodoId, Todo> get repositoryDelete => TodoRepo();
 
   @override
-  RepositoryList<Todo, FirestoreListParams<TodoId, Todo>> get repositoryList =>
-      TodoRepo();
+  RepositoryList<TodoId, Todo, FirestoreListParams<TodoId, Todo>>
+      get repositoryList => TodoRepo();
 
   @override
   RepositorySave<TodoId, Todo> get repositorySave => TodoRepo();

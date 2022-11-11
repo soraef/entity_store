@@ -4,7 +4,8 @@ import 'package:entity_store_firestore/src/collection.dart';
 import 'package:entity_store_firestore/src/firestore_repository.dart';
 import 'package:entity_store_firestore/src/firestore_where.dart';
 
-class FirestoreListParams<Id, E extends Entity<Id>> implements IListParams {
+class FirestoreListParams<Id, E extends Entity<Id>>
+    implements IListParams<Id, E> {
   final FirestoreCollection<Id, E> collection;
   final int? limit;
   final String? orderByField;
@@ -38,7 +39,7 @@ class FirestoreListParams<Id, E extends Entity<Id>> implements IListParams {
 
 mixin FirestoreList<Id, E extends Entity<Id>,
         Params extends FirestoreListParams<Id, E>>
-    implements FirestoreRepository<Id, E>, RepositoryList<E, Params> {
+    implements FirestoreRepository<Id, E>, RepositoryList<Id, E, Params> {
   @override
   Future<List<E>> list(covariant FirestoreListParams params) async {
     var ref = params.collection.collectionRef();

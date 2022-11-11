@@ -6,7 +6,10 @@ mixin FirestoreGet<Id, E extends Entity<Id>>
   @override
   Future<E?> get(Id id) async {
     final doc = await getCollection(id).documentRef(id).get();
-    return converter.fromJson(doc.data());
+    if (doc.exists) {
+      return converter.fromJson(doc.data());
+    }
+    return null;
   }
 
   @override

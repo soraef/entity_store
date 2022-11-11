@@ -26,9 +26,9 @@ mixin GetEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
   }
 }
 
-mixin ListEntitiesStore<Id, E extends Entity<Id>, Params extends IListParams>
-    on Store<EntityMap<Id, E>> {
-  RepositoryList<E, Params> get repositoryList;
+mixin ListEntitiesStore<Id, E extends Entity<Id>,
+    Params extends IListParams<Id, E>> on Store<EntityMap<Id, E>> {
+  RepositoryList<Id, E, Params> get repositoryList;
 
   Future<List<E>> list(Params params) async {
     final entities = await repositoryList.list(params);
@@ -95,7 +95,7 @@ mixin DeleteEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
 }
 
 abstract class EntitiesStore<Id, E extends Entity<Id>,
-        Params extends IListParams> extends Store<EntityMap<Id, E>>
+        Params extends IListParams<Id, E>> extends Store<EntityMap<Id, E>>
     with
         GetEntitiesStore<Id, E>,
         ListEntitiesStore<Id, E, Params>,
@@ -115,7 +115,7 @@ abstract class EntitiesStore<Id, E extends Entity<Id>,
   RepositoryGet<Id, E> get repositoryGet => repository;
 
   @override
-  RepositoryList<E, Params> get repositoryList => repository;
+  RepositoryList<Id, E, Params> get repositoryList => repository;
 
   @override
   RepositorySave<Id, E> get repositorySave => repository;

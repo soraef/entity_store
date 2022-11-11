@@ -63,7 +63,8 @@ mixin FirestoreMapFieldDelete<Id, E extends Entity<Id>>
   String batchId(E entity);
 }
 
-class MapFieldListParams implements IListParams {
+class MapFieldListParams<Id, E extends Entity<Id>>
+    implements IListParams<Id, E> {
   final FirestoreCollection collection;
   final String documentId;
 
@@ -80,7 +81,7 @@ class MapFieldListParams implements IListParams {
 mixin FirestoreMapFieldList<Id, E extends Entity<Id>>
     implements
         FirestoreRepository<Id, E>,
-        RepositoryList<E, MapFieldListParams> {
+        RepositoryList<Id, E, MapFieldListParams<Id, E>> {
   @override
   Future<List<E>> list(covariant MapFieldListParams params) async {
     var ref = params.collection.collectionRef();
