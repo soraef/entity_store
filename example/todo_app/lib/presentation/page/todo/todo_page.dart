@@ -44,7 +44,7 @@ class TodoPage extends HookConsumerWidget {
               ],
             ),
             Expanded(
-              child: ListView.builder(
+              child: ListView.separated(
                 itemBuilder: (BuildContext context, int index) {
                   final todo = todos.toList().elementAt(index);
                   return CheckboxListTile(
@@ -68,6 +68,9 @@ class TodoPage extends HookConsumerWidget {
                   );
                 },
                 itemCount: todos.length,
+                separatorBuilder: (BuildContext context, int index) {
+                  return Divider(height: 0);
+                },
               ),
             )
           ],
