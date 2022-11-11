@@ -14,14 +14,13 @@ mixin GetEntityStore<Id, E extends Entity<Id>> implements Store<E?> {
 
   /// StoreにEntityがなければ[get]してEntityを返す
   Future<E?> getUnlessExist(Id id) async {
-    if (state != null) return state;
+    if (value != null) return value;
     return await get(id);
   }
 }
 
-mixin SaveEntityStore<EntityId, E extends Entity<EntityId>>
-    implements Store<E?> {
-  RepositorySave<E> get repositorySave;
+mixin SaveEntityStore<Id, E extends Entity<Id>> implements Store<E?> {
+  RepositorySave<Id, E> get repositorySave;
 
   Future<E> save(E entity) async {
     await repositorySave.save(entity);
@@ -31,7 +30,7 @@ mixin SaveEntityStore<EntityId, E extends Entity<EntityId>>
 }
 
 mixin DeleteEntityStore<Id, E extends Entity<Id>> implements Store<E?> {
-  RepositoryDelete<E> get repositoryDelete;
+  RepositoryDelete<Id, E> get repositoryDelete;
 
   Future<E> delete(E entity) async {
     await repositoryDelete.delete(entity);

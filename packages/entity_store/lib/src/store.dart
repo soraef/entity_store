@@ -4,7 +4,7 @@ import 'entity_map.dart';
 typedef Updater<T> = T Function(T prev);
 
 abstract class Store<T> {
-  T get state;
+  T get value;
   void update(Updater<T> updater);
 }
 

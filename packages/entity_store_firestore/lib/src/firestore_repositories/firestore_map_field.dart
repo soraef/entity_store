@@ -3,7 +3,7 @@ import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 
 mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
-    implements FirestoreRepository<Id, E>, RepositorySave<E> {
+    implements FirestoreRepository<Id, E>, RepositorySave<Id, E> {
   @override
   Future<void> save(E entity) async {
     final collection = getCollection(entity.id);
@@ -45,7 +45,7 @@ mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
 }
 
 mixin FirestoreMapFieldDelete<Id, E extends Entity<Id>>
-    implements FirestoreRepository<Id, E>, RepositoryDelete<E> {
+    implements FirestoreRepository<Id, E>, RepositoryDelete<Id, E> {
   @override
   Future<void> delete(E entity) async {
     final collection = getCollection(entity.id);
@@ -63,7 +63,7 @@ mixin FirestoreMapFieldDelete<Id, E extends Entity<Id>>
   String batchId(E entity);
 }
 
-class MapFieldListParams implements ListParams {
+class MapFieldListParams implements IListParams {
   final FirestoreCollection collection;
   final String documentId;
 
@@ -78,7 +78,9 @@ class MapFieldListParams implements ListParams {
 }
 
 mixin FirestoreMapFieldList<Id, E extends Entity<Id>>
-    implements FirestoreRepository<Id, E>, RepositoryList<E> {
+    implements
+        FirestoreRepository<Id, E>,
+        RepositoryList<E, MapFieldListParams> {
   @override
   Future<List<E>> list(covariant MapFieldListParams params) async {
     var ref = params.collection.collectionRef();

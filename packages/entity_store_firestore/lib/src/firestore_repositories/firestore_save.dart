@@ -3,7 +3,7 @@ import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/src/firestore_repository.dart';
 
 mixin FirestoreSave<Id, E extends Entity<Id>>
-    implements FirestoreRepository<Id, E>, RepositorySave<E> {
+    implements FirestoreRepository<Id, E>, RepositorySave<Id, E> {
   @override
   Future<void> save(E entity) async {
     await getCollection(entity.id)

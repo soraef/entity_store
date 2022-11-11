@@ -11,7 +11,7 @@ mixin GetEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
     bool searchStore = false,
   }) async {
     if (searchStore) {
-      final entity = state.byId(id);
+      final entity = value.byId(id);
       if (entity != null) return entity;
     }
     final entity = await repositoryGet.get(id);
@@ -48,9 +48,8 @@ mixin CursorEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
   }
 }
 
-mixin SaveEntitiesStore<EntityId, E extends Entity<EntityId>>
-    on Store<EntityMap<EntityId, E>> {
-  RepositorySave<E> get repositorySave;
+mixin SaveEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
+  RepositorySave<Id, E> get repositorySave;
 
   Future<E> save(E entity) async {
     await repositorySave.save(entity);
@@ -86,7 +85,7 @@ mixin SavePartialEntitiesStore<Id, E extends MargeablePartialEntity<Id, E>>
 }
 
 mixin DeleteEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
-  RepositoryDelete<E> get repositoryDelete;
+  RepositoryDelete<Id, E> get repositoryDelete;
 
   Future<E> delete(E entity) async {
     await repositoryDelete.delete(entity);
@@ -110,7 +109,7 @@ abstract class EntitiesStore<Id, E extends Entity<Id>,
   RepositoryCursor<E> get repositoryCursor => repository;
 
   @override
-  RepositoryDelete<E> get repositoryDelete => repository;
+  RepositoryDelete<Id, E> get repositoryDelete => repository;
 
   @override
   RepositoryGet<Id, E> get repositoryGet => repository;
@@ -119,5 +118,5 @@ abstract class EntitiesStore<Id, E extends Entity<Id>,
   RepositoryList<E, Params> get repositoryList => repository;
 
   @override
-  RepositorySave<E> get repositorySave => repository;
+  RepositorySave<Id, E> get repositorySave => repository;
 }

@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 
 abstract class FirestoreCollection<Id, E extends Entity<Id>> extends Equatable {
   CollectionReference<dynamic> collectionRef();
+
   DocumentReference<dynamic> documentRef(Id id) {
     return collectionRef().doc(toDocumentId(id));
   }
@@ -12,12 +13,18 @@ abstract class FirestoreCollection<Id, E extends Entity<Id>> extends Equatable {
   String toDocumentId(Id id);
 }
 
-mixin FirestoreCollection1 implements FirestoreCollection {
+mixin FirestoreCollection1<Id, E extends Entity<Id>>
+    implements FirestoreCollection<Id, E> {
   String get collection1;
 
   @override
   CollectionReference<dynamic> collectionRef() {
     return FirebaseFirestore.instance.collection(collection1);
+  }
+
+  @override
+  DocumentReference<dynamic> documentRef(Id id) {
+    return collectionRef().doc(toDocumentId(id));
   }
 
   @override
@@ -32,7 +39,8 @@ mixin FirestoreCollection1 implements FirestoreCollection {
   bool? get stringify => true;
 }
 
-mixin FirestoreCollection2 implements FirestoreCollection {
+mixin FirestoreCollection2<Id, E extends Entity<Id>>
+    implements FirestoreCollection<Id, E> {
   String get collection1;
   String get document1;
   String get collection2;
@@ -43,6 +51,11 @@ mixin FirestoreCollection2 implements FirestoreCollection {
         .collection(collection1)
         .doc(document1)
         .collection(collection2);
+  }
+
+  @override
+  DocumentReference<dynamic> documentRef(Id id) {
+    return collectionRef().doc(toDocumentId(id));
   }
 
   @override

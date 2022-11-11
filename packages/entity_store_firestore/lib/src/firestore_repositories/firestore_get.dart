@@ -1,5 +1,4 @@
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store_firestore/src/firestore_id.dart';
 import 'package:entity_store_firestore/src/firestore_repository.dart';
 
 mixin FirestoreGet<Id, E extends Entity<Id>>
