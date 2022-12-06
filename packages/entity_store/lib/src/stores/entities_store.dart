@@ -2,27 +2,39 @@ import 'package:entity_store/src/entity.dart';
 import 'package:entity_store/src/entity_map.dart';
 import 'package:entity_store/src/repository.dart';
 import 'package:entity_store/src/store.dart';
+import 'package:result_type/result_type.dart';
 
 mixin GetEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
   RepositoryGet<Id, E> get repositoryGet;
 
-  Future<E?> get(
+  Future<Result<E?, Exception>> get(
     Id id, {
     bool searchStore = false,
   }) async {
     if (searchStore) {
       final entity = value.byId(id);
-      if (entity != null) return entity;
+      if (entity != null) return Success(entity);
     }
-    final entity = await repositoryGet.get(id);
+
+    final result = await repositoryGet.get(id);
+
+    if (result.isFailure) {
+      return result;
+    }
+
+    final entity = result.success;
     update((prev) => entity != null ? prev.put(entity) : prev.removeById(id));
-    return entity;
+    return Success(entity);
   }
 
-  Future<List<E>> getByIds(List<Id> ids) async {
-    final entities = await repositoryGet.getByIds(ids);
+  Future<Result<List<E>, Exception>> getByIds(List<Id> ids) async {
+    final result = await repositoryGet.getByIds(ids);
+    if (result.isFailure) {
+      return result;
+    }
+    final entities = result.success;
     update((prev) => prev.putAll(entities));
-    return entities;
+    return Success(entities);
   }
 }
 
@@ -30,67 +42,42 @@ mixin ListEntitiesStore<Id, E extends Entity<Id>,
     Params extends IListParams<Id, E>> on Store<EntityMap<Id, E>> {
   RepositoryList<Id, E, Params> get repositoryList;
 
-  Future<List<E>> list(Params params) async {
-    final entities = await repositoryList.list(params);
+  Future<Result<List<E>, Exception>> list(Params params) async {
+    final result = await repositoryList.list(params);
+    if (result.isFailure) {
+      return result;
+    }
+    final entities = result.success;
     update((prev) => prev.putAll(entities));
-    return entities;
-  }
-}
-
-mixin CursorEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
-  RepositoryCursor<E> get repositoryCursor;
-
-  /// 取得したEntityの一覧を返す
-  Future<List<E>> cursor(CursorParams params) async {
-    final entities = await repositoryCursor.cursor(params);
-    update((prev) => prev.putAll(entities));
-    return entities;
+    return Success(entities);
   }
 }
 
 mixin SaveEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
   RepositorySave<Id, E> get repositorySave;
 
-  Future<E> save(E entity) async {
-    await repositorySave.save(entity);
-    update((prev) => prev.put(entity));
-    return entity;
-  }
-}
-
-mixin SavePartialEntitiesStore<Id, E extends MargeablePartialEntity<Id, E>>
-    on Store<EntityMap<Id, E>> {
-  RepositoryPartialSave<Id, E> get repositoryPartialSave;
-  RepositoryGet<Id, E> get repositoryGet;
-
-  Future<E> savePartial(PartialEntity<Id, E> entity) async {
-    final e = await repositoryGet.get(entity.id);
-    if (e == null && !entity.canCreate) {
-      throw Exception('Entity cannot save because entity does not exist.');
+  Future<Result<E, Exception>> save(E entity) async {
+    final result = await repositorySave.save(entity);
+    if (result.isFailure) {
+      return result;
     }
 
-    await repositoryPartialSave.partialSave(entity);
-
-    late E newEntity;
-    if (e == null) {
-      newEntity = entity.create()!;
-    } else {
-      newEntity = e.merge(entity);
-    }
-
-    update((prev) => prev.put(newEntity));
-
-    return newEntity;
+    update((prev) => prev.put(result.success));
+    return result;
   }
 }
 
 mixin DeleteEntitiesStore<Id, E extends Entity<Id>> on Store<EntityMap<Id, E>> {
   RepositoryDelete<Id, E> get repositoryDelete;
 
-  Future<E> delete(E entity) async {
-    await repositoryDelete.delete(entity);
+  Future<Result<E, Exception>> delete(E entity) async {
+    final result = await repositoryDelete.delete(entity);
+    if (result.isFailure) {
+      return result;
+    }
+
     update((prev) => prev.removeById(entity.id));
-    return entity;
+    return result;
   }
 }
 
@@ -99,14 +86,10 @@ abstract class EntitiesStore<Id, E extends Entity<Id>,
     with
         GetEntitiesStore<Id, E>,
         ListEntitiesStore<Id, E, Params>,
-        CursorEntitiesStore<Id, E>,
         SaveEntitiesStore<Id, E>,
         DeleteEntitiesStore<Id, E> {
   EntitiesStore(this.repository);
   final RepositoryAll<Id, E, Params> repository;
-
-  @override
-  RepositoryCursor<E> get repositoryCursor => repository;
 
   @override
   RepositoryDelete<Id, E> get repositoryDelete => repository;

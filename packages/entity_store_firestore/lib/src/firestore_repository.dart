@@ -13,7 +13,6 @@ class FirestoreRepositoryAll<Id, E extends Entity<Id>,
     with
         FirestoreGet<Id, E>,
         FirestoreList<Id, E, Params>,
-        FirestoreCursor<Id, E>,
         FirestoreSave<Id, E>,
         FirestoreDelete<Id, E>
     implements FirestoreRepository<Id, E>, RepositoryAll<Id, E, Params> {

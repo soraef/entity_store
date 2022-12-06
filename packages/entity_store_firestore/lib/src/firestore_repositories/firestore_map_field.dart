@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
+import 'package:result_type/result_type.dart';
 
 mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositorySave<Id, E> {
   @override
-  Future<void> save(E entity) async {
+  Future<Result<E, Exception>> save(
+    E entity, {
+    SaveOptions options = const SaveOptions(),
+  }) async {
     final collection = getCollection(entity.id);
     await collection.collectionRef().doc(batchId(entity)).set(
       {
@@ -14,11 +18,11 @@ mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
         },
         ...toJson(entity)
       },
-      SetOptions(merge: true),
+      SetOptions(merge: options.merge),
     );
+    return Success(entity);
   }
 
-  @override
   Future<void> saveAll(Iterable<E> entities) async {
     if (entities.isEmpty) {
       throw Error();
@@ -47,7 +51,7 @@ mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
 mixin FirestoreMapFieldDelete<Id, E extends Entity<Id>>
     implements FirestoreRepository<Id, E>, RepositoryDelete<Id, E> {
   @override
-  Future<void> delete(E entity) async {
+  Future<Result<E, Exception>> delete(E entity) async {
     final collection = getCollection(entity.id);
     await collection.collectionRef().doc(batchId(entity)).set(
       {
@@ -57,6 +61,7 @@ mixin FirestoreMapFieldDelete<Id, E extends Entity<Id>>
       },
       SetOptions(merge: true),
     );
+    return Success(entity);
   }
 
   String get fieldName;
@@ -83,11 +88,12 @@ mixin FirestoreMapFieldList<Id, E extends Entity<Id>>
         FirestoreRepository<Id, E>,
         RepositoryList<Id, E, MapFieldListParams<Id, E>> {
   @override
-  Future<List<E>> list(covariant MapFieldListParams params) async {
+  Future<Result<List<E>, Exception>> list(
+      covariant MapFieldListParams params) async {
     var ref = params.collection.collectionRef();
     final query = params.getDoc(ref);
     final snapshot = await query.get();
-    return _convert(snapshot);
+    return Success(_convert(snapshot));
   }
 
   List<E> _convert(DocumentSnapshot<dynamic> doc) {

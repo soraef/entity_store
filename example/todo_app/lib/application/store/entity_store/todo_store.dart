@@ -1,6 +1,7 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:result_type/result_type.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
 import 'package:todo_app/domain/user/id.dart';
@@ -32,7 +33,7 @@ class TodoStore extends RiverpodStore<Todos>
   @override
   RepositoryGet<TodoId, Todo> get repositoryGet => TodoRepo();
 
-  Future<List<Todo>> listUserTodo(UserId userId) async {
+  Future<Result<List<Todo>, Exception>> listUserTodo(UserId userId) async {
     return list(
       FirestoreListParams(
         collection: TodoCollection(),

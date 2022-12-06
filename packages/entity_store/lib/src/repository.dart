@@ -1,33 +1,33 @@
+import 'package:result_type/result_type.dart';
+
 import 'entity.dart';
 
 abstract class RepositoryGet<Id, E extends Entity<Id>> {
-  Future<E?> get(Id id);
-  Future<List<E>> getByIds(List<Id> ids);
+  Future<Result<E?, Exception>> get(Id id);
+  Future<Result<List<E>, Exception>> getByIds(List<Id> ids);
 }
 
 abstract class IListParams<Id, E extends Entity<Id>> {}
 
 abstract class RepositoryList<Id, E extends Entity<Id>,
     Params extends IListParams<Id, E>> {
-  Future<List<E>> list(Params params);
+  Future<Result<List<E>, Exception>> list(Params params);
+}
+
+class SaveOptions {
+  final bool merge;
+  const SaveOptions({this.merge = false});
 }
 
 abstract class RepositorySave<Id, E extends Entity<Id>> {
-  Future<void> save(E entity);
-}
-
-abstract class RepositoryPartialSave<Id, E extends Entity<Id>> {
-  Future<void> partialSave(PartialEntity<Id, E> partial);
+  Future<Result<E, Exception>> save(
+    E entity, {
+    SaveOptions options = const SaveOptions(),
+  });
 }
 
 abstract class RepositoryDelete<Id, E extends Entity<Id>> {
-  Future<void> delete(E entity);
-}
-
-abstract class CursorParams {}
-
-abstract class RepositoryCursor<R extends Entity> {
-  Future<List<R>> cursor(CursorParams params);
+  Future<Result<E, Exception>> delete(E entity);
 }
 
 abstract class RepositoryAll<Id, E extends Entity<Id>,
@@ -35,7 +35,6 @@ abstract class RepositoryAll<Id, E extends Entity<Id>,
     with
         RepositoryGet<Id, E>,
         RepositoryList<Id, E, ListParams>,
-        RepositoryCursor<E>,
         RepositorySave<Id, E>,
         RepositoryDelete<Id, E> {}
 

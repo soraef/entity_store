@@ -1,10 +1,12 @@
-import 'package:equatable/equatable.dart';
-
-abstract class Id extends Equatable {
+abstract class Id {
   final String value;
 
   const Id(this.value);
 
   @override
-  List<Object?> get props => [value];
+  bool operator ==(Object other) =>
+      other is Id && other.runtimeType == runtimeType && other.value == value;
+
+  @override
+  int get hashCode => value.hashCode;
 }

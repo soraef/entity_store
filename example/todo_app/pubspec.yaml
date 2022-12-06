@@ -29,6 +29,7 @@ dependencies:
   adaptive_dialog: ^1.8.0+1
 
   uuid: ^3.0.6
+  result_type: ^0.2.0
 
   entity_store: 
     path: ../../packages/entity_store
