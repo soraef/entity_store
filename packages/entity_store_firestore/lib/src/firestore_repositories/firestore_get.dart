@@ -17,6 +17,6 @@ mixin FirestoreGet<Id, E extends Entity<Id>>
   Future<Result<List<E>, Exception>> getByIds(List<Id> ids) async {
     final future = ids.map((id) => get(id));
     final docs = await Future.wait(future);
-    return Success(docs.whereType<E>().toList());
+    return Success(docs.map((e) => e.success).whereType<E>().toList());
   }
 }
