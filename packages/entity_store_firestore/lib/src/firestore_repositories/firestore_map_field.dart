@@ -8,7 +8,7 @@ mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
   @override
   Future<Result<E, Exception>> save(
     E entity, {
-    SaveOptions options = const SaveOptions(),
+    SaveOptions options = const SaveOptions(merge: true),
   }) async {
     final collection = getCollection(entity.id);
     await collection.collectionRef().doc(batchId(entity)).set(
@@ -18,7 +18,7 @@ mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
         },
         ...toJson(entity)
       },
-      SetOptions(merge: options.merge),
+      SetOptions(merge: true),
     );
     return Success(entity);
   }
