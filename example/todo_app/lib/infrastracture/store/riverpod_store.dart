@@ -1,7 +1,7 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class RiverpodStore<T> extends StateNotifier<T> implements Store<T> {
+class RiverpodStore<T> extends StateNotifier<T> implements IStore<T> {
   RiverpodStore(super.state);
 
   @override

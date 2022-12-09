@@ -3,7 +3,7 @@ import 'package:entity_store_firestore/src/firestore_repository.dart';
 import 'package:result_type/result_type.dart';
 
 mixin FirestoreGet<Id, E extends Entity<Id>>
-    implements FirestoreRepository<Id, E>, RepositoryGet<Id, E> {
+    implements FirestoreRepo<Id, E>, RepositoryGet<Id, E> {
   @override
   Future<Result<E?, Exception>> get(Id id) async {
     final doc = await getCollection(id).documentRef(id).get();

@@ -4,7 +4,7 @@ import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:result_type/result_type.dart';
 
 mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
-    implements FirestoreRepository<Id, E>, RepositorySave<Id, E> {
+    implements FirestoreRepo<Id, E>, RepositorySave<Id, E> {
   @override
   Future<Result<E, Exception>> save(
     E entity, {
@@ -49,7 +49,7 @@ mixin FirestoreMapFieldSave<Id, E extends Entity<Id>>
 }
 
 mixin FirestoreMapFieldDelete<Id, E extends Entity<Id>>
-    implements FirestoreRepository<Id, E>, RepositoryDelete<Id, E> {
+    implements FirestoreRepo<Id, E>, RepositoryDelete<Id, E> {
   @override
   Future<Result<E, Exception>> delete(E entity) async {
     final collection = getCollection(entity.id);
@@ -85,7 +85,7 @@ class MapFieldListParams<Id, E extends Entity<Id>>
 
 mixin FirestoreMapFieldList<Id, E extends Entity<Id>>
     implements
-        FirestoreRepository<Id, E>,
+        FirestoreRepo<Id, E>,
         RepositoryList<Id, E, MapFieldListParams<Id, E>> {
   @override
   Future<Result<List<E>, Exception>> list(

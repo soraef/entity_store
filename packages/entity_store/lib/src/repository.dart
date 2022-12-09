@@ -1,49 +1,57 @@
-import 'package:result_type/result_type.dart';
+import 'store_event_dispatcher.dart';
 
-import 'entity.dart';
+abstract class IRepo {
+  final StoreEventDispatcher eventDispatcher;
 
-abstract class RepositoryGet<Id, E extends Entity<Id>> {
-  Future<Result<E?, Exception>> get(Id id);
-  Future<Result<List<E>, Exception>> getByIds(List<Id> ids);
+  IRepo(this.eventDispatcher);
 }
 
-abstract class IListParams<Id, E extends Entity<Id>> {}
+// /// 取得した[Entity]を[EntityMap]に正規化して保存するRepoの抽象クラス
+// abstract class IEntityMapRepo<Id, E extends Entity<Id>> {
+//   final IStore<EntityMap<Id, E>> store;
+//   IEntityMapRepo(this.store);
 
-abstract class RepositoryList<Id, E extends Entity<Id>,
-    Params extends IListParams<Id, E>> {
-  Future<Result<List<E>, Exception>> list(Params params);
-}
+//   @protected
+//   void onCompleteGet(E? entity) {
+//     store.update(
+//       (prev) => entity != null ? prev.put(entity) : prev.remove(entity!),
+//     );
+//   }
 
-class SaveOptions {
-  final bool merge;
-  const SaveOptions({this.merge = false});
-}
+//   @protected
+//   void onCompleteList(List<E> entities) {
+//     store.update((prev) => prev.putAll(entities));
+//   }
 
-abstract class RepositorySave<Id, E extends Entity<Id>> {
-  Future<Result<E, Exception>> save(
-    E entity, {
-    SaveOptions options = const SaveOptions(),
-  });
-}
+//   @protected
+//   void onCompleteSave(E entity) {
+//     store.update((prev) => prev.put(entity));
+//   }
 
-abstract class RepositoryDelete<Id, E extends Entity<Id>> {
-  Future<Result<E, Exception>> delete(E entity);
-}
+//   @protected
+//   void onCompleteDelete(Id id) {
+//     store.update((prev) => prev.removeById(id));
+//   }
+// }
 
-abstract class RepositoryAll<Id, E extends Entity<Id>,
-        ListParams extends IListParams<Id, E>>
-    with
-        RepositoryGet<Id, E>,
-        RepositoryList<Id, E, ListParams>,
-        RepositorySave<Id, E>,
-        RepositoryDelete<Id, E> {}
+// abstract class IEntityRepo<Id, E extends Entity<Id>> {
+//   final IStore<E?> store;
+//   IEntityRepo(this.store);
 
-class RepositoryConverter<Id, E extends Entity<Id>> {
-  final E Function(Map<String, dynamic>) fromJson;
-  final Map<String, dynamic> Function(E) toJson;
+//   @protected
+//   void onCompleteGet(E? entity) {
+//     store.update(
+//       (prev) => entity,
+//     );
+//   }
 
-  RepositoryConverter({
-    required this.fromJson,
-    required this.toJson,
-  });
-}
+//   @protected
+//   void onCompleteSave(E entity) {
+//     store.update((prev) => entity);
+//   }
+
+//   @protected
+//   void onCompleteDelete(Id id) {
+//     store.update((prev) => null);
+//   }
+// }

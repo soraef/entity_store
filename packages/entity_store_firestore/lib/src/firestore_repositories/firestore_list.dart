@@ -48,7 +48,7 @@ class FirestoreListParams<Id, E extends Entity<Id>>
 
 mixin FirestoreList<Id, E extends Entity<Id>,
         Params extends FirestoreListParams<Id, E>>
-    implements FirestoreRepository<Id, E>, RepositoryList<Id, E, Params> {
+    implements FirestoreRepo<Id, E>, RepositoryList<Id, E, Params> {
   @override
   Future<Result<List<E>, Exception>> list(
       covariant FirestoreListParams params) async {
