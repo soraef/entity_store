@@ -22,9 +22,7 @@ mixin FirestoreGet<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
     if (doc.exists) {
       try {
         final entity = converter.fromJson(doc.data());
-        eventDispatcher.dispatch(
-          GetEvent<Id, E>(entity: entity),
-        );
+        eventDispatcher.dispatch(GetEvent<Id, E>(entity: entity));
         return Success(entity);
       } catch (e) {
         return Failure(

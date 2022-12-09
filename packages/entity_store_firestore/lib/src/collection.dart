@@ -9,7 +9,6 @@ abstract class FirestoreCollection<Id, E extends Entity<Id>> extends Equatable {
     return collectionRef().doc(toDocumentId(id));
   }
 
-  String toId(String reefId);
   String toDocumentId(Id id);
 }
 
@@ -25,11 +24,6 @@ mixin FirestoreCollection1<Id, E extends Entity<Id>>
   @override
   DocumentReference<dynamic> documentRef(Id id) {
     return collectionRef().doc(toDocumentId(id));
-  }
-
-  @override
-  String toId(String reefId) {
-    return reefId;
   }
 
   @override
@@ -56,10 +50,5 @@ mixin FirestoreCollection2<Id, E extends Entity<Id>>
   @override
   DocumentReference<dynamic> documentRef(Id id) {
     return collectionRef().doc(toDocumentId(id));
-  }
-
-  @override
-  String toId(String reefId) {
-    return "$document1/$reefId";
   }
 }
