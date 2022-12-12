@@ -1,5 +1,4 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -16,6 +15,7 @@ class TodoPage extends HookConsumerWidget {
     useEffect(
       () {
         ref.read(todoUsecase).load();
+        return null;
       },
       const [],
     );
@@ -32,7 +32,7 @@ class TodoPage extends HookConsumerWidget {
                   onPressed: () async {
                     final texts = await showTextInputDialog(
                       context: context,
-                      textFields: [DialogTextField()],
+                      textFields: [const DialogTextField()],
                     );
 
                     if (texts?.isNotEmpty == true) {
@@ -69,7 +69,7 @@ class TodoPage extends HookConsumerWidget {
                 },
                 itemCount: todos.length,
                 separatorBuilder: (BuildContext context, int index) {
-                  return Divider(height: 0);
+                  return const Divider(height: 0);
                 },
               ),
             )

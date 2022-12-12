@@ -1,8 +1,9 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class RiverpodStore<T> extends StateNotifier<T> implements Store<T> {
-  RiverpodStore(super.state);
+abstract class RiverpodStoreBase<T> extends StateNotifier<T>
+    implements StoreBase<T> {
+  RiverpodStoreBase(super.state);
 
   @override
   void update(Updater<T> updater) {
@@ -11,4 +12,15 @@ class RiverpodStore<T> extends StateNotifier<T> implements Store<T> {
 
   @override
   T get value => state;
+}
+
+abstract class IRiverpodEntityMapStore<Id, E extends Entity<Id>>
+    extends RiverpodStoreBase<EntityMap<Id, E>>
+    implements EntityStoreBase<Id, E, EntityMap<Id, E>> {
+  IRiverpodEntityMapStore(super.state);
+}
+
+class RiverpodEntityMapStore<Id, E extends Entity<Id>>
+    extends IRiverpodEntityMapStore<Id, E> with EntityMapStoreMixin<Id, E> {
+  RiverpodEntityMapStore(super.state);
 }

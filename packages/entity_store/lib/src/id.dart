@@ -9,4 +9,9 @@ abstract class Id {
 
   @override
   int get hashCode => value.hashCode;
+
+  @override
+  String toString() {
+    return "$runtimeType($value)";
+  }
 }

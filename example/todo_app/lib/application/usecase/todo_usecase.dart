@@ -4,19 +4,20 @@ import 'package:todo_app/application/store/entity_store/todo_store.dart';
 import 'package:todo_app/application/store/session_store/auth_store.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
+import 'package:todo_app/infrastracture/repository/todo_repo.dart';
 
 final todoUsecase = Provider(
   (ref) => TodoUsecase(
-    ref.read(todoStore.notifier),
+    ref.read(todoRepo),
     ref.read(authStore.notifier),
   ),
 );
 
 class TodoUsecase {
-  final TodoStore todoStore;
+  final TodoRepo todoRepo;
   final AuthStore authStore;
 
-  TodoUsecase(this.todoStore, this.authStore);
+  TodoUsecase(this.todoRepo, this.authStore);
 
   Future<void> create(String name) async {
     assert(authStore.value.isLogin);
@@ -28,15 +29,15 @@ class TodoUsecase {
       userId: authStore.value.userId!,
     );
 
-    await todoStore.save(newTodo);
+    await todoRepo.save(newTodo);
   }
 
   Future<Result<Todo, Exception>> check(TodoId id, bool done) async {
     assert(authStore.value.isLogin);
 
-    final todo = await todoStore.get(id);
+    final todo = await todoRepo.get(id, useStoreCache: true);
     if (todo.isSuccess && todo.success != null) {
-      return todoStore.save(todo.success!.copyWith(done: done));
+      return todoRepo.save(todo.success!.copyWith(done: done));
     }
 
     return Failure(Exception("Todo Not Found"));
@@ -44,11 +45,11 @@ class TodoUsecase {
 
   Future<void> load() async {
     assert(authStore.value.isLogin);
-    await todoStore.listUserTodo(authStore.value.userId!);
+    await todoRepo.listUserTodo(authStore.value.userId!);
   }
 
   Future<void> delete(Todo todo) async {
     assert(authStore.value.isLogin);
-    await todoStore.delete(todo);
+    await todoRepo.delete(todo);
   }
 }
