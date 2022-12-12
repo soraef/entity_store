@@ -1,6 +1,5 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
-import 'package:entity_store_firestore/src/exception.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:result_type/result_type.dart';
 

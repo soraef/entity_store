@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store/src/store_event.dart';
 
 class StoreEventDispatcher {
   final _controller = StreamController<StoreEvent>.broadcast();
   final Set<IStore> _stores = {};
+  final bool debugPrint;
 
-  StoreEventDispatcher() {
+  StoreEventDispatcher({this.debugPrint = false}) {
     _controller.stream.listen((event) {
+      if (debugPrint) {
+        event.debugPrint();
+      }
       for (var store in _stores) {
         if (store.shouldListenTo(event)) {
           store.handleEvent(event);

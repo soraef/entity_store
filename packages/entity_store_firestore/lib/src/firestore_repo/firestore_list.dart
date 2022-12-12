@@ -1,16 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
-import 'package:entity_store_firestore/src/exception.dart';
 import 'package:result_type/result_type.dart';
 
 mixin FirestoreList<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
   Future<Result<List<E>, Exception>> list({
     required FirestoreCollection<Id, E> collection,
-    required int? limit,
-    required String? orderByField,
-    required FirestoreWhere? where,
-    required Id? afterId,
+    int? limit,
+    String? orderByField,
+    FirestoreWhere? where,
+    Id? afterId,
   }) async {
     var ref = collection.collectionRef();
     Query<dynamic> query = ref;

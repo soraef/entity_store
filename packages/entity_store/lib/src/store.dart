@@ -1,7 +1,5 @@
 import 'package:entity_store/entity_store.dart';
 
-import 'store_event.dart';
-
 typedef Updater<T> = T Function(T prev);
 
 abstract class IStore<T> {
@@ -11,8 +9,7 @@ abstract class IStore<T> {
   bool shouldListenTo(StoreEvent event);
 }
 
-abstract class IEntityMapStore<Id, E extends Entity<Id>>
-    extends IStore<EntityMap<Id, E>> {
+mixin IEntityMapStore<Id, E extends Entity<Id>> on IStore<EntityMap<Id, E>> {
   @override
   bool shouldListenTo(StoreEvent event) {
     return event is StoreEvent<Id, E>;
