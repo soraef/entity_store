@@ -4,7 +4,17 @@ import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:result_type/result_type.dart';
 
 mixin FirestoreGet<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
-  Future<Result<E?, Exception>> get(Id id) async {
+  Future<Result<E?, Exception>> get(
+    Id id, {
+    bool useStoreCache = false,
+  }) async {
+    if (useStoreCache) {
+      final entity = eventDispatcher.getEntityFromStore<Id, E>(id);
+      if (entity != null) {
+        return Success(entity);
+      }
+    }
+
     late DocumentSnapshot<dynamic> doc;
     try {
       doc = await getCollection(id).documentRef(id).get();

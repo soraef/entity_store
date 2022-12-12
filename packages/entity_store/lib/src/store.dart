@@ -2,14 +2,25 @@ import 'package:entity_store/entity_store.dart';
 
 typedef Updater<T> = T Function(T prev);
 
-abstract class IStore<T> {
+abstract class StoreBase<T> {
   T get value;
   void update(Updater<T> updater);
   void handleEvent(StoreEvent event);
   bool shouldListenTo(StoreEvent event);
 }
 
-mixin IEntityMapStore<Id, E extends Entity<Id>> on IStore<EntityMap<Id, E>> {
+abstract class EntityStoreBase<Id, E extends Entity<Id>, T>
+    extends StoreBase<T> {
+  E? getById(Id id);
+}
+
+mixin EntityMapStoreMixin<Id, E extends Entity<Id>>
+    on EntityStoreBase<Id, E, EntityMap<Id, E>> {
+  @override
+  E? getById(Id id) {
+    return value.byId(id);
+  }
+
   @override
   bool shouldListenTo(StoreEvent event) {
     return event is StoreEvent<Id, E>;
@@ -33,7 +44,12 @@ mixin IEntityMapStore<Id, E extends Entity<Id>> on IStore<EntityMap<Id, E>> {
   }
 }
 
-abstract class IEntityStore<Id, E extends Entity<Id>> extends IStore<E?> {
+mixin EntityStoreMixin<Id, E extends Entity<Id>> on EntityStoreBase<Id, E, E?> {
+  @override
+  E? getById(Id id) {
+    return value?.id == id ? value : null;
+  }
+
   @override
   bool shouldListenTo(StoreEvent event) {
     return event is StoreEvent<Id, E>;

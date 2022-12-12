@@ -13,6 +13,7 @@ dependencies:
   cloud_firestore: ^4.1.0
   equatable: ^2.0.3
   result_type: ^0.2.0
+  meta: ^1.8.0
 
   # entity_store: 0.0.2-dev.2
   entity_store:

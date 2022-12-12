@@ -23,7 +23,7 @@ final authStore = StateNotifierProvider<AuthStore, Authentication>(
   (ref) => AuthStore(),
 );
 
-class AuthStore extends RiverpodStore<Authentication> {
+class AuthStore extends RiverpodStoreBase<Authentication> {
   AuthStore() : super(Authentication.init());
 
   @override

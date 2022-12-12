@@ -13,6 +13,7 @@ class TodoRepo extends IRepo
     with
         FirestoreGet<TodoId, Todo>,
         FirestoreSave<TodoId, Todo>,
+        FirestoreUpdate<TodoId, Todo>,
         FirestoreDelete<TodoId, Todo>,
         FirestoreList<TodoId, Todo> {
   @override
