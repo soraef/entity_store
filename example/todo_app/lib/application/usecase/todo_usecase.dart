@@ -1,10 +1,10 @@
 import 'package:entity_store_firestore/entity_store_firestore.dart';
+import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:result_type/result_type.dart';
 import 'package:todo_app/application/store/session_store/auth_store.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
-import 'package:todo_app/infrastracture/loader/loader.dart';
 import 'package:todo_app/infrastracture/repository/todo_repo.dart';
 
 final todoUsecase = Provider(
@@ -14,7 +14,7 @@ final todoUsecase = Provider(
   ),
 );
 
-class TodoUsecase with LoaderMixIn<TodoId, Todo> {
+class TodoUsecase with PaginationMixIn<TodoId, Todo> {
   final TodoRepo todoRepo;
   final AuthStore authStore;
 
@@ -48,7 +48,9 @@ class TodoUsecase with LoaderMixIn<TodoId, Todo> {
   }
 
   @override
-  Future<void> loadMore() async {
+  Future<void> loadMore({
+    int limit = 10,
+  }) async {
     assert(authStore.value.isLogin);
     await cursor(
       collection: TodoCollection(),

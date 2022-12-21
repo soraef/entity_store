@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 
-mixin LoaderMixIn<Id, E extends Entity<Id>> {
+mixin PaginationMixIn<Id, E extends Entity<Id>> {
   FirestoreList<Id, E> get repo;
 
   Id? get latestId;
@@ -39,5 +39,7 @@ mixin LoaderMixIn<Id, E extends Entity<Id>> {
     }
   }
 
-  Future<void> loadMore();
+  Future<void> loadMore({
+    int limit = 10,
+  });
 }

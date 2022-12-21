@@ -1,5 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -7,7 +8,6 @@ import 'package:todo_app/application/store/entity_store/todo_store.dart';
 import 'package:todo_app/application/usecase/todo_usecase.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
-import 'package:todo_app/infrastracture/loader/loader.dart';
 
 class TodoPage extends HookConsumerWidget {
   const TodoPage({super.key});
@@ -50,7 +50,7 @@ class TodoPage extends HookConsumerWidget {
             Expanded(
               child: EntityListView<TodoId, Todo>(
                 entities: todos.entities.toList(),
-                loader: ref.read(todoUsecase),
+                pagination: ref.read(todoUsecase),
                 itemBuilder: (todo) {
                   // final todo = todos.toList().elementAt(index);
                   return CheckboxListTile(
@@ -85,12 +85,12 @@ class TodoPage extends HookConsumerWidget {
 class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
   const EntityListView({
     super.key,
-    required this.loader,
+    required this.pagination,
     required this.entities,
     required this.itemBuilder,
   });
 
-  final LoaderMixIn loader;
+  final PaginationMixIn pagination;
   final List<E> entities;
   final Widget Function(E entity) itemBuilder;
 
@@ -99,8 +99,8 @@ class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
     return ListView.builder(
       itemCount: entities.length,
       itemBuilder: (context, index) {
-        if (index + 1 == entities.length && loader.hasMore) {
-          loader.loadMore();
+        if (index + 1 == entities.length && pagination.hasMore) {
+          pagination.loadMore();
         }
 
         return itemBuilder(entities[index]);
