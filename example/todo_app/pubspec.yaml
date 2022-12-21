@@ -18,7 +18,7 @@ dependencies:
   cloud_firestore: ^4.0.3
 
   # State Management
-  hooks_riverpod: ^1.0.4
+  hooks_riverpod: ^2.1.1
   flutter_hooks: ^0.18.5+1
 
   # Freezed
@@ -30,12 +30,17 @@ dependencies:
 
   uuid: ^3.0.6
   result_type: ^0.2.0
+  
+  collection: ^1.16.0
 
   entity_store: 
     path: ../../packages/entity_store
   
   entity_store_firestore: 
     path: ../../packages/entity_store_firestore
+
+  entity_store_riverpod: 
+    path: ../../packages/entity_store_riverpod
 
 dependency_overrides:
   entity_store: 
@@ -43,6 +48,9 @@ dependency_overrides:
   
   entity_store_firestore: 
     path: ../../packages/entity_store_firestore
+  
+  entity_store_riverpod: 
+    path: ../../packages/entity_store_riverpod
 
 
 dev_dependencies:

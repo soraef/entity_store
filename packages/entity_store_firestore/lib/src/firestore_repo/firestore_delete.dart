@@ -12,10 +12,12 @@ mixin FirestoreDelete<Id, E extends Entity<Id>>
       return Success(entity);
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
+        FirestoreRequestFailure(
           entityType: E,
           code: e.code,
           method: "delete",
+          message: e.message,
+          exception: e,
         ),
       );
     }

@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'entity.dart';
 
@@ -26,6 +26,10 @@ mixin _$Todo {
   UserId get userId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   bool get done => throw _privateConstructorUsedError;
+  @DateTimeConverter()
+  DateTime get createdAt => throw _privateConstructorUsedError;
+  @DateTimeConverter()
+  DateTime get updatedAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -41,7 +45,9 @@ abstract class $TodoCopyWith<$Res> {
       {@TodoIdConverter() TodoId id,
       @UserIdConverter() UserId userId,
       String name,
-      bool done});
+      bool done,
+      @DateTimeConverter() DateTime createdAt,
+      @DateTimeConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -61,6 +67,8 @@ class _$TodoCopyWithImpl<$Res, $Val extends Todo>
     Object? userId = null,
     Object? name = null,
     Object? done = null,
+    Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -79,6 +87,14 @@ class _$TodoCopyWithImpl<$Res, $Val extends Todo>
           ? _value.done
           : done // ignore: cast_nullable_to_non_nullable
               as bool,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
     ) as $Val);
   }
 }
@@ -93,7 +109,9 @@ abstract class _$$_TodoCopyWith<$Res> implements $TodoCopyWith<$Res> {
       {@TodoIdConverter() TodoId id,
       @UserIdConverter() UserId userId,
       String name,
-      bool done});
+      bool done,
+      @DateTimeConverter() DateTime createdAt,
+      @DateTimeConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -109,6 +127,8 @@ class __$$_TodoCopyWithImpl<$Res> extends _$TodoCopyWithImpl<$Res, _$_Todo>
     Object? userId = null,
     Object? name = null,
     Object? done = null,
+    Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_$_Todo(
       id: null == id
@@ -127,6 +147,14 @@ class __$$_TodoCopyWithImpl<$Res> extends _$TodoCopyWithImpl<$Res, _$_Todo>
           ? _value.done
           : done // ignore: cast_nullable_to_non_nullable
               as bool,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
     ));
   }
 }
@@ -139,7 +167,9 @@ class _$_Todo extends _Todo {
       {@TodoIdConverter() required this.id,
       @UserIdConverter() required this.userId,
       required this.name,
-      required this.done})
+      required this.done,
+      @DateTimeConverter() required this.createdAt,
+      @DateTimeConverter() required this.updatedAt})
       : super._();
 
   factory _$_Todo.fromJson(Map<String, dynamic> json) => _$$_TodoFromJson(json);
@@ -154,10 +184,16 @@ class _$_Todo extends _Todo {
   final String name;
   @override
   final bool done;
+  @override
+  @DateTimeConverter()
+  final DateTime createdAt;
+  @override
+  @DateTimeConverter()
+  final DateTime updatedAt;
 
   @override
   String toString() {
-    return 'Todo(id: $id, userId: $userId, name: $name, done: $done)';
+    return 'Todo(id: $id, userId: $userId, name: $name, done: $done, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -168,12 +204,17 @@ class _$_Todo extends _Todo {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.done, done) || other.done == done));
+            (identical(other.done, done) || other.done == done) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, name, done);
+  int get hashCode =>
+      Object.hash(runtimeType, id, userId, name, done, createdAt, updatedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -194,7 +235,9 @@ abstract class _Todo extends Todo {
       {@TodoIdConverter() required final TodoId id,
       @UserIdConverter() required final UserId userId,
       required final String name,
-      required final bool done}) = _$_Todo;
+      required final bool done,
+      @DateTimeConverter() required final DateTime createdAt,
+      @DateTimeConverter() required final DateTime updatedAt}) = _$_Todo;
   const _Todo._() : super._();
 
   factory _Todo.fromJson(Map<String, dynamic> json) = _$_Todo.fromJson;
@@ -209,6 +252,12 @@ abstract class _Todo extends Todo {
   String get name;
   @override
   bool get done;
+  @override
+  @DateTimeConverter()
+  DateTime get createdAt;
+  @override
+  @DateTimeConverter()
+  DateTime get updatedAt;
   @override
   @JsonKey(ignore: true)
   _$$_TodoCopyWith<_$_Todo> get copyWith => throw _privateConstructorUsedError;

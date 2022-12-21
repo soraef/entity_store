@@ -1,7 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: non_constant_identifier_names
-
 part of 'entity.dart';
 
 // **************************************************************************
@@ -13,6 +11,10 @@ _$_Todo _$$_TodoFromJson(Map<String, dynamic> json) => _$_Todo(
       userId: const UserIdConverter().fromJson(json['userId'] as String),
       name: json['name'] as String,
       done: json['done'] as bool,
+      createdAt:
+          const DateTimeConverter().fromJson(json['createdAt'] as Timestamp?),
+      updatedAt:
+          const DateTimeConverter().fromJson(json['updatedAt'] as Timestamp?),
     );
 
 Map<String, dynamic> _$$_TodoToJson(_$_Todo instance) => <String, dynamic>{
@@ -20,4 +22,6 @@ Map<String, dynamic> _$$_TodoToJson(_$_Todo instance) => <String, dynamic>{
       'userId': const UserIdConverter().toJson(instance.userId),
       'name': instance.name,
       'done': instance.done,
+      'createdAt': const DateTimeConverter().toJson(instance.createdAt),
+      'updatedAt': const DateTimeConverter().toJson(instance.updatedAt),
     };

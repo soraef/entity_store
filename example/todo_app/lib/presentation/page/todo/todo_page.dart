@@ -1,9 +1,13 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:entity_store/entity_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/application/store/entity_store/todo_store.dart';
 import 'package:todo_app/application/usecase/todo_usecase.dart';
+import 'package:todo_app/domain/todo/entity.dart';
+import 'package:todo_app/domain/todo/id.dart';
+import 'package:todo_app/infrastracture/loader/loader.dart';
 
 class TodoPage extends HookConsumerWidget {
   const TodoPage({super.key});
@@ -14,7 +18,7 @@ class TodoPage extends HookConsumerWidget {
 
     useEffect(
       () {
-        ref.read(todoUsecase).load();
+        ref.read(todoUsecase).loadMore();
         return null;
       },
       const [],
@@ -44,9 +48,11 @@ class TodoPage extends HookConsumerWidget {
               ],
             ),
             Expanded(
-              child: ListView.separated(
-                itemBuilder: (BuildContext context, int index) {
-                  final todo = todos.toList().elementAt(index);
+              child: EntityListView<TodoId, Todo>(
+                entities: todos.entities.toList(),
+                loader: ref.read(todoUsecase),
+                itemBuilder: (todo) {
+                  // final todo = todos.toList().elementAt(index);
                   return CheckboxListTile(
                     title: Text(todo.name),
                     controlAffinity: ListTileControlAffinity.leading,
@@ -67,15 +73,38 @@ class TodoPage extends HookConsumerWidget {
                     value: todo.done,
                   );
                 },
-                itemCount: todos.length,
-                separatorBuilder: (BuildContext context, int index) {
-                  return const Divider(height: 0);
-                },
               ),
             )
           ],
         ),
       ),
+    );
+  }
+}
+
+class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
+  const EntityListView({
+    super.key,
+    required this.loader,
+    required this.entities,
+    required this.itemBuilder,
+  });
+
+  final LoaderMixIn loader;
+  final List<E> entities;
+  final Widget Function(E entity) itemBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: entities.length,
+      itemBuilder: (context, index) {
+        if (index + 1 == entities.length && loader.hasMore) {
+          loader.loadMore();
+        }
+
+        return itemBuilder(entities[index]);
+      },
     );
   }
 }

@@ -1,9 +1,10 @@
+import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:result_type/result_type.dart';
-import 'package:todo_app/application/store/entity_store/todo_store.dart';
 import 'package:todo_app/application/store/session_store/auth_store.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
+import 'package:todo_app/infrastracture/loader/loader.dart';
 import 'package:todo_app/infrastracture/repository/todo_repo.dart';
 
 final todoUsecase = Provider(
@@ -13,7 +14,7 @@ final todoUsecase = Provider(
   ),
 );
 
-class TodoUsecase {
+class TodoUsecase with LoaderMixIn<TodoId, Todo> {
   final TodoRepo todoRepo;
   final AuthStore authStore;
 
@@ -22,10 +23,8 @@ class TodoUsecase {
   Future<void> create(String name) async {
     assert(authStore.value.isLogin);
 
-    final newTodo = Todo(
-      id: TodoId.create(),
+    final newTodo = Todo.create(
       name: name,
-      done: false,
       userId: authStore.value.userId!,
     );
 
@@ -43,13 +42,29 @@ class TodoUsecase {
     return Failure(Exception("Todo Not Found"));
   }
 
-  Future<void> load() async {
-    assert(authStore.value.isLogin);
-    await todoRepo.listUserTodo(authStore.value.userId!);
-  }
-
   Future<void> delete(Todo todo) async {
     assert(authStore.value.isLogin);
     await todoRepo.delete(todo);
   }
+
+  @override
+  Future<void> loadMore() async {
+    assert(authStore.value.isLogin);
+    await cursor(
+      collection: TodoCollection(),
+      where: (e) => e
+          .where("userId", isEqualTo: authStore.value.userId!.value)
+          .orderBy("name")
+          .limit(2),
+    );
+  }
+
+  @override
+  bool hasMore = true;
+
+  @override
+  TodoId? latestId;
+
+  @override
+  FirestoreList<TodoId, Todo> get repo => todoRepo;
 }

@@ -21,11 +21,12 @@ mixin FirestoreBatchingSave<Id, E extends Entity<Id>>
       return Success(entity);
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
-          entityType: E,
-          code: e.code,
-          method: "firestore.batching.save",
-        ),
+        FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "firestore.batching.save",
+            message: e.message,
+            exception: e),
       );
     }
   }
@@ -57,11 +58,12 @@ mixin FirestoreBatchingSave<Id, E extends Entity<Id>>
       return Success(entities.toList());
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
-          entityType: E,
-          code: e.code,
-          method: "firestore.batching.saveAll",
-        ),
+        FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "firestore.batching.saveAll",
+            message: e.message,
+            exception: e),
       );
     }
   }

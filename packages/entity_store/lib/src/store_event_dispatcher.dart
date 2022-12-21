@@ -5,14 +5,11 @@ import 'package:entity_store/entity_store.dart';
 class StoreEventDispatcher {
   final _controller = StreamController<StoreEvent>.broadcast();
   final Set<StoreBase> _stores = {};
-  final bool debugPrint;
 
-  StoreEventDispatcher({this.debugPrint = false}) {
+  Stream<StoreEvent> get eventStream => _controller.stream;
+
+  StoreEventDispatcher() {
     _controller.stream.listen((event) {
-      if (debugPrint) {
-        event.debugPrint();
-      }
-
       for (var store in _stores) {
         if (store.shouldListenTo(event)) {
           store.handleEvent(event);

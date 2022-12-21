@@ -1,10 +1,9 @@
 import 'package:entity_store/entity_store.dart';
-import 'package:flutter/foundation.dart';
 
 abstract class StoreEvent<Id, E extends Entity<Id>> {
   const StoreEvent();
 
-  void debugPrint();
+  Type get entityType => E;
 }
 
 class GetEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
@@ -12,13 +11,6 @@ class GetEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
   const GetEvent({
     required this.entity,
   });
-
-  @override
-  void debugPrint() {
-    if (kDebugMode) {
-      print("[StoreEvent] GetEvent $entity");
-    }
-  }
 }
 
 class ListEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
@@ -26,13 +18,6 @@ class ListEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
   const ListEvent({
     required this.entities,
   });
-
-  @override
-  void debugPrint() {
-    if (kDebugMode) {
-      print("[StoreEvent] ListEvent $entities");
-    }
-  }
 }
 
 class SaveEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
@@ -40,13 +25,6 @@ class SaveEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
   const SaveEvent({
     required this.entity,
   });
-
-  @override
-  void debugPrint() {
-    if (kDebugMode) {
-      print("[StoreEvent] SaveEvent $entity");
-    }
-  }
 }
 
 class DeleteEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
@@ -54,11 +32,4 @@ class DeleteEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
   const DeleteEvent({
     required this.entityId,
   });
-
-  @override
-  void debugPrint() {
-    if (kDebugMode) {
-      print("[StoreEvent] DeleteEvent $entityId");
-    }
-  }
 }

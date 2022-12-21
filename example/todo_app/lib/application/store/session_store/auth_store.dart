@@ -1,7 +1,7 @@
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store_riverpod/entity_store_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/domain/user/id.dart';
-import 'package:todo_app/infrastracture/store/riverpod_store.dart';
 
 class Authentication {
   final UserId? userId;
@@ -24,7 +24,7 @@ final authStore = StateNotifierProvider<AuthStore, Authentication>(
 );
 
 class AuthStore extends RiverpodStoreBase<Authentication> {
-  AuthStore() : super(Authentication.init());
+  AuthStore() : super(initState: Authentication.init());
 
   @override
   void handleEvent(StoreEvent<dynamic, Entity> event) {}

@@ -16,10 +16,12 @@ mixin FirestoreSave<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
       return Success(entity);
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
+        FirestoreRequestFailure(
           entityType: E,
           code: e.code,
           method: "save",
+          message: e.message,
+          exception: e,
         ),
       );
     }

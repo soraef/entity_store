@@ -20,10 +20,12 @@ mixin FirestoreBatchingDelete<Id, E extends Entity<Id>>
       return Success(entity);
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
+        FirestoreRequestFailure(
           entityType: E,
           code: e.code,
           method: "firestore.batching.delete",
+          message: e.message,
+          exception: e,
         ),
       );
     }

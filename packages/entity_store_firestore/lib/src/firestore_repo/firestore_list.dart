@@ -19,9 +19,21 @@ mixin FirestoreList<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
     }
 
     if (afterId != null) {
-      query = query.startAfterDocument(
-        await collection.documentRef(afterId).get(),
-      );
+      late DocumentSnapshot<dynamic> snapshot;
+      try {
+        snapshot = await collection.documentRef(afterId).get();
+      } on FirebaseException catch (e) {
+        return Failure(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "list",
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
+      query = query.startAfterDocument(snapshot);
     }
 
     if (orderByField != null) {
@@ -37,10 +49,12 @@ mixin FirestoreList<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
       snapshot = await query.get();
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
+        FirestoreRequestFailure(
           entityType: E,
           code: e.code,
           method: "list",
+          message: e.message,
+          exception: e,
         ),
       );
     }
@@ -49,12 +63,13 @@ mixin FirestoreList<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
       final data = _convert(snapshot.docs).toList();
       eventDispatcher.dispatch(ListEvent<Id, E>(entities: data));
       return Success(data);
-    } catch (e) {
+    } on Exception catch (e) {
       return Failure(
-        JsonConverterException(
+        JsonConverterFailure(
           entityType: E,
           method: "list",
           fetched: snapshot.docs.map((e) => e.data()).toList(),
+          exception: e,
         ),
       );
     }

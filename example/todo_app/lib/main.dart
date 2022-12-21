@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/application/store/session_store/auth_store.dart';
+import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
 import 'firebase_options.dart';
 import 'presentation/page/auth/auth_page.dart';
@@ -33,6 +34,7 @@ class RootPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(debugger);
     final auth = ref.watch(authStore);
 
     if (!auth.isLogin) {

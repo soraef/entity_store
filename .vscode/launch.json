@@ -1,0 +1,88 @@
+{
+  // IntelliSense を使用して利用可能な属性を学べます。
+  // 既存の属性の説明をホバーして表示します。
+  // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "todo_app",
+      "cwd": "example/todo_app",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "todo_app (profile mode)",
+      "cwd": "example/todo_app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "todo_app (release mode)",
+      "cwd": "example/todo_app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "entity_store",
+      "cwd": "packages/entity_store",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "entity_store (profile mode)",
+      "cwd": "packages/entity_store",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "entity_store (release mode)",
+      "cwd": "packages/entity_store",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "entity_store_firestore",
+      "cwd": "packages/entity_store_firestore",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "entity_store_firestore (profile mode)",
+      "cwd": "packages/entity_store_firestore",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "entity_store_firestore (release mode)",
+      "cwd": "packages/entity_store_firestore",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "entity_store_riverpod",
+      "cwd": "packages/entity_store_riverpod",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "entity_store_riverpod (profile mode)",
+      "cwd": "packages/entity_store_riverpod",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "entity_store_riverpod (release mode)",
+      "cwd": "packages/entity_store_riverpod",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}

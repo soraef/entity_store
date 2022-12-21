@@ -20,10 +20,12 @@ mixin FirestoreGet<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
       doc = await getCollection(id).documentRef(id).get();
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
+        FirestoreRequestFailure(
           entityType: E,
           code: e.code,
           method: "get",
+          message: e.message,
+          exception: e,
         ),
       );
     }
@@ -33,12 +35,13 @@ mixin FirestoreGet<Id, E extends Entity<Id>> implements FirestoreRepo<Id, E> {
         final entity = converter.fromJson(doc.data());
         eventDispatcher.dispatch(GetEvent<Id, E>(entity: entity));
         return Success(entity);
-      } catch (e) {
+      } on Exception catch (e) {
         return Failure(
-          JsonConverterException(
+          JsonConverterFailure(
             entityType: E,
             method: "get",
             fetched: doc.data(),
+            exception: e,
           ),
         );
       }

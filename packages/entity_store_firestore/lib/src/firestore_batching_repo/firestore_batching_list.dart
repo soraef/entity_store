@@ -15,11 +15,12 @@ mixin FirestoreBatchingList<Id, E extends Entity<Id>>
       snapshot = await query.get();
     } on FirebaseException catch (e) {
       return Failure(
-        FirestoreRequestException(
-          entityType: E,
-          code: e.code,
-          method: "firestore.batching.list",
-        ),
+        FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "firestore.batching.list",
+            message: e.message,
+            exception: e),
       );
     }
 
@@ -27,13 +28,13 @@ mixin FirestoreBatchingList<Id, E extends Entity<Id>>
       final data = _convert(snapshot);
       eventDispatcher.dispatch(ListEvent<Id, E>(entities: data));
       return Success(data);
-    } catch (e) {
+    } on Exception catch (e) {
       return Failure(
-        JsonConverterException(
-          entityType: E,
-          method: "firestore.batching.list",
-          fetched: snapshot.data(),
-        ),
+        JsonConverterFailure(
+            entityType: E,
+            method: "firestore.batching.list",
+            fetched: snapshot.data(),
+            exception: e),
       );
     }
   }
