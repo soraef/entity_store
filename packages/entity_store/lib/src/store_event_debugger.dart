@@ -82,10 +82,10 @@ class StoreEventPrintDebugger extends StoreEventDebugger {
       try {
         return _mapToString((entity as dynamic).toJson());
       } catch (_) {
-        return entity.id;
+        return entity.id.toString();
       }
     } else {
-      return entity.id;
+      return entity.id.toString();
     }
   }
 
