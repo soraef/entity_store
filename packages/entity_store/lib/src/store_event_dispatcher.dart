@@ -39,3 +39,24 @@ class StoreEventDispatcher {
     return null;
   }
 }
+
+class StoreEventCache {
+  final Map<Type, List<StoreEvent>> _cache = {};
+
+  Future<void> put(StoreEvent event) async {
+    _cache[event.entityType] ??= [];
+    _cache[event.entityType]!.add(event);
+  }
+
+  Future<void> clear<Id, E extends Entity<Id>>() async {
+    _cache[E] = [];
+  }
+
+  Future<void> clearAll() async {
+    _cache.clear();
+  }
+
+  Future<List<StoreEvent>> getEvents<Id, E extends Entity<Id>>() async {
+    return _cache[E] ?? [];
+  }
+}

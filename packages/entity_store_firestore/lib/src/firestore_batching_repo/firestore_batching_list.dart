@@ -31,10 +31,11 @@ mixin FirestoreBatchingList<Id, E extends Entity<Id>>
     } on Exception catch (e) {
       return Failure(
         JsonConverterFailure(
-            entityType: E,
-            method: "firestore.batching.list",
-            fetched: snapshot.data(),
-            exception: e),
+          entityType: E,
+          method: "firestore.batching.list",
+          fetched: snapshot.data(),
+          exception: e,
+        ),
       );
     }
   }

@@ -1,4 +1,5 @@
 import 'package:entity_store/entity_store.dart';
+import 'package:flutter/material.dart';
 
 typedef Updater<T> = T Function(T prev);
 
@@ -64,5 +65,43 @@ mixin EntityStoreMixin<Id, E extends Entity<Id>> on EntityStoreBase<Id, E, E?> {
     } else if (event is DeleteEvent<Id, E>) {
       update((prev) => null);
     }
+  }
+}
+
+typedef EntityContainer = Map<Type, EntityMap<dynamic, dynamic>>;
+
+abstract class SingleSourceStore {
+  final EntityContainer _container = {};
+
+  void handleEvent(StoreEvent event) {
+    if (event is GetEvent) {
+      update(
+        (prev) => event.entity != null
+            ? prev.put(event.entity!)
+            : prev.delete(event.id),
+      );
+    } else if (event is ListEvent) {
+      update((prev) => prev.putAll(event.entities));
+    } else if (event is SaveEvent) {
+      update((prev) => prev.put(event.entity));
+    } else if (event is DeleteEvent) {
+      update((prev) => prev.delete(event.entityId));
+    }
+  }
+
+  void update(Updater<EntityContainer> updater);
+}
+
+extension EntityContainerX on EntityContainer {
+  EntityContainer put<Id, E extends Entity<Id>>(E entity) {
+    return {...this, E: this[E]?.put(entity) ?? EntityMap<Id, E>.empty()};
+  }
+
+  EntityContainer putAll<Id, E extends Entity<Id>>(Iterable<E> entities) {
+    return {...this, E: this[E]?.putAll(entities) ?? EntityMap<Id, E>.empty()};
+  }
+
+  EntityContainer delete<Id, E extends Entity<Id>>(Id id) {
+    return {...this, E: this[E]?.removeById(id) ?? EntityMap<Id, E>.empty()};
   }
 }

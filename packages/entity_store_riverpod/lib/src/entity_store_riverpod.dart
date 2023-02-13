@@ -14,11 +14,6 @@ abstract class RiverpodStoreBase<T> extends StateNotifier<T>
 
   @override
   T get value => state;
-
-  @override
-  void register(StoreEventDispatcher dispatcher) {
-    dispatcher.register(this);
-  }
 }
 
 abstract class IRiverpodEntityMapStore<Id, E extends Entity<Id>>
