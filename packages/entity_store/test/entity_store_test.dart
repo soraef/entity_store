@@ -28,7 +28,7 @@ class Group extends Entity<String> {
 
 void main() {
   test("a", () {
-    final event = GetEvent<String, User>(entity: User(id: "1"));
+    final event = GetEvent<String, User>(id: "1", entity: User(id: "1"));
     expect(event is StoreEvent<String, User>, true);
     expect(event is StoreEvent<String, Group>, false);
   });

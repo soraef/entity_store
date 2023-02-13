@@ -7,8 +7,10 @@ abstract class StoreEvent<Id, E extends Entity<Id>> {
 }
 
 class GetEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
+  final Id id;
   final E? entity;
   const GetEvent({
+    required this.id,
     required this.entity,
   });
 }

@@ -32,7 +32,7 @@ mixin EntityMapStoreMixin<Id, E extends Entity<Id>>
       update(
         (prev) => event.entity != null
             ? prev.put(event.entity!)
-            : prev.remove(event.entity!),
+            : prev.removeById(event.id),
       );
     } else if (event is ListEvent<Id, E>) {
       update((prev) => prev.putAll(event.entities));
