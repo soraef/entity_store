@@ -4,7 +4,11 @@ import 'package:skyreach_result/skyreach_result.dart';
 class InMemoryRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   InMemoryRepo(super.dispater);
 
-  Future<Result<E, Exception>> save(E entity) async {
+  @override
+  Future<Result<E, Exception>> save(
+    E entity, {
+    SaveOptions options = const SaveOptions(),
+  }) async {
     dispater.dispatch(SaveEvent<Id, E>.now(entity));
     return Result.ok(entity);
   }
@@ -13,7 +17,11 @@ class InMemoryRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     return Result.ok(dispater.where(test).toList());
   }
 
-  Future<Result<E, Exception>> delete(E entity) async {
+  @override
+  Future<Result<E, Exception>> delete(
+    E entity, {
+    DeleteOptions options = const DeleteOptions(),
+  }) async {
     dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
     return Result.ok(entity);
   }
@@ -21,7 +29,7 @@ class InMemoryRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   @override
   Future<Result<E?, Exception>> get(
     Id id, {
-    GetOption option = const GetOption(),
+    GetOptions options = const GetOptions(),
   }) async {
     return Result.ok(dispater.get(id));
   }

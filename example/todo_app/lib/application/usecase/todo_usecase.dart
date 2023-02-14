@@ -1,61 +1,73 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
-import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:result_type/result_type.dart';
-import 'package:todo_app/application/store/session_store/auth_store.dart';
+import 'package:skyreach_result/skyreach_result.dart';
+import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/domain/auth/repository.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
-import 'package:todo_app/domain/todo/repository.dart';
+import 'package:todo_app/domain/user/entity.dart';
+import 'package:todo_app/domain/user/id.dart';
+import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
+import 'package:todo_app/infrastracture/repository/repository.dart';
 
 final todoUsecase = Provider(
   (ref) => TodoUsecase(
+    ref.watch(
+      source.select(
+        (value) => value.get<CommonId, Auth>(CommonId.singleton())?.userId,
+      ),
+    ),
     ref.read(repoRemoteFactory),
-    ref.read(authRepo),
+    ref.read(repoInMemoryFactory),
   ),
 );
 
 class TodoUsecase with PaginationMixIn<TodoId, Todo> {
   final FirestoreRepoFactory repoFactory;
-  final AuthRepo _authRepo;
+  final InMemoryRepoFactory inMemoryFactory;
+  final UserId? userId;
 
-  TodoUsecase(this.repoFactory, this._authRepo);
+  TodoUsecase(this.userId, this.repoFactory, this.inMemoryFactory);
 
-  FirestoreRepo<TodoId, Todo> get _todoRepo =>
-      repoFactory.getRepo<TodoId, Todo>();
+  FirestoreRepo<TodoId, Todo> _todoRepo(UserId userId) {
+    return repoFactory
+        .fromSubCollection<UserId, User>(userId)
+        .getRepo<TodoId, Todo>();
+  }
+
+  IRepo<CommonId, Auth> get _authRepo =>
+      inMemoryFactory.getRepo<CommonId, Auth>();
 
   Future<void> create(String name) async {
-    final auth = await _authRepo.getAuth();
-    assert(auth?.isLogin == true);
-
     final newTodo = Todo.create(
       name: name,
-      userId: auth!.userId!,
+      userId: userId!,
     );
 
     await repoFactory.getRepo<TodoId, Todo>().save(newTodo);
   }
 
   Future<Result<Todo, Exception>> check(TodoId id, bool done) async {
-    final auth = await _authRepo.getAuth();
-    assert(auth?.isLogin == true);
-
-    final todo = await _todoRepo.get(
+    final todo = await _todoRepo(userId!).get(
       id,
-      option: const GetOption(useCache: true),
+      options: const GetOptions(useCache: true),
     );
-    if (todo.isSuccess && todo.success != null) {
-      return await _todoRepo.save(todo.success!.copyWith(done: done));
+    if (todo.isOk && todo.ok != null) {
+      return await _todoRepo(userId!).save(todo.ok!.copyWith(done: done));
     }
 
-    return Failure(Exception("Todo Not Found"));
+    return Result.err(Exception("Todo Not Found"));
   }
 
   Future<void> delete(Todo todo) async {
+    await _todoRepo(userId!).delete(todo);
+  }
+
+  Future<Auth> _checkAuth() async {
     final auth = await _authRepo.getAuth();
     assert(auth?.isLogin == true);
-    await _todoRepo.delete(todo);
+    return auth!;
   }
 
   @override
@@ -79,5 +91,5 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
   TodoId? latestId;
 
   @override
-  FirestoreRepo<TodoId, Todo> get repo => _todoRepo;
+  FirestoreRepo<TodoId, Todo> get repo => _todoRepo(userId!);
 }

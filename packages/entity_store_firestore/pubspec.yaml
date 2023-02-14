@@ -14,7 +14,7 @@ dependencies:
   equatable: ^2.0.3
   meta: ^1.8.0
   collection: ^1.16.0
-  skyreach_result: ^1.0.0
+  skyreach_result: ^1.0.1
   
 
   # entity_store: 0.0.2-dev.6

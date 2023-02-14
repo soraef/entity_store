@@ -5,12 +5,21 @@ import 'store_event_dispatcher.dart';
 
 abstract class IRepo<Id, E extends Entity<Id>> {
   final StoreEventDispatcher dispater;
-
   IRepo(this.dispater);
 
   Future<Result<E?, Exception>> get(
     Id id, {
-    GetOption option = const GetOption(),
+    GetOptions options = const GetOptions(),
+  });
+
+  Future<Result<E, Exception>> save(
+    E entity, {
+    SaveOptions options = const SaveOptions(),
+  });
+
+  Future<Result<E, Exception>> delete(
+    E entity, {
+    DeleteOptions options = const DeleteOptions(),
   });
 
   Future<List<E>> getByIds(List<Id> ids) async {
@@ -21,12 +30,23 @@ abstract class IRepo<Id, E extends Entity<Id>> {
   }
 }
 
-class GetOption {
+class GetOptions {
   final bool useCache;
 
-  const GetOption({
+  const GetOptions({
     this.useCache = false,
   });
+}
+
+class SaveOptions {
+  final bool merge;
+  const SaveOptions({
+    this.merge = false,
+  });
+}
+
+class DeleteOptions {
+  const DeleteOptions();
 }
 
 abstract class IRepoFactory {

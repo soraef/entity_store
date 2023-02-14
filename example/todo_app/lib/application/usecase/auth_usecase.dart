@@ -3,22 +3,36 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/application/store/session_store/auth_store.dart';
 import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/domain/auth/repository.dart';
+import 'package:todo_app/domain/user/entity.dart';
 import 'package:todo_app/domain/user/id.dart';
+import 'package:todo_app/infrastracture/repository/repository.dart';
 
 final authUsecase = Provider(
-  (ref) => AuthUsecase(ref.read(authRepo)),
+  (ref) => AuthUsecase(
+    ref.read(repoInMemoryFactory).getRepo(),
+    ref.read(repoRemoteFactory).getRepo(),
+  ),
 );
 
 class AuthUsecase {
-  final AuthRepo repo;
+  final IRepo<CommonId, Auth> authRepo;
+  final IRepo<UserId, User> userRepo;
 
-  AuthUsecase(this.repo);
+  AuthUsecase(
+    this.authRepo,
+    this.userRepo,
+  );
 
-  void login() {
-    repo.save(Auth.login(const UserId("user1")));
+  Future<void> login() async {
+    const userId = UserId("user1");
+    final user = await userRepo.get(userId);
+    if (user.isOk && user.ok == null) {
+      await userRepo.save(const User(id: userId));
+    }
+    await authRepo.save(Auth.login(const UserId("user1")));
   }
 
-  void logout() {
-    repo.save(Auth.init());
+  Future<void> logout() async {
+    await authRepo.save(Auth.init());
   }
 }

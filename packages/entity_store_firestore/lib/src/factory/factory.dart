@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as f;
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:meta/meta.dart';
@@ -27,10 +27,10 @@ class FirestoreRepoFactorySettings {
   }
 
   String collectionName<Id, E extends Entity<Id>>() {
-    return entityType<Id, E>().collectionName;
+    return collectionType<Id, E>().collectionName;
   }
 
-  CollectionType<Id, E> entityType<Id, E extends Entity<Id>>() {
+  CollectionType<Id, E> collectionType<Id, E extends Entity<Id>>() {
     return _collectionTypeMap[E] as CollectionType<Id, E>;
   }
 }
@@ -40,21 +40,21 @@ class FirestoreRepoFactory implements IRepoFactory {
 
   factory FirestoreRepoFactory.init(
     FirestoreRepoFactorySettings settings,
-    FirebaseFirestore firestore,
+    f.FirebaseFirestore firestore,
   ) {
     return FirestoreRepoFactory._(settings, firestore);
   }
 
   FirestoreRepoFactory._(
     this.settings,
-    FirebaseFirestore firestore,
+    f.FirebaseFirestore firestore,
   ) {
     getCollectionRef = (path) => firestore.collection(path);
   }
 
   FirestoreRepoFactory._document(
     this.settings,
-    DocumentReference document,
+    f.DocumentReference document,
   ) {
     getCollectionRef = (path) => document.collection(path);
   }
@@ -62,7 +62,7 @@ class FirestoreRepoFactory implements IRepoFactory {
   @override
   FirestoreRepoFactory fromSubCollection<Id, E extends Entity<Id>>(Id id) {
     final collectionName = settings.collectionName<Id, E>();
-    final entityType = settings.entityType<Id, E>();
+    final entityType = settings.collectionType<Id, E>();
     final documentRef = getCollectionRef(collectionName).doc(
       entityType.idToString(id),
     );
@@ -72,7 +72,7 @@ class FirestoreRepoFactory implements IRepoFactory {
     );
   }
 
-  late final CollectionReference Function(String collectionPath)
+  late final f.CollectionReference Function(String collectionPath)
       getCollectionRef;
 
   @override
@@ -80,7 +80,7 @@ class FirestoreRepoFactory implements IRepoFactory {
     final collectionName = settings.collectionName<Id, E>();
     final collectionRef = getCollectionRef(collectionName);
     return FirestoreRepo<Id, E>(
-      settings.entityType<Id, E>(),
+      settings.collectionType<Id, E>(),
       collectionRef,
       settings.dispatcher,
     );
@@ -89,7 +89,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 
 class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   final StoreEventDispatcher dispatcher;
-  final CollectionReference collection;
+  final f.CollectionReference collection;
   final CollectionType<Id, E> collectionType;
 
   FirestoreRepo(
@@ -101,19 +101,19 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   @override
   Future<Result<E?, Exception>> get(
     Id id, {
-    GetOption option = const GetOption(),
+    GetOptions options = const GetOptions(),
   }) async {
-    if (option.useCache) {
+    if (options.useCache) {
       final entity = dispater.get<Id, E>(id);
       if (entity != null) {
         return Result.ok(entity);
       }
     }
 
-    late DocumentSnapshot<dynamic> doc;
+    late f.DocumentSnapshot<dynamic> doc;
     try {
       doc = await collection.doc(collectionType.idToString(id)).get();
-    } on FirebaseException catch (e) {
+    } on f.FirebaseException catch (e) {
       return Result.err(
         FirestoreRequestFailure(
           entityType: E,
@@ -152,18 +152,18 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     Id? afterId,
   }) async {
     var ref = collection;
-    Query<dynamic> query = ref;
+    f.Query<dynamic> query = ref;
 
     if (where != null) {
       query = where(ref);
     }
 
     if (afterId != null) {
-      late DocumentSnapshot<dynamic> snapshot;
+      late f.DocumentSnapshot<dynamic> snapshot;
       try {
         snapshot =
             await collection.doc(collectionType.idToString(afterId)).get();
-      } on FirebaseException catch (e) {
+      } on f.FirebaseException catch (e) {
         return Result.err(
           FirestoreRequestFailure(
             entityType: E,
@@ -185,10 +185,10 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
       query = query.limit(limit);
     }
 
-    late QuerySnapshot<dynamic> snapshot;
+    late f.QuerySnapshot<dynamic> snapshot;
     try {
       snapshot = await query.get();
-    } on FirebaseException catch (e) {
+    } on f.FirebaseException catch (e) {
       return Result.err(
         FirestoreRequestFailure(
           entityType: E,
@@ -216,12 +216,16 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     }
   }
 
-  Future<Result<E, Exception>> delete(E entity) async {
+  @override
+  Future<Result<E, Exception>> delete(
+    E entity, {
+    DeleteOptions options = const DeleteOptions(),
+  }) async {
     try {
       await collection.doc(collectionType.idToString(entity.id)).delete();
       dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
       return Result.ok(entity);
-    } on FirebaseException catch (e) {
+    } on f.FirebaseException catch (e) {
       return Result.err(
         FirestoreRequestFailure(
           entityType: E,
@@ -234,17 +238,15 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     }
   }
 
-  Future<Result<E, Exception>> save(
-    E entity, {
-    bool merge = false,
-  }) async {
+  @override
+  Future<Result<E, Exception>> save(E entity,
+      {SaveOptions options = const SaveOptions()}) async {
     try {
-      await collection
-          .doc(collectionType.idToString(entity.id))
-          .set(collectionType.toJson(entity), SetOptions(merge: merge));
+      await collection.doc(collectionType.idToString(entity.id)).set(
+          collectionType.toJson(entity), f.SetOptions(merge: options.merge));
       dispater.dispatch(SaveEvent<Id, E>.now(entity));
       return Result.ok(entity);
-    } on FirebaseException catch (e) {
+    } on f.FirebaseException catch (e) {
       return Result.err(
         FirestoreRequestFailure(
           entityType: E,
@@ -276,7 +278,7 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     E Function(E prev) updater,
   ) async {
     try {
-      final entity = await FirebaseFirestore.instance.runTransaction<E>(
+      final entity = await collection.firestore.runTransaction<E>(
         (transaction) async {
           final ref = collection.doc(collectionType.idToString(id));
           final doc = await transaction.get<dynamic>(ref);
@@ -293,7 +295,7 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     }
   }
 
-  List<E> _convert(List<QueryDocumentSnapshot<dynamic>> docs) {
+  List<E> _convert(List<f.QueryDocumentSnapshot<dynamic>> docs) {
     return docs
         .map((e) => e.data())
         .map((data) {

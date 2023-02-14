@@ -7,14 +7,6 @@ import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
 // final todoRepo = Provider((ref) => TodoRepo(ref.read(dispater)));
 
-final repoRemoteFactory = Provider(
-  (ref) => FirestoreRepoFactory.init(
-    FirestoreRepoFactorySettings.init(ref.read(dispater))
-        .regist(todoCollectionType),
-    FirebaseFirestore.instance,
-  ),
-);
-
 final todoCollectionType = CollectionType<TodoId, Todo>(
   fromJson: Todo.fromJson,
   toJson: (e) => e.toJson(),
