@@ -61,7 +61,7 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
   }
 
   Future<void> delete(Todo todo) async {
-    await _todoRepo(userId!).delete(todo);
+    await _todoRepo(userId!).delete(todo.id);
   }
 
   Future<Auth> _checkAuth() async {

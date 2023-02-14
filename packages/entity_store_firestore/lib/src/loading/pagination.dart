@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
-import 'package:entity_store_firestore/src/factory/factory.dart';
 
 mixin PaginationMixIn<Id, E extends Entity<Id>> {
   FirestoreRepo<Id, E> get repo;
@@ -18,11 +17,9 @@ mixin PaginationMixIn<Id, E extends Entity<Id>> {
     int? limit,
   }) async {
     if (!hasMore) return;
-    final entities = await repo.list(
+    final entities = await repo.listWhere(
       afterId: latestId,
       where: where,
-      orderByField: orderByField,
-      limit: limit,
     );
 
     if (entities.isErr ||

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as f;
+import 'package:collection/collection.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:meta/meta.dart';
@@ -37,6 +38,8 @@ class FirestoreRepoFactorySettings {
 
 class FirestoreRepoFactory implements IRepoFactory {
   final FirestoreRepoFactorySettings settings;
+  late final f.CollectionReference Function(String collectionPath)
+      getCollectionRef;
 
   factory FirestoreRepoFactory.init(
     FirestoreRepoFactorySettings settings,
@@ -71,9 +74,6 @@ class FirestoreRepoFactory implements IRepoFactory {
       documentRef,
     );
   }
-
-  late final f.CollectionReference Function(String collectionPath)
-      getCollectionRef;
 
   @override
   FirestoreRepo<Id, E> getRepo<Id, E extends Entity<Id>>() {
@@ -110,44 +110,83 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
       }
     }
 
-    late f.DocumentSnapshot<dynamic> doc;
-    try {
-      doc = await collection.doc(collectionType.idToString(id)).get();
-    } on f.FirebaseException catch (e) {
-      return Result.err(
-        FirestoreRequestFailure(
-          entityType: E,
-          code: e.code,
-          method: "get",
-          message: e.message,
-          exception: e,
-        ),
-      );
-    }
-
-    if (doc.exists) {
+    if (collectionType.isGeneral) {
+      late f.DocumentSnapshot<dynamic> doc;
       try {
-        final entity = collectionType.fromJson(doc.data());
-        dispater.dispatch(GetEvent<Id, E>.now(id, entity));
-        return Result.ok(entity);
-      } on Exception catch (e) {
+        doc = await collection.doc(collectionType.idToString(id)).get();
+      } on f.FirebaseException catch (e) {
         return Result.err(
-          JsonConverterFailure(
+          FirestoreRequestFailure(
             entityType: E,
+            code: e.code,
             method: "get",
-            fetched: doc.data(),
+            message: e.message,
             exception: e,
           ),
         );
       }
-    }
+      if (doc.exists) {
+        try {
+          final entity = collectionType.fromJson(doc.data());
+          dispater.dispatch(GetEvent<Id, E>.now(id, entity));
+          return Result.ok(entity);
+        } on Exception catch (e) {
+          return Result.err(
+            JsonConverterFailure(
+              entityType: E,
+              method: "get",
+              fetched: doc.data(),
+              exception: e,
+            ),
+          );
+        }
+      }
+      return Result.ok(null);
+    } else if (collectionType.isBucketing) {
+      final bucketingType = collectionType.bucketing;
+      late f.QuerySnapshot<Object?> snapshot;
+      try {
+        snapshot = await collection
+            .where("_ids", arrayContains: collectionType.idToString(id))
+            .get();
+      } on f.FirebaseException catch (e) {
+        return Result.err(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "get.bucketing",
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
 
-    return Result.ok(null);
+      final result = <E>[];
+      try {
+        for (final doc in snapshot.docs) {
+          result.addAll(
+            _convertBucketingResult(doc, bucketingType.bucketingFieldName),
+          );
+        }
+      } on Exception catch (e) {
+        return Result.err(
+          JsonConverterFailure(
+            entityType: E,
+            method: "get.bucketing",
+            fetched: snapshot.docs.map((e) => e.data()),
+            exception: e,
+          ),
+        );
+      }
+      dispater.dispatch(ListEvent<Id, E>.now(result));
+      final entity = result.firstWhereOrNull((e) => e.id == id);
+      return Result.ok(entity);
+    } else {
+      throw AssertionError("UNKNOWN CollectionType");
+    }
   }
 
-  Future<Result<List<E>, Exception>> list({
-    int? limit,
-    String? orderByField,
+  Future<Result<List<E>, Exception>> listWhere({
     FirestoreWhere? where,
     Id? afterId,
   }) async {
@@ -161,8 +200,11 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     if (afterId != null) {
       late f.DocumentSnapshot<dynamic> snapshot;
       try {
-        snapshot =
-            await collection.doc(collectionType.idToString(afterId)).get();
+        snapshot = await collection
+            .doc(
+              collectionType.idToString(afterId),
+            )
+            .get();
       } on f.FirebaseException catch (e) {
         return Result.err(
           FirestoreRequestFailure(
@@ -175,14 +217,6 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
         );
       }
       query = query.startAfterDocument(snapshot);
-    }
-
-    if (orderByField != null) {
-      query = query.orderBy(orderByField);
-    }
-
-    if (limit != null) {
-      query = query.limit(limit);
     }
 
     late f.QuerySnapshot<dynamic> snapshot;
@@ -217,14 +251,14 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   }
 
   @override
-  Future<Result<E, Exception>> delete(
-    E entity, {
+  Future<Result<Id, Exception>> delete(
+    Id id, {
     DeleteOptions options = const DeleteOptions(),
   }) async {
     try {
-      await collection.doc(collectionType.idToString(entity.id)).delete();
-      dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
-      return Result.ok(entity);
+      await collection.doc(collectionType.idToString(id)).delete();
+      dispater.dispatch(DeleteEvent<Id, E>.now(id));
+      return Result.ok(id);
     } on f.FirebaseException catch (e) {
       return Result.err(
         FirestoreRequestFailure(
@@ -239,23 +273,60 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   }
 
   @override
-  Future<Result<E, Exception>> save(E entity,
-      {SaveOptions options = const SaveOptions()}) async {
-    try {
-      await collection.doc(collectionType.idToString(entity.id)).set(
-          collectionType.toJson(entity), f.SetOptions(merge: options.merge));
-      dispater.dispatch(SaveEvent<Id, E>.now(entity));
-      return Result.ok(entity);
-    } on f.FirebaseException catch (e) {
-      return Result.err(
-        FirestoreRequestFailure(
-          entityType: E,
-          code: e.code,
-          method: "save",
-          message: e.message,
-          exception: e,
-        ),
-      );
+  Future<Result<E, Exception>> save(
+    E entity, {
+    SaveOptions options = const SaveOptions(),
+  }) async {
+    if (collectionType.isGeneral) {
+      try {
+        await collection.doc(collectionType.idToString(entity.id)).set(
+              collectionType.toJson(entity),
+              f.SetOptions(merge: options.merge),
+            );
+        dispater.dispatch(SaveEvent<Id, E>.now(entity));
+        return Result.ok(entity);
+      } on f.FirebaseException catch (e) {
+        return Result.err(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "save",
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
+    } else if (collectionType.isBucketing) {
+      final bucketingType = collectionType.bucketing;
+      try {
+        await collection.doc(bucketingType.bucketIdToString(entity)).set(
+          {
+            bucketingType.bucketingFieldName: {
+              bucketingType.idToString(entity.id): bucketingType.toJson(entity),
+            },
+            ...bucketingType.toDocumentFields(entity),
+            "_count": f.FieldValue.increment(1),
+            "_ids": f.FieldValue.arrayUnion([
+              bucketingType.idToString(entity.id),
+            ])
+          },
+          f.SetOptions(merge: true),
+        );
+        dispater.dispatch(SaveEvent<Id, E>.now(entity));
+        return Result.ok(entity);
+      } on f.FirebaseException catch (e) {
+        return Result.err(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "firestore.batching.save",
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
+    } else {
+      throw AssertionError("UNKNOWN CollectionType");
     }
   }
 
@@ -263,12 +334,55 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     Iterable<E> entities, {
     bool merge = false,
   }) async {
-    final futureList = entities.map((e) => save(e));
-    final results = await Future.wait(futureList);
-    if (results.every((e) => e.isOk)) {
-      return Result.ok(results.map((e) => e.ok));
+    if (entities.isEmpty) {
+      return Result.err(Exception());
+    }
+    if (collectionType.isGeneral) {
+      final futureList = entities.map((e) => save(e));
+      final results = await Future.wait(futureList);
+      if (results.every((e) => e.isOk)) {
+        return Result.ok(results.map((e) => e.ok));
+      } else {
+        return results.firstWhere((e) => e.isErr).mapOk((p0) => []);
+      }
+    } else if (collectionType.isBucketing) {
+      final bucketingType = collectionType.bucketing;
+      try {
+        final entity = entities.first;
+
+        await collection.doc((bucketingType.bucketIdToString(entity))).set(
+          {
+            bucketingType.bucketingFieldName: {
+              for (final e in entities)
+                bucketingType.idToString(e.id): bucketingType.toJson(e),
+            },
+            ...bucketingType.toDocumentFields(entity),
+            "_count": f.FieldValue.increment(entities.length),
+            "_ids": f.FieldValue.arrayUnion([
+              for (final e in entities) bucketingType.idToString(e.id),
+            ])
+          },
+          f.SetOptions(merge: true),
+        );
+
+        for (final entity in entities) {
+          dispater.dispatch(SaveEvent<Id, E>.now(entity));
+        }
+
+        return Result.ok(entities.toList());
+      } on f.FirebaseException catch (e) {
+        return Result.err(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            method: "firestore.batching.saveAll",
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
     } else {
-      return results.firstWhere((e) => e.isErr).mapOk((p0) => []);
+      throw AssertionError("UNKNOWN CollectionType");
     }
   }
 
@@ -304,5 +418,23 @@ class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
         })
         .whereType<E>()
         .toList();
+  }
+
+  List<E> _convertBucketingResult(
+    f.DocumentSnapshot<dynamic> doc,
+    String fieldName,
+  ) {
+    final data = doc.data();
+    if (data == null) return [];
+    var json = data as Map<String, dynamic>;
+    var result = <E>[];
+
+    final entities = json[fieldName] as Map<String, dynamic>?;
+
+    for (final entityJson in entities?.values ?? []) {
+      result.add(collectionType.fromJson(entityJson));
+    }
+
+    return result;
   }
 }

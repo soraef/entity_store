@@ -17,8 +17,8 @@ abstract class IRepo<Id, E extends Entity<Id>> {
     SaveOptions options = const SaveOptions(),
   });
 
-  Future<Result<E, Exception>> delete(
-    E entity, {
+  Future<Result<Id, Exception>> delete(
+    Id id, {
     DeleteOptions options = const DeleteOptions(),
   });
 

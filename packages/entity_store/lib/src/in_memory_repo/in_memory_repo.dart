@@ -18,12 +18,12 @@ class InMemoryRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   }
 
   @override
-  Future<Result<E, Exception>> delete(
-    E entity, {
+  Future<Result<Id, Exception>> delete(
+    Id id, {
     DeleteOptions options = const DeleteOptions(),
   }) async {
-    dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
-    return Result.ok(entity);
+    dispater.dispatch(DeleteEvent<Id, E>.now(id));
+    return Result.ok(id);
   }
 
   @override
@@ -50,3 +50,11 @@ class InMemoryRepoFactory implements IRepoFactory {
     return InMemoryRepo<Id, E>(dispatcher);
   }
 }
+
+// abstract class IQuery<TIn, TOut> {
+//   TOut handle(TIn data);
+// }
+
+// class FirestoreQuery<Id, E extends Entity<Id>> {
+
+// }
