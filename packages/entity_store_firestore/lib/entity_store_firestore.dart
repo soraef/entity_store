@@ -8,3 +8,4 @@ export 'src/firestore_batching_repo/firestore_batching_repo.dart';
 export 'src/exception.dart';
 export 'src/entity_json_converter.dart';
 export 'src/loading/pagination.dart';
+export 'src/factory/factory.dart';

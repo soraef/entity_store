@@ -8,13 +8,16 @@ import 'package:todo_app/application/store/entity_store/todo_store.dart';
 import 'package:todo_app/application/usecase/todo_usecase.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
+import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
 class TodoPage extends HookConsumerWidget {
   const TodoPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todos = ref.watch(todoStore);
+    final todos = ref.watch(
+      source.select((value) => value.where<TodoId, Todo>()),
+    );
 
     useEffect(
       () {

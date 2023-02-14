@@ -6,7 +6,14 @@ abstract class StoreEvent<Id, E extends Entity<Id>> {
   });
 
   Type get entityType => E;
+  Type get idType => Id;
   final DateTime eventTime;
+
+  void apply(StoreEventHandler handler) {
+    if (handler.shouldListenTo<Id, E>(this)) {
+      handler.handleEvent<Id, E>(this);
+    }
+  }
 }
 
 class GetEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {

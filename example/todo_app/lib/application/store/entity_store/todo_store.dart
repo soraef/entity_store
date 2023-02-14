@@ -3,10 +3,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
 
-final todoStore = StateNotifierProvider<TodoStore, Todos>(
-  (ref) => TodoStore(),
-);
+// final todoStore = StateNotifierProvider<TodoStore, Todos>(
+//   (ref) => TodoStore(),
+// );
 
-class TodoStore extends RiverpodEntityMapStore<TodoId, Todo> {
-  TodoStore() : super(initState: Todos.empty());
-}
+// class TodoStore extends RiverpodEntityMapStore<TodoId, Todo> {
+//   TodoStore() : super(initState: Todos.empty());
+// }

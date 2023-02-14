@@ -1,42 +1,37 @@
 import 'dart:async';
 
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store/src/single_source_store.dart';
+
+abstract class StoreEventHandler {
+  void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
+  bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
+}
 
 class StoreEventDispatcher {
   final _controller = StreamController<StoreEvent>.broadcast();
-  final Set<StoreBase> _stores = {};
+  final SingleSourceStoreMixin _source;
 
   Stream<StoreEvent> get eventStream => _controller.stream;
 
-  StoreEventDispatcher() {
+  StoreEventDispatcher(this._source) {
     _controller.stream.listen((event) {
-      for (var store in _stores) {
-        if (store.shouldListenTo(event)) {
-          store.handleEvent(event);
-        }
-      }
+      event.apply(_source);
     });
   }
 
-  void register(StoreBase store) {
-    _stores.add(store);
-  }
-
-  void unregister(StoreBase store) {
-    _stores.remove(store);
-  }
-
-  void dispatch(StoreEvent event) {
+  void dispatch<Id, E extends Entity<Id>>(StoreEvent<Id, E> event) {
     _controller.sink.add(event);
   }
 
-  E? getEntityFromStore<Id, E extends Entity<Id>>(Id id) {
-    for (var store in _stores) {
-      if (store is EntityStoreBase<Id, E, dynamic>) {
-        return store.getById(id);
-      }
-    }
-    return null;
+  E? get<Id, E extends Entity<Id>>(Id id) {
+    return _source.value.get<Id, E>(id);
+  }
+
+  EntityMap<Id, E> where<Id, E extends Entity<Id>>([
+    bool Function(E) test = testAlwaysTrue,
+  ]) {
+    return _source.value.where(test);
   }
 }
 

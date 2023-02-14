@@ -2,35 +2,3 @@ import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_riverpod/entity_store_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/domain/user/id.dart';
-
-class Authentication {
-  final UserId? userId;
-
-  Authentication(this.userId);
-
-  factory Authentication.init() {
-    return Authentication(null);
-  }
-
-  factory Authentication.login(UserId userId) {
-    return Authentication(userId);
-  }
-
-  bool get isLogin => userId != null;
-}
-
-final authStore = StateNotifierProvider<AuthStore, Authentication>(
-  (ref) => AuthStore(),
-);
-
-class AuthStore extends RiverpodStoreBase<Authentication> {
-  AuthStore() : super(initState: Authentication.init());
-
-  @override
-  void handleEvent(StoreEvent<dynamic, Entity> event) {}
-
-  @override
-  bool shouldListenTo(StoreEvent<dynamic, Entity> event) {
-    return false;
-  }
-}

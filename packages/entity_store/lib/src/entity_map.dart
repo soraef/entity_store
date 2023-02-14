@@ -39,6 +39,11 @@ class EntityMap<Id, E extends Entity<Id>> {
   /// Returns the number of Entities that [this] holds.
   int get length => entities.length;
 
+  EntityMap<Id2, E2> cast<Id2, E2 extends Entity<Id2>>() {
+    final list = toList().map((e) => e as E2);
+    return EntityMap.fromIterable(list);
+  }
+
   /// returns true if this has an [id]
   bool exist(Id id) => _entities[id] != null;
 
@@ -47,6 +52,14 @@ class EntityMap<Id, E extends Entity<Id>> {
 
   /// Returns the [Entity] of the [index]
   E at(int index) => _entities.values.toList()[index];
+
+  E? atOrNull(int index) {
+    try {
+      return _entities.values.toList()[index];
+    } catch (e) {
+      return null;
+    }
+  }
 
   /// Returns the [Entity] of [ids] held by this as a new [EntityMap].
   EntityMap<Id, E> byIds(Iterable<Id> ids) {

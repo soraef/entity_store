@@ -9,14 +9,17 @@
 // ignore_for_file: unnecessary_type_check
 
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store/src/entity_map_container.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class User extends Entity<String> {
   @override
   final String id;
+  final String name;
 
   User({
     required this.id,
+    required this.name,
   });
 }
 
@@ -33,33 +36,50 @@ class Group extends Entity<String> {
       users.byIds(memberUserIds).toList();
 }
 
-class UserStore extends EntityStoreBase<String, User, EntityMap<String, User>>
-    with EntityMapStoreMixin<String, User> {
+class Source with SingleSourceStoreMixin {
+  EntityMapContainer state = EntityMapContainer.empty();
+
   @override
-  void update(Updater<EntityMap<String, User>> updater) {
-    value = updater(value);
+  void update(Updater<EntityMapContainer> updater) {
+    state = updater(state);
   }
 
   @override
-  EntityMap<String, User> value = EntityMap<String, User>.empty();
-}
-
-class GroupStore
-    extends EntityStoreBase<String, Group, EntityMap<String, Group>>
-    with EntityMapStoreMixin<String, Group> {
-  @override
-  void update(Updater<EntityMap<String, Group>> updater) {
-    value = updater(value);
-  }
-
-  @override
-  EntityMap<String, Group> value = EntityMap<String, Group>.empty();
+  EntityMapContainer get value => state;
 }
 
 void main() {
   test("a", () {
-    final event = GetEvent<String, User>.now("1", User(id: "1"));
+    final event =
+        GetEvent<String, User>.now("1", User(id: "1", name: "soraef"));
     expect(event is StoreEvent<String, User>, true);
     expect(event is StoreEvent<String, Group>, false);
+  });
+
+  test("b", () async {
+    final source = Source();
+    final dispater = StoreEventDispatcher(source);
+    final event = GetEvent<String, User>.now(
+      "1",
+      User(id: "1", name: "soraef"),
+    );
+    final event2 = GetEvent<String, Group>.now(
+      "1",
+      Group(id: "1", memberUserIds: []),
+    );
+    dispater.dispatch(event);
+    dispater.dispatch(event2);
+    await Future.delayed(const Duration(milliseconds: 200));
+    print(source.state.where<String, User>().length);
+    print(source.state.get<String, User>("1")?.name);
+
+    final event3 = GetEvent<String, User>.now(
+      "1",
+      User(id: "1", name: "changed"),
+    );
+    dispater.dispatch(event3);
+    await Future.delayed(const Duration(milliseconds: 100));
+    print(source.state.where<String, User>().length);
+    print(source.state.get<String, User>("1")?.name);
   });
 }

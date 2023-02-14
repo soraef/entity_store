@@ -8,7 +8,8 @@
       "name": "todo_app",
       "cwd": "example/todo_app",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "args": ["--debug"]
     },
     {
       "name": "todo_app (profile mode)",

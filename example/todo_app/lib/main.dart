@@ -1,9 +1,13 @@
+import 'package:entity_store/entity_store.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/application/store/session_store/auth_store.dart';
+import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
+import 'domain/todo/entity.dart';
+import 'domain/todo/id.dart';
 import 'firebase_options.dart';
 import 'presentation/page/auth/auth_page.dart';
 import 'presentation/page/todo/todo_page.dart';
@@ -14,11 +18,15 @@ void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(debugger);
+    // final store = ref.watch(source);
+    // final todos = ref.watch(source).whereType<TodoId, Todo>();
+
     return MaterialApp(
       title: 'Todo Sample',
       theme: ThemeData(
@@ -34,10 +42,13 @@ class RootPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.read(debugger);
-    final auth = ref.watch(authStore);
+    final auth = ref
+        .watch(source.select(
+          (value) => value.where<CommonId, Auth>(),
+        ))
+        .atOrNull(0);
 
-    if (!auth.isLogin) {
+    if (auth == null || !auth.isLogin) {
       return const AuthPage();
     } else {
       return const TodoPage();

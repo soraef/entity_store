@@ -9,3 +9,5 @@ export 'src/store_event_dispatcher.dart';
 export 'src/store_event.dart';
 export 'src/in_memory_repo/in_memory_repo.dart';
 export 'src/store_event_debugger.dart';
+export "src/single_source_store.dart";
+export 'src/entity_map_container.dart';

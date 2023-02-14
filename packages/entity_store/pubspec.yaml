@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   collection: ^1.16.0
-  result_type: ^0.2.0
+  skyreach_result: ^1.0.0
 
 dev_dependencies:
   flutter_test:
