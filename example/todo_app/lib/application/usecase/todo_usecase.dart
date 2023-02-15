@@ -64,12 +64,6 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
     await _todoRepo(userId!).delete(todo);
   }
 
-  Future<Auth> _checkAuth() async {
-    final auth = await _authRepo.getAuth();
-    assert(auth?.isLogin == true);
-    return auth!;
-  }
-
   @override
   Future<void> loadMore({
     int limit = 10,

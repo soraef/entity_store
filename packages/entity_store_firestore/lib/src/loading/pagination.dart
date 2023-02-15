@@ -24,8 +24,6 @@ mixin PaginationMixIn<Id, E extends Entity<Id>> {
 
     if (entities.isOk) {
       latestId = entities.ok.lastOrNull?.id;
-    } else {
-      print((entities.err as FirestoreRequestFailure).message);
     }
   }
 

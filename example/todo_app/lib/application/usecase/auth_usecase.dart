@@ -1,8 +1,6 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/application/store/session_store/auth_store.dart';
 import 'package:todo_app/domain/auth/entity.dart';
-import 'package:todo_app/domain/auth/repository.dart';
 import 'package:todo_app/domain/user/entity.dart';
 import 'package:todo_app/domain/user/id.dart';
 import 'package:todo_app/infrastracture/repository/repository.dart';

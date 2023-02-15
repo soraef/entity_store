@@ -1,6 +1,5 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
-import 'package:entity_store_firestore/src/repository/firestore_repo.dart';
 import 'package:entity_store_firestore/src/repository/query.dart';
 import 'package:skyreach_result/skyreach_result.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as f;

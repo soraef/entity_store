@@ -1,5 +1,4 @@
 import '../entity_store.dart';
-import 'entity_map_container.dart';
 
 mixin SingleSourceStoreMixin
     implements StoreEventHandler, Updatable<EntityMapContainer> {

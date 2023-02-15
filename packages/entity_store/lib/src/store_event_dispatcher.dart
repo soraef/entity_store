@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store/src/single_source_store.dart';
 
 abstract class StoreEventHandler {
   void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);

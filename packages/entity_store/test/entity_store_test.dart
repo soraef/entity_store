@@ -1,15 +1,6 @@
-// import 'package:entity_store/entity_store.dart';
-
-// class MessageRoom extends Entity<String> {
-//   @override
-//   final String id;
-//   MessageRoom({required this.id});
-// }
-
 // ignore_for_file: unnecessary_type_check
 
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store/src/entity_map_container.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class User extends Entity<String> {
@@ -70,8 +61,6 @@ void main() {
     dispater.dispatch(event);
     dispater.dispatch(event2);
     await Future.delayed(const Duration(milliseconds: 200));
-    print(source.state.where<String, User>().length);
-    print(source.state.get<String, User>("1")?.name);
 
     final event3 = GetEvent<String, User>.now(
       "1",
@@ -79,7 +68,5 @@ void main() {
     );
     dispater.dispatch(event3);
     await Future.delayed(const Duration(milliseconds: 100));
-    print(source.state.where<String, User>().length);
-    print(source.state.get<String, User>("1")?.name);
   });
 }
