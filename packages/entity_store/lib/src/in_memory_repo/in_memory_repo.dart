@@ -13,17 +13,18 @@ class InMemoryRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
     return Result.ok(entity);
   }
 
-  Future<Result<List<E>, Exception>> list(bool Function(E) test) async {
-    return Result.ok(dispater.where(test).toList());
+  @override
+  Future<Result<List<E>, Exception>> list(Query query) async {
+    return Result.ok(dispater.where<Id, E>().toList());
   }
 
   @override
-  Future<Result<Id, Exception>> delete(
-    Id id, {
+  Future<Result<E, Exception>> delete(
+    E entity, {
     DeleteOptions options = const DeleteOptions(),
   }) async {
-    dispater.dispatch(DeleteEvent<Id, E>.now(id));
-    return Result.ok(id);
+    dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
+    return Result.ok(entity);
   }
 
   @override

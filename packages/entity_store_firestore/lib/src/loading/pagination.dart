@@ -11,16 +11,10 @@ mixin PaginationMixIn<Id, E extends Entity<Id>> {
   bool get hasMore;
   set hasMore(bool more);
 
-  Future<void> cursor({
-    FirestoreWhere? where,
-    String? orderByField,
-    int? limit,
-  }) async {
+  Future<void> cursor(Query<Id, E> query) async {
     if (!hasMore) return;
-    final entities = await repo.listWhere(
-      afterId: latestId,
-      where: where,
-    );
+    final entities = await repo
+        .list(latestId != null ? query.startAfterId(latestId as Id) : query);
 
     if (entities.isErr ||
         entities.ok.isEmpty ||

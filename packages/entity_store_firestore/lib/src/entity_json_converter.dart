@@ -39,11 +39,11 @@ abstract class CollectionType<Id, E extends Entity<Id>> {
   factory CollectionType.bucketing({
     required String collectionName,
     required String bucketingFieldName,
-    required String Function(E id) bucketIdToString,
+    required String Function(E entity) bucketIdToString,
     required String Function(Id id) idToString,
-    required E Function(Map<String, dynamic>) fromJson,
-    required Map<String, dynamic> Function(E) toJson,
-    required Map<String, dynamic> Function(E) toDocumentFields,
+    required E Function(Map<String, dynamic> json) fromJson,
+    required Map<String, dynamic> Function(E entity) toJson,
+    required Map<String, dynamic> Function(E entity) toDocumentFields,
   }) {
     return BucketingCollection(
       fromJson: fromJson,

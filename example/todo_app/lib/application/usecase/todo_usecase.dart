@@ -45,7 +45,7 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
       userId: userId!,
     );
 
-    await repoFactory.getRepo<TodoId, Todo>().save(newTodo);
+    await repo.save(newTodo);
   }
 
   Future<Result<Todo, Exception>> check(TodoId id, bool done) async {
@@ -61,7 +61,7 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
   }
 
   Future<void> delete(Todo todo) async {
-    await _todoRepo(userId!).delete(todo.id);
+    await _todoRepo(userId!).delete(todo);
   }
 
   Future<Auth> _checkAuth() async {
@@ -76,11 +76,20 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
   }) async {
     final auth = await _authRepo.getAuth();
     assert(auth?.isLogin == true);
-    await cursor(
-      where: (e) => e
-          .where("userId", isEqualTo: auth!.userId!.value)
-          .orderBy("name")
-          .limit(2),
+    // await cursor(
+    //   Query<TodoId, Todo>()
+    //       .where("userId", isEqualTo: auth!.userId!.value)
+    //       .orderBy("name")
+    //       .limit(2),
+    // );
+    hasMore = false;
+  }
+
+  Future<void> loadAll() async {
+    final auth = await _authRepo.getAuth();
+    assert(auth?.isLogin == true);
+    await repo.list(
+      Query<TodoId, Todo>().where("userId", isEqualTo: auth!.userId!.value),
     );
   }
 

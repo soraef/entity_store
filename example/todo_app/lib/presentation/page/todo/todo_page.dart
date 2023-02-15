@@ -21,7 +21,7 @@ class TodoPage extends HookConsumerWidget {
 
     useEffect(
       () {
-        ref.read(todoUsecase).loadMore();
+        ref.read(todoUsecase).loadAll();
         return null;
       },
       const [],
