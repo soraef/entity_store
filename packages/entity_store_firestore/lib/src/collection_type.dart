@@ -1,3 +1,4 @@
+
 import 'package:entity_store/entity_store.dart';
 
 abstract class CollectionType<Id, E extends Entity<Id>> {

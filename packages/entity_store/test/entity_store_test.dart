@@ -12,6 +12,13 @@ class User extends Entity<String> {
     required this.id,
     required this.name,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "name": name,
+    };
+  }
 }
 
 class Group extends Entity<String> {
@@ -25,6 +32,13 @@ class Group extends Entity<String> {
 
   List<User> members(EntityMap<String, User> users) =>
       users.byIds(memberUserIds).toList();
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "memberUserIds": memberUserIds,
+    };
+  }
 }
 
 class Source with EntityStoreMixin {

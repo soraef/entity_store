@@ -1,5 +1,6 @@
 library repository;
 
+import 'package:collection/collection.dart';
 import 'package:skyreach_result/skyreach_result.dart';
 
 import 'store.dart';

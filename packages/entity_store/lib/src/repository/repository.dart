@@ -68,6 +68,33 @@ class Filter {
   final dynamic value;
 
   Filter(this.field, this.operator, this.value);
+
+  bool test(Map<String, dynamic> object) {
+    switch (operator) {
+      case FilterOperator.isEqualTo:
+        return object[field] == value;
+      case FilterOperator.isNotEqualTo:
+        return object[field] != value;
+      case FilterOperator.isLessThan:
+        return object[field] < value;
+      case FilterOperator.isLessThanOrEqualTo:
+        return object[field] <= value;
+      case FilterOperator.isGreaterThan:
+        return object[field] > value;
+      case FilterOperator.isGreaterThanOrEqualTo:
+        return object[field] >= value;
+      case FilterOperator.arrayContains:
+        return (object[field] as List).contains(value);
+      case FilterOperator.arrayContainsAny:
+        return (object[field] as List).any((e) => (value as List).contains(e));
+      case FilterOperator.whereIn:
+        return (value as List).contains(object[field]);
+      case FilterOperator.whereNotIn:
+        return (value as List).every((e) => e != object[field]);
+      case FilterOperator.isNull:
+        return object[field] == null;
+    }
+  }
 }
 
 class Sort {
@@ -216,5 +243,9 @@ class Query<Id, E extends Entity<Id>> {
       _limitNum,
       id,
     );
+  }
+
+  bool test(Map<String, dynamic> object) {
+    return _filters.map((e) => e.test(object)).every((e) => e);
   }
 }

@@ -15,4 +15,10 @@ class Auth extends SingletonEntity {
   }
 
   bool get isLogin => userId != null;
+
+  Map<String, dynamic> toJson() {
+    return {
+      "userId": userId?.value,
+    };
+  }
 }
