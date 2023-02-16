@@ -13,8 +13,8 @@ final authUsecase = Provider(
 );
 
 class AuthUsecase {
-  final IRepo<CommonId, Auth> authRepo;
-  final IRepo<UserId, User> userRepo;
+  final IRepository<CommonId, Auth> authRepo;
+  final IRepository<UserId, User> userRepo;
 
   AuthUsecase(
     this.authRepo,

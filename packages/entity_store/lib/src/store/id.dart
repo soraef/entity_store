@@ -1,3 +1,5 @@
+part of "../store.dart";
+
 abstract class Id {
   final String value;
 

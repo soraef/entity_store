@@ -35,7 +35,7 @@ class FirestoreRepoFactorySettings {
   }
 }
 
-class FirestoreRepoFactory implements IRepoFactory {
+class FirestoreRepoFactory implements IRepositoryFactory {
   final FirestoreRepoFactorySettings settings;
   late final f.CollectionReference Function(String collectionPath)
       getCollectionRef;
@@ -100,7 +100,7 @@ class FirestoreRepoFactory implements IRepoFactory {
   }
 }
 
-// class FirestoreRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
+// class FirestoreRepo<Id, E extends Entity<Id>> extends IRepository<Id, E> {
 //   final StoreEventDispatcher dispatcher;
 //   final f.CollectionReference collection;
 //   final CollectionType<Id, E> collectionType;

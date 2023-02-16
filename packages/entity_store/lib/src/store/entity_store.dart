@@ -1,5 +1,7 @@
-import 'entity.dart';
-import 'entity_map.dart';
+part of "../store.dart";
+
+// import 'entity.dart';
+// import 'entity_map.dart';
 
 class EntityStore {
   final Map<Type, EntityMap<dynamic, dynamic>> _entityMaps;

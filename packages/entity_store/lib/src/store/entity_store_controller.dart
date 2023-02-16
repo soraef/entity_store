@@ -1,11 +1,12 @@
-import 'dart:async';
+part of "../store.dart";
 
-import 'package:entity_store/entity_store.dart';
+// import 'dart:async';
 
-abstract class StoreEventHandler {
-  void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
-  bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
-}
+// import 'entity.dart';
+// import 'entity_map.dart';
+// import 'entity_store.dart';
+// import 'entity_store_notifier.dart';
+// import 'store_event.dart';
 
 class EntityStoreController {
   final _controller = StreamController<StoreEvent>.broadcast();

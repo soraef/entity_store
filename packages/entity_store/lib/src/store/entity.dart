@@ -1,4 +1,6 @@
-import 'package:entity_store/entity_store.dart';
+part of "../store.dart";
+
+// import 'id.dart';
 
 abstract class Entity<Id> {
   Id get id;

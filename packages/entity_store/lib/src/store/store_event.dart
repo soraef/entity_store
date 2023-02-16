@@ -1,4 +1,11 @@
-import 'package:entity_store/entity_store.dart';
+part of "../store.dart";
+
+// import 'entity.dart';
+
+abstract class StoreEventHandler {
+  void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
+  bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
+}
 
 abstract class StoreEvent<Id, E extends Entity<Id>> {
   const StoreEvent({

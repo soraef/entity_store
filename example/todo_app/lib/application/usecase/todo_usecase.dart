@@ -25,7 +25,7 @@ final todoUsecase = Provider(
 
 class TodoUsecase with PaginationMixIn<TodoId, Todo> {
   final FirestoreRepoFactory repoFactory;
-  final InMemoryRepoFactory inMemoryFactory;
+  final InMemoryRepositoryFactory inMemoryFactory;
   final UserId? userId;
 
   TodoUsecase(this.userId, this.repoFactory, this.inMemoryFactory);
@@ -36,7 +36,7 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
         .getRepo<TodoId, Todo>();
   }
 
-  IRepo<CommonId, Auth> get _authRepo =>
+  IRepository<CommonId, Auth> get _authRepo =>
       inMemoryFactory.getRepo<CommonId, Auth>();
 
   Future<void> create(String name) async {

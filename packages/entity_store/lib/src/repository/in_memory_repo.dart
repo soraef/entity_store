@@ -1,8 +1,7 @@
-import 'package:entity_store/entity_store.dart';
-import 'package:skyreach_result/skyreach_result.dart';
+part of "../repository.dart";
 
-class InMemoryRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
-  InMemoryRepo(super.controller);
+class InMemoryRepository<Id, E extends Entity<Id>> extends IRepository<Id, E> {
+  InMemoryRepository(super.controller);
 
   @override
   Future<Result<E, Exception>> save(
@@ -36,26 +35,18 @@ class InMemoryRepo<Id, E extends Entity<Id>> extends IRepo<Id, E> {
   }
 }
 
-class InMemoryRepoFactory implements IRepoFactory {
+class InMemoryRepositoryFactory implements IRepositoryFactory {
   final EntityStoreController dispatcher;
 
-  InMemoryRepoFactory(this.dispatcher);
+  InMemoryRepositoryFactory(this.dispatcher);
 
   @override
-  InMemoryRepoFactory fromSubCollection<Id, E extends Entity<Id>>(Id id) {
+  InMemoryRepositoryFactory fromSubCollection<Id, E extends Entity<Id>>(Id id) {
     return this;
   }
 
   @override
-  InMemoryRepo<Id, E> getRepo<Id, E extends Entity<Id>>() {
-    return InMemoryRepo<Id, E>(dispatcher);
+  InMemoryRepository<Id, E> getRepo<Id, E extends Entity<Id>>() {
+    return InMemoryRepository<Id, E>(dispatcher);
   }
 }
-
-// abstract class IQuery<TIn, TOut> {
-//   TOut handle(TIn data);
-// }
-
-// class FirestoreQuery<Id, E extends Entity<Id>> {
-
-// }
