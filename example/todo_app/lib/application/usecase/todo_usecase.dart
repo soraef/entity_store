@@ -68,7 +68,7 @@ class TodoUsecase {
     final auth = await _authRepo.getAuth();
     assert(auth?.isLogin == true);
     await repo.list(
-      Query<TodoId, Todo>().where("userId", isEqualTo: auth!.userId!.value),
+      (q) => q.where("userId", isEqualTo: auth!.userId!.value),
     );
   }
 

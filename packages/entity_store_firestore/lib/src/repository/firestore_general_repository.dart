@@ -84,7 +84,14 @@ class FirestoreGeneralRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<List<E>, Exception>> list(Query<Id, E> query) async {
+  Future<Result<List<E>, Exception>> list([
+    Query<Id, E> Function(Query<Id, E> query)? buildQuery,
+  ]) async {
+    var query = Query<Id, E>();
+    if (buildQuery != null) {
+      query = buildQuery(query);
+    }
+
     f.Query<dynamic> ref = collection;
     ref = query.buildFilterQuery(ref);
 

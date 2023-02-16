@@ -16,5 +16,5 @@ final repoRemoteFactory = Provider(
 );
 
 final repoInMemoryFactory = Provider(
-  (ref) => InMemoryRepositoryFactory(ref.read(entityStoreController)),
+  (ref) => InMemoryRepositoryFactory.init(ref.read(entityStoreController)),
 );

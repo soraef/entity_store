@@ -115,7 +115,7 @@ class TodoInfiniteLoading extends InfiniteLoadingNotifier<TodoId, Todo> {
 
   @override
   Future<void> load({int limit = 10}) async {
-    await cursor(Query<TodoId, Todo>().limit(2));
+    await cursor((q) => q.limit(limit));
   }
 }
 

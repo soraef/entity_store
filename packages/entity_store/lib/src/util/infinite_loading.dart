@@ -39,13 +39,16 @@ abstract class InfiniteLoadingNotifier<Id, E extends Entity<Id>>
   IRepository<Id, E> get repo;
 
   @mustCallSuper
-  Future<void> cursor(Query<Id, E> query) async {
+  Future<void> cursor(Query<Id, E> Function(Query<Id, E>) buildQuery) async {
     if (!state.hasMore) return;
     state = state.copyWith(isLoading: true);
 
     final latestId = state.loadedIds.lastOrNull;
-    final entities = await repo
-        .list(latestId != null ? query.startAfterId(latestId) : query);
+    final entities = await repo.list(
+      (query) => latestId != null
+          ? buildQuery(query).startAfterId(latestId)
+          : buildQuery(query),
+    );
 
     if (entities.isErr ||
         entities.ok.isEmpty ||

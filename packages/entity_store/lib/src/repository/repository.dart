@@ -9,7 +9,9 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     GetOptions options = const GetOptions(),
   });
 
-  Future<Result<List<E>, Exception>> list(Query<Id, E> query);
+  Future<Result<List<E>, Exception>> list([
+    Query<Id, E> Function(Query<Id, E> query)? buildQuery,
+  ]);
 
   Future<Result<E, Exception>> save(
     E entity, {
@@ -122,9 +124,9 @@ class Query<Id, E extends Entity<Id>> {
     this._startAfterId,
   );
 
-  Query()
-      : _filters = [],
-        _sorts = [],
+  const Query()
+      : _filters = const [],
+        _sorts = const [],
         _limitNum = null,
         _startAfterId = null;
 

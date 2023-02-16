@@ -15,7 +15,14 @@ class InMemoryRepository<Id, E extends Entity<Id>> extends IRepository<Id, E> {
   }
 
   @override
-  Future<Result<List<E>, Exception>> list(Query<Id, E> query) async {
+  Future<Result<List<E>, Exception>> list([
+    Query<Id, E> Function(Query<Id, E> query)? buildQuery,
+  ]) async {
+    var query = Query<Id, E>();
+    if (buildQuery != null) {
+      query = buildQuery(query);
+    }
+
     var entities = controller
         .where<Id, E>(
           (e) => query.test(
@@ -78,12 +85,16 @@ class InMemoryRepositoryFactory implements IRepositoryFactory {
   final EntityStoreController controller;
   final Map<Type, EntityJsonConverter> _converters;
 
-  InMemoryRepositoryFactory(this.controller, this._converters);
+  InMemoryRepositoryFactory._(this.controller, this._converters);
+
+  factory InMemoryRepositoryFactory.init(EntityStoreController controller) {
+    return InMemoryRepositoryFactory._(controller, {});
+  }
 
   InMemoryRepositoryFactory regist<Id, E extends Entity<Id>>(
     EntityJsonConverter<Id, E> converter,
   ) {
-    return InMemoryRepositoryFactory(
+    return InMemoryRepositoryFactory._(
       controller,
       {..._converters, E: converter},
     );
