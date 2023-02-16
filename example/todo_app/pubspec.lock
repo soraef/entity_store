@@ -239,14 +239,14 @@ packages:
       path: "../../packages/entity_store"
       relative: true
     source: path
-    version: "0.0.2-dev.6"
+    version: "1.0.0"
   entity_store_firestore:
     dependency: "direct main"
     description:
       path: "../../packages/entity_store_firestore"
       relative: true
     source: path
-    version: "0.0.2-dev.6"
+    version: "1.0.0"
   equatable:
     dependency: transitive
     description:

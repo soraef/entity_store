@@ -1,9 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store_firestore/entity_store_firestore.dart';
 
 mixin PaginationMixIn<Id, E extends Entity<Id>> {
-  FirestoreRepo<Id, E> get repo;
+  IRepository<Id, E> get repo;
 
   Id? get latestId;
   set latestId(Id? latestId);
@@ -26,8 +25,4 @@ mixin PaginationMixIn<Id, E extends Entity<Id>> {
       latestId = entities.ok.lastOrNull?.id;
     }
   }
-
-  Future<void> loadMore({
-    int limit = 10,
-  });
 }

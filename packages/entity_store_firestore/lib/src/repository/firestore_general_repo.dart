@@ -62,6 +62,7 @@ class FirestoreGeneralRepo<Id, E extends Entity<Id>>
         ),
       );
     }
+
     if (doc.exists) {
       try {
         final entity = collectionType.fromJson(doc.data());
