@@ -1,11 +1,11 @@
 import 'package:skyreach_result/skyreach_result.dart';
 
 import 'entity.dart';
-import 'store_event_dispatcher.dart';
+import 'entity_store_controller.dart';
 
 abstract class IRepo<Id, E extends Entity<Id>> {
-  final StoreEventDispatcher dispater;
-  IRepo(this.dispater);
+  final EntityStoreController controller;
+  IRepo(this.controller);
 
   Future<Result<E?, Exception>> get(
     Id id, {

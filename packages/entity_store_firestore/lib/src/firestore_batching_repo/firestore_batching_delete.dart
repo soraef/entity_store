@@ -16,7 +16,7 @@
 //         },
 //         SetOptions(merge: true),
 //       );
-//       dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
+//       controller.dispatch(DeleteEvent<Id, E>.now(entity.id));
 //       return Success(entity);
 //     } on FirebaseException catch (e) {
 //       return Failure(

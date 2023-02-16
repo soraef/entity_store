@@ -14,7 +14,7 @@ import 'package:todo_app/infrastracture/repository/repository.dart';
 final todoUsecase = Provider(
   (ref) => TodoUsecase(
     ref.watch(
-      source.select(
+      entityStore.select(
         (value) => value.get<CommonId, Auth>(CommonId.singleton())?.userId,
       ),
     ),

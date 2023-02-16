@@ -40,7 +40,7 @@ class RootPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref
-        .watch(source.select(
+        .watch(entityStore.select(
           (value) => value.where<CommonId, Auth>(),
         ))
         .atOrNull(0);

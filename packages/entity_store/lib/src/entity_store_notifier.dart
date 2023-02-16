@@ -1,7 +1,24 @@
-import '../entity_store.dart';
+import 'package:state_notifier/state_notifier.dart';
 
-mixin SingleSourceStoreMixin
-    implements StoreEventHandler, Updatable<EntityMapContainer> {
+import 'entity.dart';
+import 'entity_store.dart';
+import 'store_event.dart';
+import 'entity_store_controller.dart';
+
+class EntityStoreNotifier extends StateNotifier<EntityStore>
+    with EntityStoreMixin {
+  EntityStoreNotifier() : super(EntityStore.empty());
+
+  @override
+  void update(Updater<EntityStore> updater) {
+    state = updater(state);
+  }
+
+  @override
+  EntityStore get value => state;
+}
+
+mixin EntityStoreMixin implements StoreEventHandler, Updatable<EntityStore> {
   @override
   void handleEvent<Id, E extends Entity<Id>>(
     StoreEvent<Id, E> event,
@@ -25,4 +42,11 @@ mixin SingleSourceStoreMixin
   bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent event) {
     return event is StoreEvent<Id, E>;
   }
+}
+
+typedef Updater<T> = T Function(T prev);
+
+abstract class Updatable<T> {
+  T get value;
+  void update(Updater<T> updater);
 }

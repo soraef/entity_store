@@ -1,19 +1,17 @@
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store_riverpod/entity_store_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final source =
-    StateNotifierProvider<SingleSourceStoreRiverpod, EntityMapContainer>(
-  (ref) => SingleSourceStoreRiverpod(),
+final entityStore = StateNotifierProvider<EntityStoreNotifier, EntityStore>(
+  (ref) => EntityStoreNotifier(),
 );
 
-final dispater = Provider(
-  (ref) => StoreEventDispatcher(ref.read(source.notifier)),
+final entityStoreController = Provider(
+  (ref) => EntityStoreController(ref.read(entityStore.notifier)),
 );
 
 final debugger = Provider(
   (ref) => StoreEventPrintDebugger(
-    ref.read(dispater).eventStream,
+    ref.read(entityStoreController).eventStream,
     showEntityDetail: true,
   ),
 );

@@ -39,18 +39,12 @@ dependencies:
   entity_store_firestore: 
     path: ../../packages/entity_store_firestore
 
-  entity_store_riverpod: 
-    path: ../../packages/entity_store_riverpod
-
 dependency_overrides:
   entity_store: 
     path: ../../packages/entity_store
   
   entity_store_firestore: 
     path: ../../packages/entity_store_firestore
-  
-  entity_store_riverpod: 
-    path: ../../packages/entity_store_riverpod
 
 
 dev_dependencies:

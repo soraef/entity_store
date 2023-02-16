@@ -26,7 +26,7 @@
 
 //     try {
 //       final data = _convert(snapshot);
-//       dispater.dispatch(ListEvent<Id, E>.now(data));
+//       controller.dispatch(ListEvent<Id, E>.now(data));
 //       return Success(data);
 //     } on Exception catch (e) {
 //       return Failure(

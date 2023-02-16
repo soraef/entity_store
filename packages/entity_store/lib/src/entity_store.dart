@@ -1,32 +1,32 @@
 import 'entity.dart';
 import 'entity_map.dart';
 
-class EntityMapContainer {
+class EntityStore {
   final Map<Type, EntityMap<dynamic, dynamic>> _entityMaps;
 
-  EntityMapContainer(this._entityMaps);
+  EntityStore._(this._entityMaps);
 
-  factory EntityMapContainer.empty() {
-    return EntityMapContainer({});
+  factory EntityStore.empty() {
+    return EntityStore._({});
   }
 
-  EntityMapContainer put<Id, E extends Entity<Id>>(E entity) {
-    return EntityMapContainer({
+  EntityStore put<Id, E extends Entity<Id>>(E entity) {
+    return EntityStore._({
       ..._entityMaps,
       E: _entityMaps[E]?.put(entity) ?? EntityMap<Id, E>.fromIterable([entity])
     });
   }
 
-  EntityMapContainer putAll<Id, E extends Entity<Id>>(Iterable<E> entities) {
-    return EntityMapContainer({
+  EntityStore putAll<Id, E extends Entity<Id>>(Iterable<E> entities) {
+    return EntityStore._({
       ..._entityMaps,
       E: _entityMaps[E]?.putAll(entities) ??
           EntityMap<Id, E>.fromIterable(entities),
     });
   }
 
-  EntityMapContainer delete<Id, E extends Entity<Id>>(Id id) {
-    return EntityMapContainer({
+  EntityStore delete<Id, E extends Entity<Id>>(Id id) {
+    return EntityStore._({
       ..._entityMaps,
       E: _entityMaps[E]?.removeById(id) ?? EntityMap<Id, E>.empty()
     });

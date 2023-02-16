@@ -15,7 +15,7 @@ class TodoPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todos = ref.watch(
-      source.select((value) => value.where<TodoId, Todo>()),
+      entityStore.select((value) => value.where<TodoId, Todo>()),
     );
 
     useEffect(

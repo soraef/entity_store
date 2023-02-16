@@ -6,9 +6,9 @@ import 'package:entity_store_firestore/src/repository/firestore_general_repo.dar
 
 class FirestoreRepoFactorySettings {
   final Map<Type, CollectionType> _collectionTypeMap;
-  final StoreEventDispatcher dispatcher;
+  final EntityStoreController dispatcher;
 
-  factory FirestoreRepoFactorySettings.init(StoreEventDispatcher dispatcher) {
+  factory FirestoreRepoFactorySettings.init(EntityStoreController dispatcher) {
     return FirestoreRepoFactorySettings._({}, dispatcher);
   }
 
@@ -117,7 +117,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //     GetOptions options = const GetOptions(),
 //   }) async {
 //     if (options.useCache) {
-//       final entity = dispater.get<Id, E>(id);
+//       final entity = controller.get<Id, E>(id);
 //       if (entity != null) {
 //         return Result.ok(entity);
 //       }
@@ -141,7 +141,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //       if (doc.exists) {
 //         try {
 //           final entity = collectionType.fromJson(doc.data());
-//           dispater.dispatch(GetEvent<Id, E>.now(id, entity));
+//           controller.dispatch(GetEvent<Id, E>.now(id, entity));
 //           return Result.ok(entity);
 //         } on Exception catch (e) {
 //           return Result.err(
@@ -191,7 +191,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //           ),
 //         );
 //       }
-//       dispater.dispatch(ListEvent<Id, E>.now(result));
+//       controller.dispatch(ListEvent<Id, E>.now(result));
 //       final entity = result.firstWhereOrNull((e) => e.id == id);
 //       return Result.ok(entity);
 //     } else {
@@ -249,7 +249,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 
 //     try {
 //       final data = _convert(snapshot.docs).toList();
-//       dispater.dispatch(ListEvent<Id, E>.now(data));
+//       controller.dispatch(ListEvent<Id, E>.now(data));
 //       return Result.ok(data);
 //     } on Exception catch (e) {
 //       return Result.err(
@@ -270,7 +270,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //   }) async {
 //     try {
 //       await collection.doc(collectionType.idToString(id)).delete();
-//       dispater.dispatch(DeleteEvent<Id, E>.now(id));
+//       controller.dispatch(DeleteEvent<Id, E>.now(id));
 //       return Result.ok(id);
 //     } on f.FirebaseException catch (e) {
 //       return Result.err(
@@ -296,7 +296,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //               collectionType.toJson(entity),
 //               f.SetOptions(merge: options.merge),
 //             );
-//         dispater.dispatch(SaveEvent<Id, E>.now(entity));
+//         controller.dispatch(SaveEvent<Id, E>.now(entity));
 //         return Result.ok(entity);
 //       } on f.FirebaseException catch (e) {
 //         return Result.err(
@@ -325,7 +325,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //           },
 //           f.SetOptions(merge: true),
 //         );
-//         dispater.dispatch(SaveEvent<Id, E>.now(entity));
+//         controller.dispatch(SaveEvent<Id, E>.now(entity));
 //         return Result.ok(entity);
 //       } on f.FirebaseException catch (e) {
 //         return Result.err(
@@ -379,7 +379,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //         );
 
 //         for (final entity in entities) {
-//           dispater.dispatch(SaveEvent<Id, E>.now(entity));
+//           controller.dispatch(SaveEvent<Id, E>.now(entity));
 //         }
 
 //         return Result.ok(entities.toList());
@@ -415,7 +415,7 @@ class FirestoreRepoFactory implements IRepoFactory {
 //           return newEntity;
 //         },
 //       );
-//       dispater.dispatch(SaveEvent<Id, E>.now(entity));
+//       controller.dispatch(SaveEvent<Id, E>.now(entity));
 //       return Result.ok(entity);
 //     } catch (e) {
 //       return Result.err(Exception());

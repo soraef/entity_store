@@ -21,7 +21,7 @@ class FirestoreGeneralRepo<Id, E extends Entity<Id>>
   }) async {
     try {
       await collection.doc(collectionType.idToString(entity.id)).delete();
-      dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
+      controller.dispatch(DeleteEvent<Id, E>.now(entity.id));
       return Result.ok(entity);
     } on f.FirebaseException catch (e) {
       return Result.err(
@@ -42,7 +42,7 @@ class FirestoreGeneralRepo<Id, E extends Entity<Id>>
     GetOptions options = const GetOptions(),
   }) async {
     if (options.useCache) {
-      final entity = dispater.get<Id, E>(id);
+      final entity = controller.get<Id, E>(id);
       if (entity != null) {
         return Result.ok(entity);
       }
@@ -65,7 +65,7 @@ class FirestoreGeneralRepo<Id, E extends Entity<Id>>
     if (doc.exists) {
       try {
         final entity = collectionType.fromJson(doc.data());
-        dispater.dispatch(GetEvent<Id, E>.now(id, entity));
+        controller.dispatch(GetEvent<Id, E>.now(id, entity));
         return Result.ok(entity);
       } on Exception catch (e) {
         return Result.err(
@@ -129,7 +129,7 @@ class FirestoreGeneralRepo<Id, E extends Entity<Id>>
 
     try {
       final data = _convert(snapshot.docs).toList();
-      dispater.dispatch(ListEvent<Id, E>.now(data));
+      controller.dispatch(ListEvent<Id, E>.now(data));
       return Result.ok(data);
     } on Exception catch (e) {
       return Result.err(
@@ -153,7 +153,7 @@ class FirestoreGeneralRepo<Id, E extends Entity<Id>>
             collectionType.toJson(entity),
             f.SetOptions(merge: options.merge),
           );
-      dispater.dispatch(SaveEvent<Id, E>.now(entity));
+      controller.dispatch(SaveEvent<Id, E>.now(entity));
       return Result.ok(entity);
     } on f.FirebaseException catch (e) {
       return Result.err(

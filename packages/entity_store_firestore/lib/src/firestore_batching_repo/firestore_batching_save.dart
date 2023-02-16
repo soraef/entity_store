@@ -17,7 +17,7 @@
 //         },
 //         SetOptions(merge: true),
 //       );
-//       dispater.dispatch(SaveEvent<Id, E>.now(entity));
+//       controller.dispatch(SaveEvent<Id, E>.now(entity));
 //       return Success(entity);
 //     } on FirebaseException catch (e) {
 //       return Failure(
@@ -52,7 +52,7 @@
 //       );
 
 //       for (final entity in entities) {
-//         dispater.dispatch(SaveEvent<Id, E>.now(entity));
+//         controller.dispatch(SaveEvent<Id, E>.now(entity));
 //       }
 
 //       return Success(entities.toList());

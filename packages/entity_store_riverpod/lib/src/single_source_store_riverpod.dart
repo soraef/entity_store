@@ -1,15 +1,15 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:riverpod/riverpod.dart';
 
-class SingleSourceStoreRiverpod extends StateNotifier<EntityMapContainer>
-    with SingleSourceStoreMixin {
-  SingleSourceStoreRiverpod() : super(EntityMapContainer.empty());
+class SingleSourceStoreRiverpod extends StateNotifier<EntityStore>
+    with EntityStoreMixin {
+  SingleSourceStoreRiverpod() : super(EntityStore.empty());
 
   @override
-  void update(Updater<EntityMapContainer> updater) {
+  void update(Updater<EntityStore> updater) {
     state = updater(state);
   }
 
   @override
-  EntityMapContainer get value => state;
+  EntityStore get value => state;
 }

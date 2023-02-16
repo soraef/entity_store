@@ -31,7 +31,7 @@ class FirestoreBucketingRepo<Id, E extends Entity<Id>>
         },
         f.SetOptions(merge: true),
       );
-      dispater.dispatch(DeleteEvent<Id, E>.now(entity.id));
+      controller.dispatch(DeleteEvent<Id, E>.now(entity.id));
       return Result.ok(entity);
     } on f.FirebaseException catch (e) {
       return Result.err(
@@ -86,7 +86,7 @@ class FirestoreBucketingRepo<Id, E extends Entity<Id>>
         ),
       );
     }
-    dispater.dispatch(ListEvent<Id, E>.now(result));
+    controller.dispatch(ListEvent<Id, E>.now(result));
     final entity = result.firstWhereOrNull((e) => e.id == id);
     return Result.ok(entity);
   }
@@ -137,7 +137,7 @@ class FirestoreBucketingRepo<Id, E extends Entity<Id>>
         ),
       );
     }
-    dispater.dispatch(ListEvent<Id, E>.now(result));
+    controller.dispatch(ListEvent<Id, E>.now(result));
     return Result.ok(result);
   }
 
@@ -160,7 +160,7 @@ class FirestoreBucketingRepo<Id, E extends Entity<Id>>
         },
         f.SetOptions(merge: true),
       );
-      dispater.dispatch(SaveEvent<Id, E>.now(entity));
+      controller.dispatch(SaveEvent<Id, E>.now(entity));
       return Result.ok(entity);
     } on f.FirebaseException catch (e) {
       return Result.err(

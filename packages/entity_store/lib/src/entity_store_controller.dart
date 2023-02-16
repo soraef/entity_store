@@ -7,15 +7,15 @@ abstract class StoreEventHandler {
   bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
 }
 
-class StoreEventDispatcher {
+class EntityStoreController {
   final _controller = StreamController<StoreEvent>.broadcast();
-  final SingleSourceStoreMixin _source;
+  final EntityStoreMixin _entityStore;
 
   Stream<StoreEvent> get eventStream => _controller.stream;
 
-  StoreEventDispatcher(this._source) {
+  EntityStoreController(this._entityStore) {
     _controller.stream.listen((event) {
-      event.apply(_source);
+      event.apply(_entityStore);
     });
   }
 
@@ -24,13 +24,13 @@ class StoreEventDispatcher {
   }
 
   E? get<Id, E extends Entity<Id>>(Id id) {
-    return _source.value.get<Id, E>(id);
+    return _entityStore.value.get<Id, E>(id);
   }
 
   EntityMap<Id, E> where<Id, E extends Entity<Id>>([
     bool Function(E) test = testAlwaysTrue,
   ]) {
-    return _source.value.where(test);
+    return _entityStore.value.where(test);
   }
 }
 
