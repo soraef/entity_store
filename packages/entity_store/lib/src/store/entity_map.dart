@@ -1,12 +1,8 @@
 part of "../store.dart";
 
-// Copyright 2022 Sora Fukui. All rights reserved.
+// Copyright 2023 Sora Fukui. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// ignore: depend_on_referenced_packages
-// import 'package:collection/collection.dart';
-
-// import 'entity.dart';
 
 /// The [EntityMap] class holds multiple Entities and provides Immutable [Entity] collection operations.
 ///

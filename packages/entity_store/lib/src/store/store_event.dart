@@ -1,7 +1,5 @@
 part of "../store.dart";
 
-// import 'entity.dart';
-
 abstract class StoreEventHandler {
   void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
   bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);

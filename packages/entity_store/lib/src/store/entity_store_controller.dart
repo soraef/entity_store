@@ -1,13 +1,5 @@
 part of "../store.dart";
 
-// import 'dart:async';
-
-// import 'entity.dart';
-// import 'entity_map.dart';
-// import 'entity_store.dart';
-// import 'entity_store_notifier.dart';
-// import 'store_event.dart';
-
 class EntityStoreController {
   final _controller = StreamController<StoreEvent>.broadcast();
   final EntityStoreMixin _entityStore;

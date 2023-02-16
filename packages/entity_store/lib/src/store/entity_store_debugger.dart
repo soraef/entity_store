@@ -1,10 +1,4 @@
 part of "../store.dart";
-// ignore_for_file: avoid_print
-
-// import 'package:entity_store/entity_store.dart';
-// import 'package:flutter/foundation.dart';
-
-// import 'entity.dart';
 
 abstract class StoreEventDebugger {
   final Stream<StoreEvent> eventStream;

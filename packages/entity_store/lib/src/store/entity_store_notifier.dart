@@ -1,11 +1,5 @@
 part of "../store.dart";
 
-// import 'package:state_notifier/state_notifier.dart';
-
-// import 'entity.dart';
-// import 'entity_store.dart';
-// import 'store_event.dart';
-
 class EntityStoreNotifier extends StateNotifier<EntityStore>
     with EntityStoreMixin {
   EntityStoreNotifier() : super(EntityStore.empty());

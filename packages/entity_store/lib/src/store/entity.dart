@@ -1,7 +1,5 @@
 part of "../store.dart";
 
-// import 'id.dart';
-
 abstract class Entity<Id> {
   Id get id;
 }
