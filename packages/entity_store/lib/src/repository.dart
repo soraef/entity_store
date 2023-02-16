@@ -1,7 +1,10 @@
-import 'store_event_dispatcher.dart';
+library repository;
 
-abstract class IRepo {
-  final StoreEventDispatcher eventDispatcher;
+import 'package:collection/collection.dart';
+import 'package:skyreach_result/skyreach_result.dart';
 
-  IRepo(this.eventDispatcher);
-}
+import 'store.dart';
+
+part 'repository/repository.dart';
+part 'repository/in_memory_repository.dart';
+part 'repository/repository_factory.dart';

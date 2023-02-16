@@ -1,6 +1,6 @@
-abstract class FirestoreRepoFailure implements Exception {}
+abstract class FirestoreRepositoryFailure implements Exception {}
 
-class JsonConverterFailure extends FirestoreRepoFailure {
+class JsonConverterFailure extends FirestoreRepositoryFailure {
   final Type entityType;
   final String method;
   final dynamic fetched;
@@ -14,7 +14,7 @@ class JsonConverterFailure extends FirestoreRepoFailure {
   });
 }
 
-class FirestoreRequestFailure extends FirestoreRepoFailure {
+class FirestoreRequestFailure extends FirestoreRepositoryFailure {
   final Type entityType;
   final String method;
   final String code;

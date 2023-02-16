@@ -239,21 +239,14 @@ packages:
       path: "../../packages/entity_store"
       relative: true
     source: path
-    version: "0.0.2-dev.7"
+    version: "1.0.0"
   entity_store_firestore:
     dependency: "direct main"
     description:
       path: "../../packages/entity_store_firestore"
       relative: true
     source: path
-    version: "0.0.2-dev.7"
-  entity_store_riverpod:
-    dependency: "direct main"
-    description:
-      path: "../../packages/entity_store_riverpod"
-      relative: true
-    source: path
-    version: "0.0.2-dev.7"
+    version: "1.0.0"
   equatable:
     dependency: transitive
     description:
@@ -557,14 +550,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
-  result_type:
-    dependency: "direct main"
-    description:
-      name: result_type
-      sha256: "6805648c4d01425409e1f0a3c15898ad36c7f1fa6428eddf64c3e06d82a356d1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.0"
   riverpod:
     dependency: transitive
     description:
@@ -594,6 +579,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  skyreach_result:
+    dependency: "direct main"
+    description:
+      name: skyreach_result
+      sha256: ef88a1098d787f09c6b0bddbcec89c722e5dfef0fa553c9b7e1b66f8e0867654
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   source_gen:
     dependency: transitive
     description:
@@ -731,5 +724,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.0 <3.0.0"
+  dart: ">=2.19.2 <3.0.0"
   flutter: ">=3.4.0-17.0.pre"

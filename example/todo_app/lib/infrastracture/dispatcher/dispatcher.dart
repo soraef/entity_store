@@ -1,14 +1,17 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/application/store/entity_store/todo_store.dart';
 
-final eventDispatcher = Provider(
-  (ref) => StoreEventDispatcher()..register(ref.read(todoStore.notifier)),
+final entityStore = StateNotifierProvider<EntityStoreNotifier, EntityStore>(
+  (ref) => EntityStoreNotifier(),
+);
+
+final entityStoreController = Provider(
+  (ref) => EntityStoreController(ref.read(entityStore.notifier)),
 );
 
 final debugger = Provider(
   (ref) => StoreEventPrintDebugger(
-    ref.read(eventDispatcher).eventStream,
+    ref.read(entityStoreController).eventStream,
     showEntityDetail: true,
   ),
 );

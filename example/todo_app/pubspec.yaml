@@ -29,7 +29,7 @@ dependencies:
   adaptive_dialog: ^1.8.0+1
 
   uuid: ^3.0.6
-  result_type: ^0.2.0
+  skyreach_result: ^1.0.1
   
   collection: ^1.16.0
 
@@ -39,18 +39,12 @@ dependencies:
   entity_store_firestore: 
     path: ../../packages/entity_store_firestore
 
-  entity_store_riverpod: 
-    path: ../../packages/entity_store_riverpod
-
 dependency_overrides:
   entity_store: 
     path: ../../packages/entity_store
   
   entity_store_firestore: 
     path: ../../packages/entity_store_firestore
-  
-  entity_store_riverpod: 
-    path: ../../packages/entity_store_riverpod
 
 
 dev_dependencies:
