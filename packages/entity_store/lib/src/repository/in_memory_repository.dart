@@ -36,9 +36,9 @@ class InMemoryRepository<Id, E extends Entity<Id>> extends IRepository<Id, E> {
 }
 
 class InMemoryRepositoryFactory implements IRepositoryFactory {
-  final EntityStoreController dispatcher;
+  final EntityStoreController controller;
 
-  InMemoryRepositoryFactory(this.dispatcher);
+  InMemoryRepositoryFactory(this.controller);
 
   @override
   InMemoryRepositoryFactory fromSubCollection<Id, E extends Entity<Id>>(Id id) {
@@ -47,6 +47,6 @@ class InMemoryRepositoryFactory implements IRepositoryFactory {
 
   @override
   InMemoryRepository<Id, E> getRepo<Id, E extends Entity<Id>>() {
-    return InMemoryRepository<Id, E>(dispatcher);
+    return InMemoryRepository<Id, E>(controller);
   }
 }

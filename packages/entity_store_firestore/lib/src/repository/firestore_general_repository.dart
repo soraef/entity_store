@@ -4,11 +4,11 @@ import 'package:entity_store_firestore/src/repository/query.dart';
 import 'package:skyreach_result/skyreach_result.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as f;
 
-class FirestoreGeneralRepo<Id, E extends Entity<Id>>
-    extends FirestoreRepo<Id, E> {
-  FirestoreGeneralRepo(
+class FirestoreGeneralRepository<Id, E extends Entity<Id>>
+    extends FirestoreRepository<Id, E> {
+  FirestoreGeneralRepository(
     super.collection,
-    super.dispatcher,
+    super.controller,
     super.collectionType,
   );
 

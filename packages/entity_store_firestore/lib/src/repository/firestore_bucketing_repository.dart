@@ -5,11 +5,11 @@ import 'package:entity_store_firestore/src/repository/query.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as f;
 import 'package:skyreach_result/skyreach_result.dart';
 
-class FirestoreBucketingRepo<Id, E extends Entity<Id>>
-    extends FirestoreRepo<Id, E> {
-  FirestoreBucketingRepo(
+class FirestoreBucketingRepository<Id, E extends Entity<Id>>
+    extends FirestoreRepository<Id, E> {
+  FirestoreBucketingRepository(
     super.collection,
-    super.dispatcher,
+    super.controller,
     super.collectionType,
   );
 

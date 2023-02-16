@@ -1,28 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as f;
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
-import 'package:entity_store_firestore/src/repository/firestore_bucketing_repo.dart';
-import 'package:entity_store_firestore/src/repository/firestore_general_repo.dart';
+import 'package:entity_store_firestore/src/repository/firestore_bucketing_repository.dart';
+import 'package:entity_store_firestore/src/repository/firestore_general_repository.dart';
 
-class FirestoreRepoFactorySettings {
+class FirestoreRepositoryFactorySettings {
   final Map<Type, CollectionType> _collectionTypeMap;
-  final EntityStoreController dispatcher;
+  final EntityStoreController controller;
 
-  factory FirestoreRepoFactorySettings.init(EntityStoreController dispatcher) {
-    return FirestoreRepoFactorySettings._({}, dispatcher);
+  factory FirestoreRepositoryFactorySettings.init(
+      EntityStoreController controller) {
+    return FirestoreRepositoryFactorySettings._({}, controller);
   }
 
-  FirestoreRepoFactorySettings._(
+  FirestoreRepositoryFactorySettings._(
     this._collectionTypeMap,
-    this.dispatcher,
+    this.controller,
   );
 
-  FirestoreRepoFactorySettings regist<Id, E extends Entity<Id>>(
+  FirestoreRepositoryFactorySettings regist<Id, E extends Entity<Id>>(
     CollectionType<Id, E> collectionType,
   ) {
-    return FirestoreRepoFactorySettings._(
+    return FirestoreRepositoryFactorySettings._(
       {..._collectionTypeMap, E: collectionType},
-      dispatcher,
+      controller,
     );
   }
 
@@ -35,26 +36,26 @@ class FirestoreRepoFactorySettings {
   }
 }
 
-class FirestoreRepoFactory implements IRepositoryFactory {
-  final FirestoreRepoFactorySettings settings;
+class FirestoreRepositoryFactory implements IRepositoryFactory {
+  final FirestoreRepositoryFactorySettings settings;
   late final f.CollectionReference Function(String collectionPath)
       getCollectionRef;
 
-  factory FirestoreRepoFactory.init(
-    FirestoreRepoFactorySettings settings,
+  factory FirestoreRepositoryFactory.init(
+    FirestoreRepositoryFactorySettings settings,
     f.FirebaseFirestore firestore,
   ) {
-    return FirestoreRepoFactory._(settings, firestore);
+    return FirestoreRepositoryFactory._(settings, firestore);
   }
 
-  FirestoreRepoFactory._(
+  FirestoreRepositoryFactory._(
     this.settings,
     f.FirebaseFirestore firestore,
   ) {
     getCollectionRef = (path) => firestore.collection(path);
   }
 
-  FirestoreRepoFactory._document(
+  FirestoreRepositoryFactory._document(
     this.settings,
     f.DocumentReference document,
   ) {
@@ -62,35 +63,36 @@ class FirestoreRepoFactory implements IRepositoryFactory {
   }
 
   @override
-  FirestoreRepoFactory fromSubCollection<Id, E extends Entity<Id>>(Id id) {
+  FirestoreRepositoryFactory fromSubCollection<Id, E extends Entity<Id>>(
+      Id id) {
     final collectionName = settings.collectionName<Id, E>();
     final entityType = settings.collectionType<Id, E>();
     final documentRef = getCollectionRef(collectionName).doc(
       entityType.idToString(id),
     );
-    return FirestoreRepoFactory._document(
+    return FirestoreRepositoryFactory._document(
       settings,
       documentRef,
     );
   }
 
   @override
-  FirestoreRepo<Id, E> getRepo<Id, E extends Entity<Id>>() {
+  FirestoreRepository<Id, E> getRepo<Id, E extends Entity<Id>>() {
     final collectionName = settings.collectionName<Id, E>();
     final collectionRef = getCollectionRef(collectionName);
     final collectionType = settings.collectionType<Id, E>();
 
     if (collectionType.isGeneral) {
-      return FirestoreGeneralRepo<Id, E>(
+      return FirestoreGeneralRepository<Id, E>(
         settings.collectionType<Id, E>(),
         collectionRef,
-        settings.dispatcher,
+        settings.controller,
       );
     } else if (collectionType.isBucketing) {
-      return FirestoreBucketingRepo<Id, E>(
+      return FirestoreBucketingRepository<Id, E>(
         settings.collectionType<Id, E>(),
         collectionRef,
-        settings.dispatcher,
+        settings.controller,
       );
     } else {
       throw AssertionError(

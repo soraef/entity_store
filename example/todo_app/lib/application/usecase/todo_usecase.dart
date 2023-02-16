@@ -23,14 +23,14 @@ final todoUsecase = Provider(
   ),
 );
 
-class TodoUsecase with PaginationMixIn<TodoId, Todo> {
-  final FirestoreRepoFactory repoFactory;
+class TodoUsecase {
+  final FirestoreRepositoryFactory repoFactory;
   final InMemoryRepositoryFactory inMemoryFactory;
   final UserId? userId;
 
   TodoUsecase(this.userId, this.repoFactory, this.inMemoryFactory);
 
-  FirestoreRepo<TodoId, Todo> _todoRepo(UserId userId) {
+  FirestoreRepository<TodoId, Todo> _todoRepo(UserId userId) {
     return repoFactory
         .fromSubCollection<UserId, User>(userId)
         .getRepo<TodoId, Todo>();
@@ -64,21 +64,6 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
     await _todoRepo(userId!).delete(todo);
   }
 
-  @override
-  Future<void> loadMore({
-    int limit = 10,
-  }) async {
-    final auth = await _authRepo.getAuth();
-    assert(auth?.isLogin == true);
-    // await cursor(
-    //   Query<TodoId, Todo>()
-    //       .where("userId", isEqualTo: auth!.userId!.value)
-    //       .orderBy("name")
-    //       .limit(2),
-    // );
-    hasMore = false;
-  }
-
   Future<void> loadAll() async {
     final auth = await _authRepo.getAuth();
     assert(auth?.isLogin == true);
@@ -87,12 +72,5 @@ class TodoUsecase with PaginationMixIn<TodoId, Todo> {
     );
   }
 
-  @override
-  bool hasMore = true;
-
-  @override
-  TodoId? latestId;
-
-  @override
-  FirestoreRepo<TodoId, Todo> get repo => _todoRepo(userId!);
+  FirestoreRepository<TodoId, Todo> get repo => _todoRepo(userId!);
 }
