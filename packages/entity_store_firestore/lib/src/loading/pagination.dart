@@ -25,4 +25,8 @@ mixin PaginationMixIn<Id, E extends Entity<Id>> {
       latestId = entities.ok.lastOrNull?.id;
     }
   }
+
+  Future<void> loadMore({
+    int limit = 10,
+  });
 }

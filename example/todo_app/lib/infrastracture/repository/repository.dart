@@ -9,7 +9,7 @@ import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 final repoRemoteFactory = Provider(
   (ref) => FirestoreRepoFactory.init(
     FirestoreRepoFactorySettings.init(ref.read(entityStoreController))
-        .regist(todoCollectionType)
+        .regist(todoGeneralCollection)
         .regist(userCollectionType),
     FirebaseFirestore.instance,
   ),

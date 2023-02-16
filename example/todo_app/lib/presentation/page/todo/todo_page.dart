@@ -1,13 +1,15 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/application/usecase/todo_usecase.dart';
+import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
+import 'package:todo_app/domain/user/id.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
+import 'package:todo_app/infrastracture/repository/repository.dart';
 
 class TodoPage extends HookConsumerWidget {
   const TodoPage({super.key});
@@ -18,9 +20,23 @@ class TodoPage extends HookConsumerWidget {
       entityStore.select((value) => value.where<TodoId, Todo>()),
     );
 
+    final userId = ref
+        .watch(entityStore.select(
+          (value) => value.where<CommonId, Auth>().atOrNull(0),
+        ))
+        ?.userId;
+
+    if (userId == null) {
+      return Container();
+    }
+
+    final loading = ref.read(todoInfiniteLoading(userId).notifier);
+
     useEffect(
       () {
-        ref.read(todoUsecase).loadAll();
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          loading.load();
+        });
         return null;
       },
       const [],
@@ -52,7 +68,7 @@ class TodoPage extends HookConsumerWidget {
             Expanded(
               child: EntityListView<TodoId, Todo>(
                 entities: todos.entities.toList(),
-                pagination: ref.read(todoUsecase),
+                loading: loading,
                 itemBuilder: (todo) {
                   // final todo = todos.toList().elementAt(index);
                   return CheckboxListTile(
@@ -84,15 +100,34 @@ class TodoPage extends HookConsumerWidget {
   }
 }
 
+final todoInfiniteLoading =
+    StateNotifierProvider.family<TodoInfiniteLoading, LoadingState, UserId>(
+        (ref, userId) => TodoInfiniteLoading(ref, userId));
+
+class TodoInfiniteLoading extends InfiniteLoadingNotifier<TodoId, Todo> {
+  final Ref ref;
+  final UserId userId;
+
+  TodoInfiniteLoading(this.ref, this.userId);
+
+  @override
+  IRepository<TodoId, Todo> get repo => ref.read(repoRemoteFactory).getRepo();
+
+  @override
+  Future<void> load({int limit = 10}) async {
+    await cursor(Query<TodoId, Todo>().limit(2));
+  }
+}
+
 class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
   const EntityListView({
     super.key,
-    required this.pagination,
+    required this.loading,
     required this.entities,
     required this.itemBuilder,
   });
 
-  final PaginationMixIn pagination;
+  final InfiniteLoadingNotifier<Id, E> loading;
   final List<E> entities;
   final Widget Function(E entity) itemBuilder;
 
@@ -101,8 +136,10 @@ class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
     return ListView.builder(
       itemCount: entities.length,
       itemBuilder: (context, index) {
-        if (index + 1 == entities.length && pagination.hasMore) {
-          pagination.loadMore();
+        if (index + 1 == entities.length) {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            loading.load();
+          });
         }
 
         return itemBuilder(entities[index]);
