@@ -1,6 +1,6 @@
 name: entity_store_riverpod
 description: store implementation for entity_store package
-version: 0.0.2-dev.7
+version: 0.0.2
 
 environment:
   sdk: '>=2.18.5 <3.0.0'
@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   riverpod: ^2.1.1
-  entity_store: 0.0.2-dev.7
+  entity_store: 0.0.2
 
 dev_dependencies:
   flutter_test:
