@@ -6,13 +6,10 @@ class EntityStoreController {
 
   Stream<StoreEvent> get eventStream => _controller.stream;
 
-  EntityStoreController(this._entityStore) {
-    _controller.stream.listen((event) {
-      event.apply(_entityStore);
-    });
-  }
+  EntityStoreController(this._entityStore);
 
   void dispatch<Id, E extends Entity<Id>>(StoreEvent<Id, E> event) {
+    event.apply(_entityStore);
     _controller.sink.add(event);
   }
 

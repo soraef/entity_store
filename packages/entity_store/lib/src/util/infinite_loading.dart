@@ -41,6 +41,7 @@ abstract class InfiniteLoadingNotifier<Id, E extends Entity<Id>>
   @mustCallSuper
   Future<void> cursor(Query<Id, E> Function(Query<Id, E>) buildQuery) async {
     if (!state.hasMore) return;
+    if (state.isLoading) return;
     state = state.copyWith(isLoading: true);
 
     final latestId = state.loadedIds.lastOrNull;
