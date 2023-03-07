@@ -13,6 +13,10 @@ class EntityStoreController {
     _controller.sink.add(event);
   }
 
+  void clearAll() {
+    _entityStore.update((prev) => EntityStore.empty());
+  }
+
   E? getById<Id, E extends Entity<Id>>(Id id) {
     return _entityStore.value.get<Id, E>(id);
   }
