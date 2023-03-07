@@ -5,16 +5,3 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/domain/todo/repository.dart';
 import 'package:todo_app/domain/user/repository.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
-
-final repoRemoteFactory = Provider(
-  (ref) => FirestoreRepositoryFactory.init(
-    FirestoreRepositoryFactorySettings.init(ref.read(entityStoreController))
-        .regist(todoGeneralCollection)
-        .regist(userCollectionType),
-    FirebaseFirestore.instance,
-  ),
-);
-
-final repoInMemoryFactory = Provider(
-  (ref) => InMemoryRepositoryFactory.init(ref.read(entityStoreController)),
-);

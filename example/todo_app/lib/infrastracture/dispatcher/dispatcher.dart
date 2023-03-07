@@ -10,7 +10,7 @@ final entityStoreController = Provider(
 );
 
 final debugger = Provider(
-  (ref) => StoreEventPrintDebugger(
+  (ref) => EntityStorePrintDebugger(
     ref.read(entityStoreController).eventStream,
     showEntityDetail: true,
   ),

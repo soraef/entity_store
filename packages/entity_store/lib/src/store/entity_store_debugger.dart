@@ -1,9 +1,9 @@
 part of "../store.dart";
 
-abstract class StoreEventDebugger {
+abstract class EntityStoreDebugger {
   final Stream<StoreEvent> eventStream;
 
-  StoreEventDebugger(this.eventStream) {
+  EntityStoreDebugger(this.eventStream) {
     eventStream.listen((event) {
       if (kDebugMode) {
         onEvent(event);
@@ -14,9 +14,9 @@ abstract class StoreEventDebugger {
   void onEvent(StoreEvent<dynamic, Entity<dynamic>> event);
 }
 
-class StoreEventPrintDebugger extends StoreEventDebugger {
+class EntityStorePrintDebugger extends EntityStoreDebugger {
   final bool showEntityDetail;
-  StoreEventPrintDebugger(
+  EntityStorePrintDebugger(
     super.eventStream, {
     this.showEntityDetail = false,
   });
@@ -24,28 +24,28 @@ class StoreEventPrintDebugger extends StoreEventDebugger {
   @override
   void onEvent(StoreEvent<dynamic, Entity> event) {
     if (event is GetEvent) {
-      print(
+      debugPrint(
         "[GetEvent:${event.entityType}] ${_entityString(
           event.entity,
           showEntityDetail: showEntityDetail,
         )}",
       );
     } else if (event is ListEvent) {
-      print(
+      debugPrint(
         "[ListEvent:${event.entityType}] ${_entitiesString(
           event.entities,
           showEntityDetail: showEntityDetail,
         )}",
       );
     } else if (event is SaveEvent) {
-      print(
+      debugPrint(
         "[SaveEvent:${event.entityType}] ${_entityString(
           event.entity,
           showEntityDetail: showEntityDetail,
         )}",
       );
     } else if (event is DeleteEvent) {
-      print(
+      debugPrint(
         "[DeleteEvent:${event.entityType}] ${event.entityId}",
       );
     }

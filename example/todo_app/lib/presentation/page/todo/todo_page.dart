@@ -7,9 +7,7 @@ import 'package:todo_app/application/usecase/todo_usecase.dart';
 import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
-import 'package:todo_app/domain/user/id.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
-import 'package:todo_app/infrastracture/repository/repository.dart';
 
 class TodoPage extends HookConsumerWidget {
   const TodoPage({super.key});
@@ -30,12 +28,12 @@ class TodoPage extends HookConsumerWidget {
       return Container();
     }
 
-    final loading = ref.read(todoInfiniteLoading(userId).notifier);
+    // final loading = ref.read(todoInfiniteLoading(userId).notifier);
 
     useEffect(
       () {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          loading.load();
+          ref.read(todoUsecase).loadUserAll();
         });
         return null;
       },
@@ -66,11 +64,10 @@ class TodoPage extends HookConsumerWidget {
               ],
             ),
             Expanded(
-              child: EntityListView<TodoId, Todo>(
-                entities: todos.entities.toList(),
-                loading: loading,
-                itemBuilder: (todo) {
-                  // final todo = todos.toList().elementAt(index);
+              child: ListView.builder(
+                itemCount: todos.entities.length,
+                itemBuilder: (context, index) {
+                  final todo = todos.toList().elementAt(index);
                   return CheckboxListTile(
                     title: Text(todo.name),
                     controlAffinity: ListTileControlAffinity.leading,
@@ -100,50 +97,50 @@ class TodoPage extends HookConsumerWidget {
   }
 }
 
-final todoInfiniteLoading =
-    StateNotifierProvider.family<TodoInfiniteLoading, LoadingState, UserId>(
-        (ref, userId) => TodoInfiniteLoading(ref, userId));
+// final todoInfiniteLoading =
+//     StateNotifierProvider.family<TodoInfiniteLoading, LoadingState, UserId>(
+//         (ref, userId) => TodoInfiniteLoading(ref, userId));
 
-class TodoInfiniteLoading extends InfiniteLoadingNotifier<TodoId, Todo> {
-  final Ref ref;
-  final UserId userId;
+// class TodoInfiniteLoading extends InfiniteLoadingNotifier<TodoId, Todo> {
+//   final Ref ref;
+//   final UserId userId;
 
-  TodoInfiniteLoading(this.ref, this.userId);
+//   TodoInfiniteLoading(this.ref, this.userId);
 
-  @override
-  IRepository<TodoId, Todo> get repo => ref.read(repoRemoteFactory).getRepo();
+//   @override
+//   IRepository<TodoId, Todo> get repo => ref.read(repoRemoteFactory).getRepo();
 
-  @override
-  Future<void> load({int limit = 10}) async {
-    await cursor((q) => q.limit(limit));
-  }
-}
+//   @override
+//   Future<void> load({int limit = 10}) async {
+//     await cursor((q) => q.limit(limit));
+//   }
+// }
 
-class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
-  const EntityListView({
-    super.key,
-    required this.loading,
-    required this.entities,
-    required this.itemBuilder,
-  });
+// class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
+//   const EntityListView({
+//     super.key,
+//     required this.loading,
+//     required this.entities,
+//     required this.itemBuilder,
+//   });
 
-  final InfiniteLoadingNotifier<Id, E> loading;
-  final List<E> entities;
-  final Widget Function(E entity) itemBuilder;
+//   final InfiniteLoadingNotifier<Id, E> loading;
+//   final List<E> entities;
+//   final Widget Function(E entity) itemBuilder;
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: entities.length,
-      itemBuilder: (context, index) {
-        if (index + 1 == entities.length) {
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            loading.load();
-          });
-        }
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListView.builder(
+//       itemCount: entities.length,
+//       itemBuilder: (context, index) {
+//         if (index + 1 == entities.length) {
+//           WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+//             loading.load();
+//           });
+//         }
 
-        return itemBuilder(entities[index]);
-      },
-    );
-  }
-}
+//         return itemBuilder(entities[index]);
+//       },
+//     );
+//   }
+// }

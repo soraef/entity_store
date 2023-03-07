@@ -1,27 +1,34 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
 
-final todoBucketingCollection = CollectionType<TodoId, Todo>.bucketing(
-  fromJson: Todo.fromJson,
-  toJson: (e) => e.toJson(),
-  idToString: (e) => e.value,
-  collectionName: "Todo",
-  bucketIdToString: (Todo entity) {
-    /// Bucketing Monthly
-    return entity.createdAt.year.toString() + entity.createdAt.month.toString();
-  },
-  bucketingFieldName: "todos",
-  toDocumentFields: (Todo todo) {
-    return {
-      "userId": todo.userId.value,
-    };
-  },
-);
+class TodoRepository extends SubCollectionRepository<TodoId, Todo> {
+  @override
+  final EntityStoreController controller;
 
-final todoGeneralCollection = CollectionType<TodoId, Todo>.general(
-  fromJson: Todo.fromJson,
-  toJson: (e) => e.toJson(),
-  idToString: (e) => e.value,
-  collectionName: "Todo",
-);
+  TodoRepository({
+    required this.controller,
+    required super.parentRepository,
+    required super.parentDocumentId,
+  });
+
+  @override
+  Todo fromJson(Map<String, dynamic> json) {
+    return Todo.fromJson(json);
+  }
+
+  @override
+  String toDocumentId(TodoId id) {
+    return id.value;
+  }
+
+  @override
+  Map<String, dynamic> toJson(Todo entity) {
+    return entity.toJson();
+  }
+
+  @override
+  String get collectionId => "Todo";
+}

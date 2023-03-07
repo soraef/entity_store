@@ -6,10 +6,11 @@ import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/domain/auth/repository.dart';
 import 'package:todo_app/domain/todo/entity.dart';
 import 'package:todo_app/domain/todo/id.dart';
+import 'package:todo_app/domain/todo/repository.dart';
 import 'package:todo_app/domain/user/entity.dart';
 import 'package:todo_app/domain/user/id.dart';
+import 'package:todo_app/domain/user/repository.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
-import 'package:todo_app/infrastracture/repository/repository.dart';
 
 final todoUsecase = Provider(
   (ref) => TodoUsecase(
@@ -18,26 +19,21 @@ final todoUsecase = Provider(
         (value) => value.get<CommonId, Auth>(CommonId.singleton())?.userId,
       ),
     ),
-    ref.read(repoRemoteFactory),
-    ref.read(repoInMemoryFactory),
+    ref.read(userRepo),
+    ref.read(authRepo),
   ),
 );
 
 class TodoUsecase {
-  final FirestoreRepositoryFactory repoFactory;
-  final InMemoryRepositoryFactory inMemoryFactory;
   final UserId? userId;
+  final UserRepository userRepository;
+  final AuthRepo authRepo;
 
-  TodoUsecase(this.userId, this.repoFactory, this.inMemoryFactory);
+  TodoUsecase(this.userId, this.userRepository, this.authRepo);
 
-  FirestoreRepository<TodoId, Todo> _todoRepo(UserId userId) {
-    return repoFactory
-        .fromSubCollection<UserId, User>(userId)
-        .getRepo<TodoId, Todo>();
+  TodoRepository _todoRepo(UserId userId) {
+    return userRepository.getRepo(userId);
   }
-
-  IRepository<CommonId, Auth> get _authRepo =>
-      inMemoryFactory.getRepo<CommonId, Auth>();
 
   Future<void> create(String name) async {
     final newTodo = Todo.create(
@@ -45,13 +41,13 @@ class TodoUsecase {
       userId: userId!,
     );
 
-    await repo.save(newTodo);
+    await _todoRepo(userId!).save(newTodo);
   }
 
   Future<Result<Todo, Exception>> check(TodoId id, bool done) async {
-    final todo = await _todoRepo(userId!).get(
+    final todo = await _todoRepo(userId!).findById(
       id,
-      options: const GetOptions(useCache: true),
+      // options: const GetOptions(useCache: true),
     );
     if (todo.isOk && todo.ok != null) {
       return await _todoRepo(userId!).save(todo.ok!.copyWith(done: done));
@@ -61,16 +57,15 @@ class TodoUsecase {
   }
 
   Future<void> delete(Todo todo) async {
-    await _todoRepo(userId!).delete(todo);
+    await _todoRepo(userId!).delete(todo.id);
   }
 
-  Future<void> loadAll() async {
-    final auth = await _authRepo.getAuth();
+  Future<void> loadUserAll() async {
+    final auth = (await authRepo.findById(CommonId.singleton())).ok;
     assert(auth?.isLogin == true);
-    await repo.list(
-      (q) => q.where("userId", isEqualTo: auth!.userId!.value),
-    );
+    await _todoRepo(userId!)
+        .query()
+        .where("userId", isEqualTo: auth!.userId!.value)
+        .findAll();
   }
-
-  FirestoreRepository<TodoId, Todo> get repo => _todoRepo(userId!);
 }

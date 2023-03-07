@@ -13,7 +13,7 @@ class EntityStoreController {
     _controller.sink.add(event);
   }
 
-  E? get<Id, E extends Entity<Id>>(Id id) {
+  E? getById<Id, E extends Entity<Id>>(Id id) {
     return _entityStore.value.get<Id, E>(id);
   }
 
@@ -42,5 +42,29 @@ class StoreEventCache {
 
   Future<List<StoreEvent>> getEvents<Id, E extends Entity<Id>>() async {
     return _cache[E] ?? [];
+  }
+}
+
+mixin EntityChangeNotifier<Id, E extends Entity<Id>> {
+  EntityStoreController get controller;
+
+  void notifyGetComplete(E entity) {
+    controller.dispatch(GetEvent<Id, E>.now(entity.id, entity));
+  }
+
+  void notifyEntityNotFound(Id id) {
+    controller.dispatch(GetEvent<Id, E>.now(id, null));
+  }
+
+  void notifyListComplete(List<E> entities) {
+    controller.dispatch(ListEvent<Id, E>.now(entities));
+  }
+
+  void notifySaveComplete(E entity) {
+    controller.dispatch(SaveEvent<Id, E>.now(entity));
+  }
+
+  void notifyDeleteComplete(Id id) {
+    controller.dispatch(DeleteEvent<Id, E>.now(id));
   }
 }

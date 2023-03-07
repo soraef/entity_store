@@ -16,7 +16,9 @@ dependencies:
   collection: ^1.16.0
   skyreach_result: ^1.0.1
 
-  entity_store: 1.0.0-dev.2
+  # entity_store: 1.0.0-dev.2
+  entity_store: 
+    path: ../entity_store
 
 dev_dependencies:
   flutter_test:

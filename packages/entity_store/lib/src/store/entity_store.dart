@@ -42,6 +42,10 @@ class EntityStore {
         .where(test);
   }
 
+  List<E> toList<E>() {
+    return (_entityMaps[E]?.toList() ?? <E>[]) as List<E>;
+  }
+
   @override
   String toString() {
     return _entityMaps.toString();
