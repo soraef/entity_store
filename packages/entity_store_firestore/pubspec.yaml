@@ -1,6 +1,6 @@
 name: entity_store_firestore
 description: firestore operations for entity_store package
-version: 1.0.0-dev.2
+version: 1.0.0-dev.3
 
 environment:
   sdk: ">=2.17.5 <3.0.0"
@@ -16,9 +16,9 @@ dependencies:
   collection: ^1.16.0
   skyreach_result: ^1.0.1
 
-  # entity_store: 1.0.0-dev.2
-  entity_store: 
-    path: ../entity_store
+  entity_store: 1.0.0-dev.3
+  # entity_store: 
+  #   path: ../entity_store
 
 dev_dependencies:
   flutter_test:
