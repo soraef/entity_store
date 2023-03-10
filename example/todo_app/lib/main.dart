@@ -9,7 +9,7 @@ import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 import 'domain/user/id.dart';
 import 'firebase_options.dart';
 import 'presentation/page/auth/auth_page.dart';
-import 'presentation/page/todo/todo_page.dart';
+import 'presentation/page/task/task_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,10 +25,10 @@ class MyApp extends ConsumerWidget {
     ref.watch(debugger);
 
     // final store = ref.watch(source);
-    // final todos = ref.watch(source).whereType<TodoId, Todo>();
+    // final tasks = ref.watch(source).whereType<TaskId, Task>();
 
     return MaterialApp(
-      title: 'Todo Sample',
+      title: 'Task Sample',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -51,7 +51,7 @@ class RootPage extends ConsumerWidget {
     if (auth == null || !auth.isLogin) {
       return const AuthPage();
     } else {
-      return const TodoPage();
+      return const TaskPage();
     }
   }
 }

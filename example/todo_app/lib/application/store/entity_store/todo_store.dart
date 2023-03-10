@@ -1,9 +1,9 @@
 
 
-// final todoStore = StateNotifierProvider<TodoStore, Todos>(
-//   (ref) => TodoStore(),
+// final taskStore = StateNotifierProvider<TaskStore, Tasks>(
+//   (ref) => TaskStore(),
 // );
 
-// class TodoStore extends RiverpodEntityMapStore<TodoId, Todo> {
-//   TodoStore() : super(initState: Todos.empty());
+// class TaskStore extends RiverpodEntityMapStore<TaskId, Task> {
+//   TaskStore() : super(initState: Tasks.empty());
 // }

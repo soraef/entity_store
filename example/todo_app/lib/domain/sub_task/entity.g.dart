@@ -6,8 +6,9 @@ part of 'entity.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$_Todo _$$_TodoFromJson(Map<String, dynamic> json) => _$_Todo(
-      id: const TodoIdConverter().fromJson(json['id'] as String),
+_$_SubTask _$$_SubTaskFromJson(Map<String, dynamic> json) => _$_SubTask(
+      id: const SubTaskIdConverter().fromJson(json['id'] as String),
+      taskId: const TaskIdConverter().fromJson(json['taskId'] as String),
       userId: const UserIdConverter().fromJson(json['userId'] as String),
       name: json['name'] as String,
       done: json['done'] as bool,
@@ -17,8 +18,10 @@ _$_Todo _$$_TodoFromJson(Map<String, dynamic> json) => _$_Todo(
           const DateTimeConverter().fromJson(json['updatedAt'] as Timestamp?),
     );
 
-Map<String, dynamic> _$$_TodoToJson(_$_Todo instance) => <String, dynamic>{
-      'id': const TodoIdConverter().toJson(instance.id),
+Map<String, dynamic> _$$_SubTaskToJson(_$_SubTask instance) =>
+    <String, dynamic>{
+      'id': const SubTaskIdConverter().toJson(instance.id),
+      'taskId': const TaskIdConverter().toJson(instance.taskId),
       'userId': const UserIdConverter().toJson(instance.userId),
       'name': instance.name,
       'done': instance.done,

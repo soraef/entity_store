@@ -1,11 +1,17 @@
 part of '../firestore_repository.dart';
 
+typedef CreateRepository<T, Id> = T Function(
+    BaseFirestoreRepository parent, Id id);
+
 abstract class RootCollectionRepository<Id, E extends Entity<Id>>
     extends FirestoreRepository<Id, E> {
-  String get collectionId;
+  @override
+  final EntityStoreController controller;
   final FirebaseFirestore instance;
+  String get collectionId;
 
   RootCollectionRepository({
+    required this.controller,
     required this.instance,
   });
 
@@ -15,11 +21,14 @@ abstract class RootCollectionRepository<Id, E extends Entity<Id>>
 }
 
 abstract class SubCollectionRepository<Id, E extends Entity<Id>>
-    extends FirestoreRepository<Id, E> {
+    extends FirestoreRepository<Id, E> implements SubCollection {
+  @override
+  final EntityStoreController controller;
   final String parentDocumentId;
-  final FirestoreRepository parentRepository;
+  final BaseFirestoreRepository parentRepository;
 
   SubCollectionRepository({
+    required this.controller,
     required this.parentRepository,
     required this.parentDocumentId,
   });
@@ -33,25 +42,38 @@ abstract class SubCollectionRepository<Id, E extends Entity<Id>>
           .collection(collectionId);
 }
 
+abstract class SubCollection {}
+
 abstract class FirestoreRepository<Id, E extends Entity<Id>>
+    extends BaseFirestoreRepository<Id, E>
     with EntityChangeNotifier<Id, E>, FirestoreEntityNotifier<Id, E>
     implements IRepository<Id, E> {
-  CollectionReference<Map<String, dynamic>> get collectionRef;
+  final Map<Type, CreateRepository<Object?, Id>> _container = {};
 
-  final Map<Type, Object Function(FirestoreRepository parent, Id id)>
-      _container = {};
-
-  TRepo getRepo<TRepo extends SubCollectionRepository<dynamic, dynamic>>(
+  TRepo getRepository<TRepo extends SubCollection>(
     Id id,
   ) {
+    if (_container[TRepo] == null) {
+      throw ArgumentError("$TRepo is Not regist in $runtimeType");
+    }
+
     return _container[TRepo]!(this, id) as TRepo;
   }
 
-  void bindRepo<TRepo extends SubCollectionRepository<dynamic, dynamic>>(
-    TRepo Function(FirestoreRepository parent, Id id) repo,
-  ) {
+  void registRepository<TRepo extends SubCollection>(
+      CreateRepository<TRepo, Id> repo) {
     _container[TRepo] = repo;
   }
+
+  @override
+  DocumentReference getDocumentRef(Id id) {
+    return collectionRef.doc(idToString(id));
+  }
+}
+
+abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
+    implements IFirestoreEntityNotifier<Id, E>, IRepository<Id, E> {
+  CollectionReference<Map<String, dynamic>> get collectionRef;
 
   @override
   Future<Result<Id, Exception>> delete(
@@ -82,12 +104,14 @@ abstract class FirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E, Exception>> save(
     E entity, {
-    ISaveOptions? options,
+    covariant FirestoreSaveOptions? options,
   }) {
-    return protectedSaveAndNotify(collectionRef, entity);
+    return protectedSaveAndNotify(
+      collectionRef,
+      entity,
+      merge: options?.merge ?? true,
+    );
   }
 
-  DocumentReference getDocumentRef(Id id) {
-    return collectionRef.doc(toDocumentId(id));
-  }
+  DocumentReference getDocumentRef(Id id);
 }

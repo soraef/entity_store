@@ -4,7 +4,7 @@ part of '../firestore_repository.dart';
 
 class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     implements IRepositoryQuery<Id, E> {
-  final FirestoreRepository<Id, E> _repository;
+  final BaseFirestoreRepository<Id, E> _repository;
   final List<Filter> _filters;
   final List<Sort> _sorts;
   final int? _limitNum;
@@ -122,8 +122,10 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> orderBy(Object field,
-      {bool descending = false}) {
+  FirestoreRepositoryQuery<Id, E> orderBy(
+    Object field, {
+    bool descending = false,
+  }) {
     return FirestoreRepositoryQuery<Id, E>._(
       _repository,
       _filters,
@@ -160,7 +162,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return _filters.map((e) => e.test(object)).every((e) => e);
   }
 
-  Query buildFilterQuery(Query query) {
+  Query _buildFilterQuery(Query query) {
     for (final filter in getFilters) {
       switch (filter.operator) {
         case FilterOperator.isEqualTo:
@@ -202,14 +204,14 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return query;
   }
 
-  Query buildSortQuery(Query query) {
+  Query _buildSortQuery(Query query) {
     for (final sort in getSorts) {
       query = query.orderBy(sort.field, descending: sort.descending);
     }
     return query;
   }
 
-  Query buildLimitQuery(Query query) {
+  Query _buildLimitQuery(Query query) {
     final lim = getLimit;
     if (lim != null) {
       return query.limit(lim);
@@ -219,9 +221,13 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
 
   @override
   Future<Result<List<E>, Exception>> findAll() async {
-    var ref = buildFilterQuery(_repository.collectionRef);
-    ref = buildSortQuery(ref);
-    ref = buildLimitQuery(ref);
+    var ref = _buildFilterQuery(_repository.collectionRef);
+    if (_startAfterId != null) {
+      final doc = await _repository.getDocumentRef(_startAfterId!).get();
+      ref = ref.startAfterDocument(doc);
+    }
+    ref = _buildSortQuery(ref);
+    ref = _buildLimitQuery(ref);
     return _repository.protectedListAndNotify(ref);
   }
 }

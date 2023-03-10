@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entity_store/src/store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/domain/todo/repository.dart';
+import 'package:todo_app/domain/sub_task/repository.dart';
+import 'package:todo_app/domain/task/repository.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
 import 'entity.dart';
@@ -11,8 +12,16 @@ import 'id.dart';
 final userRepo = Provider(
   (ref) => UserRepository(
     ref.read(entityStoreController),
-  )..bindRepo(
-      (parent, id) => TodoRepository(
+  )
+    ..registRepository(
+      (parent, id) => TaskRepository(
+        controller: parent.controller,
+        parentRepository: parent,
+        parentDocumentId: id.value,
+      ),
+    )
+    ..registRepository(
+      (parent, id) => SubTaskRepository(
         controller: parent.controller,
         parentRepository: parent,
         parentDocumentId: id.value,
@@ -21,13 +30,11 @@ final userRepo = Provider(
 );
 
 class UserRepository extends RootCollectionRepository<UserId, User> {
-  UserRepository(this.controller)
+  UserRepository(EntityStoreController controller)
       : super(
+          controller: controller,
           instance: FirebaseFirestore.instance,
         );
-
-  @override
-  final EntityStoreController controller;
 
   @override
   User fromJson(Map<String, dynamic> json) {
@@ -35,7 +42,7 @@ class UserRepository extends RootCollectionRepository<UserId, User> {
   }
 
   @override
-  String toDocumentId(UserId id) {
+  String idToString(UserId id) {
     return id.value;
   }
 

@@ -4,13 +4,35 @@ import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:meta/meta.dart';
 import 'package:skyreach_result/skyreach_result.dart';
 
+abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
+  @protected
+  Future<Result<E?, Exception>> protectedGetAndNotify(
+    CollectionReference collection,
+    Id id,
+  );
+  @protected
+  Future<Result<Id, Exception>> protectedDeleteAndNotify(
+    CollectionReference collection,
+    Id id,
+  );
+  @protected
+  Future<Result<List<E>, Exception>> protectedListAndNotify(Query ref);
+  @protected
+  Future<Result<E, Exception>> protectedSaveAndNotify(
+    CollectionReference collection,
+    E entity, {
+    bool? merge,
+    List<Object>? mergeFields,
+  });
+}
+
 mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
-    on EntityChangeNotifier<Id, E> {
+    on EntityChangeNotifier<Id, E> implements IFirestoreEntityNotifier<Id, E> {
   Map<String, dynamic> toJson(E entity);
   E fromJson(Map<String, dynamic> json);
-  String toDocumentId(Id id);
+  String idToString(Id id);
 
-  @protected
+  @override
   Future<Result<E?, Exception>> protectedGetAndNotify(
     CollectionReference collection,
     Id id,
@@ -18,13 +40,12 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     late DocumentSnapshot<dynamic> doc;
 
     try {
-      doc = await collection.doc(toDocumentId(id)).get();
+      doc = await collection.doc(idToString(id)).get();
     } on FirebaseException catch (e) {
       return Result.err(
         FirestoreRequestFailure(
           entityType: E,
           code: e.code,
-          method: "get",
           message: e.message,
           exception: e,
         ),
@@ -40,7 +61,6 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
         return Result.err(
           JsonConverterFailure(
             entityType: E,
-            method: "get",
             fetched: doc.data(),
             exception: e,
           ),
@@ -53,13 +73,13 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     return Result.ok(null);
   }
 
-  @protected
+  @override
   Future<Result<Id, Exception>> protectedDeleteAndNotify(
     CollectionReference collection,
     Id id,
   ) async {
     try {
-      await collection.doc(toDocumentId(id)).delete();
+      await collection.doc(idToString(id)).delete();
       notifyDeleteComplete(id);
       return Result.ok(id);
     } on FirebaseException catch (e) {
@@ -67,7 +87,6 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
         FirestoreRequestFailure(
           entityType: E,
           code: e.code,
-          method: "delete",
           message: e.message,
           exception: e,
         ),
@@ -75,7 +94,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     }
   }
 
-  @protected
+  @override
   Future<Result<List<E>, Exception>> protectedListAndNotify(Query ref) async {
     late QuerySnapshot<dynamic> snapshot;
     try {
@@ -85,7 +104,6 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
         FirestoreRequestFailure(
           entityType: E,
           code: e.code,
-          method: "list",
           message: e.message,
           exception: e,
         ),
@@ -100,7 +118,6 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
       return Result.err(
         JsonConverterFailure(
           entityType: E,
-          method: "list",
           fetched: snapshot.docs.map((e) => e.data()).toList(),
           exception: e,
         ),
@@ -108,7 +125,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     }
   }
 
-  @protected
+  @override
   Future<Result<E, Exception>> protectedSaveAndNotify(
     CollectionReference collection,
     E entity, {
@@ -116,7 +133,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     List<Object>? mergeFields,
   }) async {
     try {
-      await collection.doc(toDocumentId(entity.id)).set(
+      await collection.doc(idToString(entity.id)).set(
             toJson(entity),
             merge != null || mergeFields != null
                 ? SetOptions(merge: merge, mergeFields: mergeFields)
@@ -129,7 +146,6 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
         FirestoreRequestFailure(
           entityType: E,
           code: e.code,
-          method: "save",
           message: e.message,
           exception: e,
         ),

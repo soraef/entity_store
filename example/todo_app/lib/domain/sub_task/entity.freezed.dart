@@ -14,14 +14,16 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
-Todo _$TodoFromJson(Map<String, dynamic> json) {
-  return _Todo.fromJson(json);
+SubTask _$SubTaskFromJson(Map<String, dynamic> json) {
+  return _SubTask.fromJson(json);
 }
 
 /// @nodoc
-mixin _$Todo {
-  @TodoIdConverter()
-  TodoId get id => throw _privateConstructorUsedError;
+mixin _$SubTask {
+  @SubTaskIdConverter()
+  SubTaskId get id => throw _privateConstructorUsedError;
+  @TaskIdConverter()
+  TaskId get taskId => throw _privateConstructorUsedError;
   @UserIdConverter()
   UserId get userId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
@@ -33,16 +35,17 @@ mixin _$Todo {
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $TodoCopyWith<Todo> get copyWith => throw _privateConstructorUsedError;
+  $SubTaskCopyWith<SubTask> get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TodoCopyWith<$Res> {
-  factory $TodoCopyWith(Todo value, $Res Function(Todo) then) =
-      _$TodoCopyWithImpl<$Res, Todo>;
+abstract class $SubTaskCopyWith<$Res> {
+  factory $SubTaskCopyWith(SubTask value, $Res Function(SubTask) then) =
+      _$SubTaskCopyWithImpl<$Res, SubTask>;
   @useResult
   $Res call(
-      {@TodoIdConverter() TodoId id,
+      {@SubTaskIdConverter() SubTaskId id,
+      @TaskIdConverter() TaskId taskId,
       @UserIdConverter() UserId userId,
       String name,
       bool done,
@@ -51,9 +54,9 @@ abstract class $TodoCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TodoCopyWithImpl<$Res, $Val extends Todo>
-    implements $TodoCopyWith<$Res> {
-  _$TodoCopyWithImpl(this._value, this._then);
+class _$SubTaskCopyWithImpl<$Res, $Val extends SubTask>
+    implements $SubTaskCopyWith<$Res> {
+  _$SubTaskCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -64,6 +67,7 @@ class _$TodoCopyWithImpl<$Res, $Val extends Todo>
   @override
   $Res call({
     Object? id = null,
+    Object? taskId = null,
     Object? userId = null,
     Object? name = null,
     Object? done = null,
@@ -74,7 +78,11 @@ class _$TodoCopyWithImpl<$Res, $Val extends Todo>
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as TodoId,
+              as SubTaskId,
+      taskId: null == taskId
+          ? _value.taskId
+          : taskId // ignore: cast_nullable_to_non_nullable
+              as TaskId,
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
@@ -100,13 +108,15 @@ class _$TodoCopyWithImpl<$Res, $Val extends Todo>
 }
 
 /// @nodoc
-abstract class _$$_TodoCopyWith<$Res> implements $TodoCopyWith<$Res> {
-  factory _$$_TodoCopyWith(_$_Todo value, $Res Function(_$_Todo) then) =
-      __$$_TodoCopyWithImpl<$Res>;
+abstract class _$$_SubTaskCopyWith<$Res> implements $SubTaskCopyWith<$Res> {
+  factory _$$_SubTaskCopyWith(
+          _$_SubTask value, $Res Function(_$_SubTask) then) =
+      __$$_SubTaskCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
-      {@TodoIdConverter() TodoId id,
+      {@SubTaskIdConverter() SubTaskId id,
+      @TaskIdConverter() TaskId taskId,
       @UserIdConverter() UserId userId,
       String name,
       bool done,
@@ -115,26 +125,32 @@ abstract class _$$_TodoCopyWith<$Res> implements $TodoCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$_TodoCopyWithImpl<$Res> extends _$TodoCopyWithImpl<$Res, _$_Todo>
-    implements _$$_TodoCopyWith<$Res> {
-  __$$_TodoCopyWithImpl(_$_Todo _value, $Res Function(_$_Todo) _then)
+class __$$_SubTaskCopyWithImpl<$Res>
+    extends _$SubTaskCopyWithImpl<$Res, _$_SubTask>
+    implements _$$_SubTaskCopyWith<$Res> {
+  __$$_SubTaskCopyWithImpl(_$_SubTask _value, $Res Function(_$_SubTask) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? id = null,
+    Object? taskId = null,
     Object? userId = null,
     Object? name = null,
     Object? done = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(_$_Todo(
+    return _then(_$_SubTask(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as TodoId,
+              as SubTaskId,
+      taskId: null == taskId
+          ? _value.taskId
+          : taskId // ignore: cast_nullable_to_non_nullable
+              as TaskId,
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
@@ -162,9 +178,10 @@ class __$$_TodoCopyWithImpl<$Res> extends _$TodoCopyWithImpl<$Res, _$_Todo>
 /// @nodoc
 
 @JsonSerializable(explicitToJson: true)
-class _$_Todo extends _Todo {
-  const _$_Todo(
-      {@TodoIdConverter() required this.id,
+class _$_SubTask extends _SubTask {
+  const _$_SubTask(
+      {@SubTaskIdConverter() required this.id,
+      @TaskIdConverter() required this.taskId,
       @UserIdConverter() required this.userId,
       required this.name,
       required this.done,
@@ -172,11 +189,15 @@ class _$_Todo extends _Todo {
       @DateTimeConverter() required this.updatedAt})
       : super._();
 
-  factory _$_Todo.fromJson(Map<String, dynamic> json) => _$$_TodoFromJson(json);
+  factory _$_SubTask.fromJson(Map<String, dynamic> json) =>
+      _$$_SubTaskFromJson(json);
 
   @override
-  @TodoIdConverter()
-  final TodoId id;
+  @SubTaskIdConverter()
+  final SubTaskId id;
+  @override
+  @TaskIdConverter()
+  final TaskId taskId;
   @override
   @UserIdConverter()
   final UserId userId;
@@ -193,15 +214,16 @@ class _$_Todo extends _Todo {
 
   @override
   String toString() {
-    return 'Todo(id: $id, userId: $userId, name: $name, done: $done, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'SubTask(id: $id, taskId: $taskId, userId: $userId, name: $name, done: $done, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_Todo &&
+            other is _$_SubTask &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.taskId, taskId) || other.taskId == taskId) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.done, done) || other.done == done) &&
@@ -213,38 +235,42 @@ class _$_Todo extends _Todo {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, userId, name, done, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType, id, taskId, userId, name, done, createdAt, updatedAt);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_TodoCopyWith<_$_Todo> get copyWith =>
-      __$$_TodoCopyWithImpl<_$_Todo>(this, _$identity);
+  _$$_SubTaskCopyWith<_$_SubTask> get copyWith =>
+      __$$_SubTaskCopyWithImpl<_$_SubTask>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_TodoToJson(
+    return _$$_SubTaskToJson(
       this,
     );
   }
 }
 
-abstract class _Todo extends Todo {
-  const factory _Todo(
-      {@TodoIdConverter() required final TodoId id,
+abstract class _SubTask extends SubTask {
+  const factory _SubTask(
+      {@SubTaskIdConverter() required final SubTaskId id,
+      @TaskIdConverter() required final TaskId taskId,
       @UserIdConverter() required final UserId userId,
       required final String name,
       required final bool done,
       @DateTimeConverter() required final DateTime createdAt,
-      @DateTimeConverter() required final DateTime updatedAt}) = _$_Todo;
-  const _Todo._() : super._();
+      @DateTimeConverter() required final DateTime updatedAt}) = _$_SubTask;
+  const _SubTask._() : super._();
 
-  factory _Todo.fromJson(Map<String, dynamic> json) = _$_Todo.fromJson;
+  factory _SubTask.fromJson(Map<String, dynamic> json) = _$_SubTask.fromJson;
 
   @override
-  @TodoIdConverter()
-  TodoId get id;
+  @SubTaskIdConverter()
+  SubTaskId get id;
+  @override
+  @TaskIdConverter()
+  TaskId get taskId;
   @override
   @UserIdConverter()
   UserId get userId;
@@ -260,5 +286,6 @@ abstract class _Todo extends Todo {
   DateTime get updatedAt;
   @override
   @JsonKey(ignore: true)
-  _$$_TodoCopyWith<_$_Todo> get copyWith => throw _privateConstructorUsedError;
+  _$$_SubTaskCopyWith<_$_SubTask> get copyWith =>
+      throw _privateConstructorUsedError;
 }
