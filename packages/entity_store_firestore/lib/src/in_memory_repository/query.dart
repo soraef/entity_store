@@ -202,4 +202,9 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
     _repository.notifyListComplete(entities);
     return Result.ok(entities);
   }
+
+  @override
+  Future<Result<E?, Exception>> findOne() async {
+    return (await findAll()).mapOk((ok) => ok.firstOrNull);
+  }
 }

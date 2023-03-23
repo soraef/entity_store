@@ -11,6 +11,8 @@ abstract class IRepository<Id, E extends Entity<Id>> {
 
   Future<Result<List<E>, Exception>> findAll();
 
+  Future<Result<E?, Exception>> findOne();
+
   IRepositoryQuery query();
 
   Future<Result<E, Exception>> save(

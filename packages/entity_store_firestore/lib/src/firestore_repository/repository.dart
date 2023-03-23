@@ -89,6 +89,11 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   }
 
   @override
+  Future<Result<E?, Exception>> findOne() {
+    return query().findOne();
+  }
+
+  @override
   Future<Result<E?, Exception>> findById(
     Id id, {
     IGetOptions? options,

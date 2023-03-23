@@ -20,6 +20,11 @@ abstract class InMemoryRepository<Id, E extends Entity<Id>>
   }
 
   @override
+  Future<Result<E?, Exception>> findOne() {
+    return query().findOne();
+  }
+
+  @override
   Future<Result<Id, Exception>> delete(
     Id id, {
     IDeleteOptions? options,

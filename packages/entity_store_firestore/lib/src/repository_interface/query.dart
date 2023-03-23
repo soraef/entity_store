@@ -81,4 +81,6 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
   bool test(Map<String, dynamic> object);
 
   Future<Result<List<E>, Exception>> findAll();
+
+  Future<Result<E?, Exception>> findOne();
 }

@@ -219,15 +219,27 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return query;
   }
 
-  @override
-  Future<Result<List<E>, Exception>> findAll() async {
+  Future<Query> _build() async {
     var ref = _buildFilterQuery(_repository.collectionRef);
     if (_startAfterId != null) {
-      final doc = await _repository.getDocumentRef(_startAfterId!).get();
+      final doc = await _repository.getDocumentRef(_startAfterId as Id).get();
       ref = ref.startAfterDocument(doc);
     }
     ref = _buildSortQuery(ref);
     ref = _buildLimitQuery(ref);
+    return ref;
+  }
+
+  @override
+  Future<Result<List<E>, Exception>> findAll() async {
+    final ref = await _build();
     return _repository.protectedListAndNotify(ref);
+  }
+
+  @override
+  Future<Result<E?, Exception>> findOne() async {
+    final ref = await _build();
+    return (await _repository.protectedListAndNotify(ref.limit(1)))
+        .mapOk((ok) => ok.firstOrNull);
   }
 }
