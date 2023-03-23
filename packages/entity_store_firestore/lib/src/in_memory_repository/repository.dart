@@ -43,6 +43,23 @@ abstract class InMemoryRepository<Id, E extends Entity<Id>>
   }
 
   @override
+  Future<Result<E?, Exception>> update(
+    Id id, {
+    required E? Function(E? prev) updater,
+    ISaveOptions? options,
+  }) async {
+    final entity = controller.getById<Id, E>(id);
+    final newEntity = updater(entity);
+    if (newEntity != null) {
+      notifyGetComplete(newEntity);
+    } else {
+      notifyEntityNotFound(id);
+    }
+
+    return Result.ok(newEntity);
+  }
+
+  @override
   final EntityStoreController controller;
 
   @override

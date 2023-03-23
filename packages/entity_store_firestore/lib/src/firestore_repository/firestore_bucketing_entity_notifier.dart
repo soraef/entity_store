@@ -168,6 +168,73 @@ mixin FirestoreBucketEntityNotifier<Id, E extends Entity<Id>>
     }
   }
 
+  @override
+  @protected
+  Future<Result<E?, Exception>> protectedUpdateAndNotify(
+    CollectionReference collection,
+    Id id,
+    E? Function(E? prev) updater, {
+    bool? merge,
+    List<Object>? mergeFields,
+  }) async {
+    try {
+      final snapshot = await collection
+          .where("_ids", arrayContains: idToString(id))
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        notifyEntityNotFound(id);
+        return Result.ok(null);
+      }
+
+      final documentId = snapshot.docs.first.reference.id;
+
+      final entity =
+          await collection.firestore.runTransaction((transaction) async {
+        final doc = await transaction.get(collection.doc(documentId));
+        final entities = _convertBucketingResult(doc, bucketFieldName);
+        final entity = entities.firstWhereOrNull((e) => e.id == id);
+
+        final newEntity = updater(entity);
+        if (newEntity != null) {
+          transaction.set(
+            collection.doc(bucketIdToString(newEntity)),
+            {
+              "id": bucketIdToString(newEntity),
+              bucketFieldName: {
+                idToString(newEntity.id): toJson(newEntity),
+              },
+              "_ids": FieldValue.arrayUnion([idToString(newEntity.id)])
+            },
+            SetOptions(merge: true),
+          );
+
+          notifySaveComplete(newEntity);
+        }
+
+        return newEntity;
+      });
+
+      if (entity == null) {
+        notifyEntityNotFound(id);
+      } else {
+        notifySaveComplete(entity);
+      }
+
+      return Result.ok(entity);
+    } on FirebaseException catch (e) {
+      return Result.err(
+        FirestoreRequestFailure(
+          entityType: E,
+          code: e.code,
+          message: e.message,
+          exception: e,
+        ),
+      );
+    }
+  }
+
   List<E> _convertBucketingResult(
     DocumentSnapshot<dynamic> doc,
     String fieldName,

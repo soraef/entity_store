@@ -104,13 +104,44 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E, Exception>> save(
     E entity, {
-    covariant FirestoreSaveOptions? options,
+    ISaveOptions? options,
   }) {
-    return protectedSaveAndNotify(
-      collectionRef,
-      entity,
-      merge: options?.merge ?? true,
-    );
+    if (options is FirestoreSaveOptions) {
+      return protectedSaveAndNotify(
+        collectionRef,
+        entity,
+        merge: options.merge,
+      );
+    } else {
+      return protectedSaveAndNotify(
+        collectionRef,
+        entity,
+        merge: true,
+      );
+    }
+  }
+
+  @override
+  Future<Result<E?, Exception>> update(
+    Id id, {
+    required E? Function(E? prev) updater,
+    ISaveOptions? options,
+  }) {
+    if (options is FirestoreSaveOptions) {
+      return protectedUpdateAndNotify(
+        collectionRef,
+        id,
+        updater,
+        merge: options.merge,
+      );
+    } else {
+      return protectedUpdateAndNotify(
+        collectionRef,
+        id,
+        updater,
+        merge: true,
+      );
+    }
   }
 
   DocumentReference getDocumentRef(Id id);

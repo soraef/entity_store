@@ -1,4 +1,4 @@
-import 'package:entity_store_firestore/src/repository_interface.dart';
+part of '../firestore_repository.dart';
 
 class FirestoreSaveOptions implements ISaveOptions {
   final bool merge;

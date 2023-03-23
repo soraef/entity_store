@@ -24,6 +24,15 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
     bool? merge,
     List<Object>? mergeFields,
   });
+
+  @protected
+  Future<Result<E?, Exception>> protectedUpdateAndNotify(
+    CollectionReference collection,
+    Id id,
+    E? Function(E? prev) updater, {
+    bool? merge,
+    List<Object>? mergeFields,
+  });
 }
 
 mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
@@ -140,6 +149,52 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
                 : null,
           );
       notifySaveComplete(entity);
+      return Result.ok(entity);
+    } on FirebaseException catch (e) {
+      return Result.err(
+        FirestoreRequestFailure(
+          entityType: E,
+          code: e.code,
+          message: e.message,
+          exception: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<E?, Exception>> protectedUpdateAndNotify(
+    CollectionReference collection,
+    Id id,
+    E? Function(E? prev) updater, {
+    bool? merge,
+    List<Object>? mergeFields,
+  }) async {
+    try {
+      final entity =
+          await collection.firestore.runTransaction((transaction) async {
+        final doc = await transaction.get(collection.doc(idToString(id)));
+        final entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
+        final newEntity = updater(entity);
+        if (newEntity != null) {
+          transaction.set(
+            collection.doc(idToString(id)),
+            toJson(newEntity),
+            merge != null || mergeFields != null
+                ? SetOptions(merge: merge, mergeFields: mergeFields)
+                : null,
+          );
+        }
+
+        return newEntity;
+      });
+
+      if (entity == null) {
+        notifyEntityNotFound(id);
+      } else {
+        notifySaveComplete(entity);
+      }
+
       return Result.ok(entity);
     } on FirebaseException catch (e) {
       return Result.err(

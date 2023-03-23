@@ -22,4 +22,10 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     Id entity, {
     IDeleteOptions? options,
   });
+
+  Future<Result<E?, Exception>> update(
+    Id id, {
+    required E? Function(E? prev) updater,
+    ISaveOptions? options,
+  });
 }
