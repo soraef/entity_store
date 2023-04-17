@@ -170,10 +170,11 @@ mixin FirestoreBucketEntityNotifier<Id, E extends Entity<Id>>
 
   @override
   @protected
-  Future<Result<E?, Exception>> protectedUpdateAndNotify(
+  Future<Result<E?, Exception>> protectedCreateOrUpdateAndNotify(
     CollectionReference collection,
     Id id,
-    E? Function(E? prev) updater, {
+    E? Function() creater,
+    E? Function(E prev) updater, {
     bool? merge,
     List<Object>? mergeFields,
   }) async {
@@ -196,7 +197,7 @@ mixin FirestoreBucketEntityNotifier<Id, E extends Entity<Id>>
         final entities = _convertBucketingResult(doc, bucketFieldName);
         final entity = entities.firstWhereOrNull((e) => e.id == id);
 
-        final newEntity = updater(entity);
+        final newEntity = entity == null ? creater() : updater(entity);
         if (newEntity != null) {
           transaction.set(
             collection.doc(bucketIdToString(newEntity)),

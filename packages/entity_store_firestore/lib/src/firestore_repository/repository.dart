@@ -127,22 +127,25 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E?, Exception>> update(
+  Future<Result<E?, Exception>> createOrUpdate(
     Id id, {
-    required E? Function(E? prev) updater,
+    required E? Function() creater,
+    required E? Function(E prev) updater,
     ISaveOptions? options,
   }) {
     if (options is FirestoreSaveOptions) {
-      return protectedUpdateAndNotify(
+      return protectedCreateOrUpdateAndNotify(
         collectionRef,
         id,
+        creater,
         updater,
         merge: options.merge,
       );
     } else {
-      return protectedUpdateAndNotify(
+      return protectedCreateOrUpdateAndNotify(
         collectionRef,
         id,
+        creater,
         updater,
         merge: true,
       );

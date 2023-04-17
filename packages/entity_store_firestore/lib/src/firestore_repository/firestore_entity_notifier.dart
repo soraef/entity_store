@@ -26,10 +26,11 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   });
 
   @protected
-  Future<Result<E?, Exception>> protectedUpdateAndNotify(
+  Future<Result<E?, Exception>> protectedCreateOrUpdateAndNotify(
     CollectionReference collection,
     Id id,
-    E? Function(E? prev) updater, {
+    E? Function() creater,
+    E? Function(E prev) updater, {
     bool? merge,
     List<Object>? mergeFields,
   });
@@ -163,10 +164,11 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E?, Exception>> protectedUpdateAndNotify(
+  Future<Result<E?, Exception>> protectedCreateOrUpdateAndNotify(
     CollectionReference collection,
     Id id,
-    E? Function(E? prev) updater, {
+    E? Function() creater,
+    E? Function(E prev) updater, {
     bool? merge,
     List<Object>? mergeFields,
   }) async {
@@ -175,7 +177,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
           await collection.firestore.runTransaction((transaction) async {
         final doc = await transaction.get(collection.doc(idToString(id)));
         final entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
-        final newEntity = updater(entity);
+        final newEntity = entity == null ? creater() : updater(entity);
         if (newEntity != null) {
           transaction.set(
             collection.doc(idToString(id)),
