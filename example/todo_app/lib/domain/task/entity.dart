@@ -1,8 +1,11 @@
 // ignore_for_file: invalid_annotation_target
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:todo_app/domain/sub_task/entity.dart';
+import 'package:todo_app/domain/sub_task/id.dart';
 import 'package:todo_app/domain/user/id.dart';
 import 'package:todo_app/infrastracture/converter/datetime_conveter.dart';
 
@@ -20,6 +23,7 @@ class Task with _$Task implements Entity<TaskId> {
     @UserIdConverter() required UserId userId,
     required String name,
     required bool done,
+    @JsonKey(defaultValue: <SubTask>[]) required List<SubTask> subTasks,
     @DateTimeConverter() required DateTime createdAt,
     @DateTimeConverter() required DateTime updatedAt,
   }) = _Task;
@@ -35,20 +39,85 @@ class Task with _$Task implements Entity<TaskId> {
       userId: userId,
       name: name,
       done: false,
+      subTasks: [],
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
   }
 
-  Task update({
-    String? name,
-    bool? done,
-  }) {
+  Task complete() {
     return copyWith(
-      name: name ?? this.name,
-      done: done ?? this.done,
+      done: true,
+      subTasks: [
+        for (final subTask in subTasks) subTask.complete(),
+      ],
       updatedAt: DateTime.now(),
     );
+  }
+
+  Task uncomplete() {
+    return copyWith(
+      done: false,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Task addSubTask(String name) {
+    final newSubTasks = [
+      ...subTasks,
+      SubTask.create(taskId: id, userId: userId, name: name),
+    ];
+    return copyWith(
+      subTasks: newSubTasks,
+      done: newSubTasks.every((subTask) => subTask.done),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Task removeSubTask(SubTaskId subTaskId) {
+    return copyWith(
+      subTasks: [
+        for (final subTask in subTasks)
+          if (subTask.id != subTaskId) subTask,
+      ],
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Task completeSubTask(SubTaskId subTaskId) {
+    final newSubTasks = subTasks.map((subTask) {
+      if (subTask.id == subTaskId) {
+        return subTask.complete();
+      } else {
+        return subTask;
+      }
+    }).toList();
+
+    return copyWith(
+      subTasks: newSubTasks,
+      done: newSubTasks.every((subTask) => subTask.done),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Task uncompleteSubTask(SubTaskId subTaskId) {
+    final newSubTasks = subTasks.map((subTask) {
+      if (subTask.id == subTaskId) {
+        return subTask.uncomplete();
+      } else {
+        return subTask;
+      }
+    }).toList();
+
+    return copyWith(
+      subTasks: newSubTasks,
+      done: newSubTasks.every((subTask) => subTask.done),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  SubTask? findSubTaskById(SubTaskId subTaskId) {
+    return subTasks.firstWhereOrNull((subTask) => subTask.id == subTaskId);
   }
 }
 

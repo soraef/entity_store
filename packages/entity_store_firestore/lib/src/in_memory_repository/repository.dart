@@ -52,7 +52,7 @@ abstract class InMemoryRepository<Id, E extends Entity<Id>>
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
-    ISaveOptions? options,
+    ICreateOrUpdateOptions? options,
   }) async {
     final entity = controller.getById<Id, E>(id);
     final newEntity = entity == null ? creater() : updater(entity);

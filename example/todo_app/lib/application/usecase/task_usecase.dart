@@ -6,13 +6,13 @@ import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/domain/auth/repository.dart';
 import 'package:todo_app/domain/sub_task/entity.dart';
 import 'package:todo_app/domain/sub_task/id.dart';
-import 'package:todo_app/domain/sub_task/repository.dart';
 import 'package:todo_app/domain/task/entity.dart';
 import 'package:todo_app/domain/task/id.dart';
 import 'package:todo_app/domain/task/repository.dart';
-import 'package:todo_app/domain/user/entity.dart';
 import 'package:todo_app/domain/user/id.dart';
 import 'package:todo_app/domain/user/repository.dart';
+import 'package:todo_app/domain/weekly_activity/repository.dart';
+import 'package:todo_app/domain/weekly_activity/weekly_activity.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
 final taskUsecase = Provider(
@@ -38,7 +38,7 @@ class TaskUsecase {
     return userRepository.getRepository(userId);
   }
 
-  SubTaskRepository _subTaskRepo(UserId userId) {
+  WeeklyActivityRepository _activityRepository(UserId userId) {
     return userRepository.getRepository(userId);
   }
 
@@ -49,18 +49,59 @@ class TaskUsecase {
     );
 
     await _taskRepo(userId!).save(newTask);
+
+    _activityRepository(userId!).createOrUpdate(
+      WeeklyActivityId.create(userId!, DateTime.now()),
+      creater: () => WeeklyActivity.createNow(
+        userId: userId!,
+        activities: [],
+      ),
+      updater: (prev) => prev.addActivity("Create Task: $name"),
+    );
   }
 
   Future<Result<Task, Exception>> check(TaskId id, bool done) async {
-    final task = await _taskRepo(userId!).findById(id);
-    if (task.isOk && task.ok != null) {
-      return await _taskRepo(userId!).save(task.ok!.copyWith(done: done));
+    final result = await _taskRepo(userId!).createOrUpdate(
+      id,
+      creater: () => null,
+      updater: (prev) => done ? prev.complete() : prev.uncomplete(),
+      options: FirestoreCreateOrUpdateOptions(
+        useTransaction: false,
+      ),
+    );
+
+    if (result.isOk && result.ok != null) {
+      return Result.ok(result.ok!);
     }
+
+    _activityRepository(userId!).createOrUpdate(
+      WeeklyActivityId.create(userId!, DateTime.now()),
+      creater: () => WeeklyActivity.createNow(
+        userId: userId!,
+        activities: [],
+      ),
+      updater: (prev) {
+        if (done) {
+          return prev.addActivity("Complete Task: ${id.value}");
+        } else {
+          return prev.addActivity("Uncomplete Task: ${id.value}");
+        }
+      },
+    );
 
     return Result.err(Exception("Task Not Found"));
   }
 
   Future<void> delete(Task task) async {
+    _activityRepository(userId!).createOrUpdate(
+      WeeklyActivityId.create(userId!, DateTime.now()),
+      creater: () => WeeklyActivity.createNow(
+        userId: userId!,
+        activities: [],
+      ),
+      updater: (prev) => prev.addActivity("Delete Task: ${task.name}"),
+    );
+
     await _taskRepo(userId!).delete(task.id);
   }
 
@@ -74,40 +115,73 @@ class TaskUsecase {
   }
 
   Future<void> createSubTask(TaskId taskId, String name) async {
-    final newTask = SubTask.create(
-      taskId: taskId,
-      name: name,
-      userId: userId!,
+    _activityRepository(userId!).createOrUpdate(
+      WeeklyActivityId.create(userId!, DateTime.now()),
+      creater: () => WeeklyActivity.createNow(
+        userId: userId!,
+        activities: [],
+      ),
+      updater: (prev) => prev.addActivity("Create SubTask: $name"),
     );
-
-    await _subTaskRepo(userId!).save(newTask);
+    await _taskRepo(userId!).createOrUpdate(
+      taskId,
+      creater: () => null,
+      updater: (prev) => prev.addSubTask(name),
+    );
   }
 
   Future<Result<SubTask, Exception>> checkSubTask(
+    TaskId taskId,
     SubTaskId subTaskId,
     bool done,
   ) async {
-    final task = await _subTaskRepo(userId!).findById(
-      subTaskId,
+    final result = await _taskRepo(userId!).createOrUpdate(
+      taskId,
+      creater: () => null,
+      updater: (prev) => done
+          ? prev.completeSubTask(subTaskId)
+          : prev.uncompleteSubTask(subTaskId),
     );
-    if (task.isOk && task.ok != null) {
-      return await _subTaskRepo(userId!).save(task.ok!.copyWith(done: done));
+
+    _activityRepository(userId!).createOrUpdate(
+      WeeklyActivityId.create(userId!, DateTime.now()),
+      creater: () => WeeklyActivity.createNow(
+        userId: userId!,
+        activities: [],
+      ),
+      updater: (prev) {
+        if (done) {
+          return prev.addActivity("Complete SubTask: ${subTaskId.value}");
+        } else {
+          return prev.addActivity("Uncomplete SubTask: ${subTaskId.value}");
+        }
+      },
+    );
+
+    if (result.isOk && result.ok != null) {
+      final sub = result.ok!.findSubTaskById(subTaskId);
+      if (sub != null) {
+        return Result.ok(sub);
+      }
     }
 
     return Result.err(Exception("Task Not Found"));
   }
 
-  Future<void> deleteSubTask(SubTask task) async {
-    await _subTaskRepo(userId!).delete(task.id);
-  }
+  Future<void> deleteSubTask(TaskId taskId, SubTask task) async {
+    _activityRepository(userId!).createOrUpdate(
+      WeeklyActivityId.create(userId!, DateTime.now()),
+      creater: () => WeeklyActivity.createNow(
+        userId: userId!,
+        activities: [],
+      ),
+      updater: (prev) => prev.addActivity("Delete Task: ${task.name}"),
+    );
 
-  Future<void> loadAllSubTask(Task task) async {
-    final auth = (await authRepo.findById(CommonId.singleton())).ok;
-    assert(auth?.isLogin == true);
-
-    await _subTaskRepo(userId!)
-        .query()
-        .where("taskId", isEqualTo: task.id.value)
-        .findAll();
+    await _taskRepo(userId!).createOrUpdate(
+      taskId,
+      creater: () => null,
+      updater: (prev) => prev.removeSubTask(task.id),
+    );
   }
 }

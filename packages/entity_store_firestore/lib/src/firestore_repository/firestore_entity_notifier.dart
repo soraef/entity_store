@@ -8,8 +8,9 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   @protected
   Future<Result<E?, Exception>> protectedGetAndNotify(
     CollectionReference collection,
-    Id id,
-  );
+    Id id, {
+    bool? useCache,
+  });
   @protected
   Future<Result<Id, Exception>> protectedDeleteAndNotify(
     CollectionReference collection,
@@ -32,6 +33,7 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
     E? Function() creater,
     E? Function(E prev) updater, {
     bool? merge,
+    bool? useTransaction,
     List<Object>? mergeFields,
   });
 }
@@ -45,9 +47,18 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> protectedGetAndNotify(
     CollectionReference collection,
-    Id id,
-  ) async {
+    Id id, {
+    bool? useCache,
+  }) async {
     late DocumentSnapshot<dynamic> doc;
+
+    if (useCache == true) {
+      final entity = controller.getById<Id, E>(id);
+      if (entity != null) {
+        notifyGetComplete(entity);
+        return Result.ok(entity);
+      }
+    }
 
     try {
       doc = await collection.doc(idToString(id)).get();
@@ -170,11 +181,18 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     E? Function() creater,
     E? Function(E prev) updater, {
     bool? merge,
+    bool? useTransaction,
+    bool? useCache,
     List<Object>? mergeFields,
   }) async {
-    try {
-      final entity =
-          await collection.firestore.runTransaction((transaction) async {
+    assert(
+      !(useTransaction == true && useCache == true),
+      'useTransaction and useCache cannot be true at the same time.',
+    );
+
+    /// get and set using transaction
+    Future<E?> getAndSetTransaction() async {
+      return await collection.firestore.runTransaction((transaction) async {
         final doc = await transaction.get(collection.doc(idToString(id)));
         final entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
         final newEntity = entity == null ? creater() : updater(entity);
@@ -190,6 +208,38 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
 
         return newEntity;
       });
+    }
+
+    /// get and set using no transaction
+    Future<E?> getAndSetNoTransaction() async {
+      E? entity;
+      if (useCache == true) {
+        entity = controller.getById<Id, E>(id);
+      }
+
+      if (entity == null) {
+        final doc = await collection.doc(idToString(id)).get();
+        entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
+      }
+
+      final newEntity = entity == null ? creater() : updater(entity);
+      if (newEntity != null) {
+        await collection.doc(idToString(id)).set(
+              toJson(newEntity),
+              merge != null || mergeFields != null
+                  ? SetOptions(merge: merge, mergeFields: mergeFields)
+                  : null,
+            );
+      }
+
+      return newEntity;
+    }
+
+    try {
+      final entity = await useTransaction.orTrue.ifMap(
+        ifTrue: getAndSetTransaction,
+        ifFalse: getAndSetNoTransaction,
+      );
 
       if (entity == null) {
         notifyEntityNotFound(id);
@@ -220,4 +270,39 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
         .whereType<E>()
         .toList();
   }
+}
+
+extension _BoolX on bool {
+  T ifMap<T>({
+    required T Function() ifTrue,
+    required T Function() ifFalse,
+  }) {
+    if (this) {
+      return ifTrue();
+    } else {
+      return ifFalse();
+    }
+  }
+}
+
+extension _BoolOrNullX on bool? {
+  T ifMap<T>({
+    required T Function() ifTrue,
+    required T Function() ifFalse,
+    required T Function() ifNull,
+  }) {
+    if (this == null) {
+      return ifNull();
+    } else if (this!) {
+      return ifTrue();
+    } else {
+      return ifFalse();
+    }
+  }
+
+  /// if null, return false
+  bool get orFalse => this ?? false;
+
+  /// if null, return true
+  bool get orTrue => this ?? true;
 }

@@ -22,18 +22,3 @@ class TaskIdConverter implements JsonConverter<TaskId, String> {
     return object.value;
   }
 }
-
-class TaskIdListConverter
-    implements JsonConverter<List<TaskId>, List<dynamic>> {
-  const TaskIdListConverter();
-
-  @override
-  List<TaskId> fromJson(List<dynamic> json) {
-    return json.map((e) => TaskId(e)).toList();
-  }
-
-  @override
-  List<String> toJson(List<TaskId> object) {
-    return object.map((e) => e.value).toList();
-  }
-}

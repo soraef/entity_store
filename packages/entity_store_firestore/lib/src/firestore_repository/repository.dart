@@ -98,7 +98,11 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     Id id, {
     IGetOptions? options,
   }) async {
-    return protectedGetAndNotify(collectionRef, id);
+    return protectedGetAndNotify(
+      collectionRef,
+      id,
+      useCache: options?.useCache,
+    );
   }
 
   @override
@@ -131,9 +135,9 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
-    ISaveOptions? options,
+    ICreateOrUpdateOptions? options,
   }) {
-    if (options is FirestoreSaveOptions) {
+    if (options is FirestoreCreateOrUpdateOptions) {
       return protectedCreateOrUpdateAndNotify(
         collectionRef,
         id,

@@ -29,6 +29,6 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
-    ISaveOptions? options,
+    ICreateOrUpdateOptions? options,
   });
 }

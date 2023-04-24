@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:entity_store/src/store.dart';
+import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/domain/sub_task/repository.dart';
 import 'package:todo_app/domain/task/repository.dart';
+import 'package:todo_app/domain/weekly_activity/repository.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
 import 'entity.dart';
@@ -21,7 +21,7 @@ final userRepo = Provider(
       ),
     )
     ..registRepository(
-      (parent, id) => SubTaskRepository(
+      (parent, id) => WeeklyActivityRepository(
         controller: parent.controller,
         parentRepository: parent,
         parentDocumentId: id.value,

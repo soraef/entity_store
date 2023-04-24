@@ -42,4 +42,18 @@ class SubTask with _$SubTask implements Entity<SubTaskId> {
       updatedAt: DateTime.now(),
     );
   }
+
+  SubTask complete() {
+    return copyWith(
+      done: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  SubTask uncomplete() {
+    return copyWith(
+      done: false,
+      updatedAt: DateTime.now(),
+    );
+  }
 }

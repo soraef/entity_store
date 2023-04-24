@@ -46,6 +46,16 @@ class TaskPage extends HookConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                "Tasks",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ),
             Row(
               children: [
                 const Spacer(),
@@ -70,30 +80,24 @@ class TaskPage extends HookConsumerWidget {
                 itemCount: tasks.entities.length,
                 itemBuilder: (context, index) {
                   final task = tasks.toList().elementAt(index);
-                  return CheckboxListTile(
-                    title: Text(task.name),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (bool? value) {
+                  return _TaskCheckBox(
+                    title: task.name,
+                    checked: task.done,
+                    onTapCheck: (bool? value) async {
                       if (value != null) {
-                        ref.read(taskUsecase).check(task.id, value);
+                        await ref.read(taskUsecase).check(task.id, value);
                       }
                     },
-                    secondary: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return SubTaskListPage(task: task);
-                            },
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        "detail",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                    value: task.done,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return SubTaskListPage(taskId: task.id);
+                          },
+                        ),
+                      );
+                    },
+                    // secondaryTitle: "detail",
                   );
                 },
               ),
@@ -105,25 +109,120 @@ class TaskPage extends HookConsumerWidget {
   }
 }
 
+class _TaskCheckBox extends HookWidget {
+  final String title;
+  final bool checked;
+  final Future<dynamic> Function(bool? value) onTapCheck;
+  final Function()? onTap;
+  final String? secondaryTitle;
+  final Function()? onTapSecondary;
+
+  const _TaskCheckBox({
+    super.key,
+    required this.checked,
+    required this.title,
+    required this.onTapCheck,
+    this.secondaryTitle,
+    this.onTapSecondary,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoading = useState(false);
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          children: [
+            if (isLoading.value)
+              const SizedBox(
+                width: 36,
+                height: 36,
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            if (!isLoading.value)
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: Checkbox(
+                  value: checked,
+                  onChanged: (bool? value) {
+                    isLoading.value = true;
+                    onTapCheck(value).then((value) {
+                      isLoading.value = false;
+                    });
+                  },
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(title),
+            ),
+            const Spacer(),
+            if (secondaryTitle != null)
+              TextButton(
+                onPressed: () {
+                  if (onTapSecondary != null) {
+                    onTapSecondary!();
+                  }
+                },
+                child: Text(
+                  secondaryTitle!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class SubTaskListPage extends ConsumerWidget {
-  final Task task;
+  final TaskId taskId;
   const SubTaskListPage({
     super.key,
-    required this.task,
+    required this.taskId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subTasks = ref.watch(entityStore.select((value) =>
-        value.where<SubTaskId, SubTask>((e) => e.taskId == task.id)));
+    final task = ref.watch(
+      entityStore.select(
+        (value) => value.where<TaskId, Task>().byId(taskId),
+      ),
+    )!;
+
+    final subTasks = task.subTasks;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(task.name),
-      ),
       body: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  const BackButton(),
+                  const Spacer(),
+                  Text(
+                    task.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+                  const Spacer(),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
             Row(
               children: [
                 const Spacer(),
@@ -145,28 +244,47 @@ class SubTaskListPage extends ConsumerWidget {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: subTasks.entities.length,
+                itemCount: subTasks.length,
                 itemBuilder: (context, index) {
                   final task = subTasks.toList().elementAt(index);
-                  return CheckboxListTile(
-                    title: Text(task.name),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (bool? value) {
+
+                  return _TaskCheckBox(
+                    title: task.name,
+                    checked: task.done,
+                    onTapCheck: (bool? value) async {
                       if (value != null) {
-                        ref.read(taskUsecase).checkSubTask(task.id, value);
+                        await ref
+                            .read(taskUsecase)
+                            .checkSubTask(task.taskId, task.id, value);
                       }
                     },
-                    secondary: TextButton(
-                      onPressed: () {
-                        ref.read(taskUsecase).deleteSubTask(task);
-                      },
-                      child: const Text(
-                        "delete",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                    value: task.done,
+                    onTapSecondary: () {
+                      ref.read(taskUsecase).deleteSubTask(task.taskId, task);
+                    },
+                    secondaryTitle: "DELETE",
                   );
+
+                  // return CheckboxListTile(
+                  //   title: Text(task.name),
+                  //   controlAffinity: ListTileControlAffinity.leading,
+                  //   onChanged: (bool? value) {
+                  //     if (value != null) {
+                  //       ref
+                  //           .read(taskUsecase)
+                  //           .checkSubTask(task.taskId, task.id, value);
+                  //     }
+                  //   },
+                  //   secondary: TextButton(
+                  //     onPressed: () {
+                  //       ref.read(taskUsecase).deleteSubTask(task.taskId, task);
+                  //     },
+                  //     child: const Text(
+                  //       "delete",
+                  //       style: TextStyle(color: Colors.red),
+                  //     ),
+                  //   ),
+                  //   value: task.done,
+                  // );
                 },
               ),
             )

@@ -14,12 +14,12 @@ enum FilterOperator {
   isNull,
 }
 
-class Filter {
+class RepositoryFilter {
   final Object field;
   final FilterOperator operator;
   final dynamic value;
 
-  Filter(this.field, this.operator, this.value);
+  RepositoryFilter(this.field, this.operator, this.value);
 
   bool test(Map<String, dynamic> object) {
     switch (operator) {
@@ -49,11 +49,11 @@ class Filter {
   }
 }
 
-class Sort {
+class RepositorySort {
   final Object field;
   final bool descending;
 
-  Sort(this.field, this.descending);
+  RepositorySort(this.field, this.descending);
 }
 
 abstract class IRepositoryQuery<Id, E extends Entity<Id>> {

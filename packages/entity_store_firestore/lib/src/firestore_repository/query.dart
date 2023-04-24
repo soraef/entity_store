@@ -5,13 +5,13 @@ part of '../firestore_repository.dart';
 class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     implements IRepositoryQuery<Id, E> {
   final BaseFirestoreRepository<Id, E> _repository;
-  final List<Filter> _filters;
-  final List<Sort> _sorts;
+  final List<RepositoryFilter> _filters;
+  final List<RepositorySort> _sorts;
   final int? _limitNum;
   final Id? _startAfterId;
 
-  List<Filter> get getFilters => _filters;
-  List<Sort> get getSorts => _sorts;
+  List<RepositoryFilter> get getFilters => _filters;
+  List<RepositorySort> get getSorts => _sorts;
   int? get getLimit => _limitNum;
   Id? get getStartAfterId => _startAfterId;
 
@@ -49,67 +49,67 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
       [
         ..._filters,
         if (isEqualTo != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.isEqualTo,
             isEqualTo,
           ),
         if (isNotEqualTo != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.isNotEqualTo,
             isNotEqualTo,
           ),
         if (isLessThan != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.isLessThan,
             isLessThan,
           ),
         if (isLessThanOrEqualTo != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.isLessThanOrEqualTo,
             isLessThanOrEqualTo,
           ),
         if (isGreaterThan != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.isGreaterThan,
             isGreaterThan,
           ),
         if (isGreaterThanOrEqualTo != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.isGreaterThanOrEqualTo,
             isGreaterThanOrEqualTo,
           ),
         if (arrayContainsAny != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.arrayContains,
             arrayContains,
           ),
         if (arrayContainsAny != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.arrayContainsAny,
             arrayContainsAny,
           ),
         if (whereIn != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.whereIn,
             whereIn,
           ),
         if (whereNotIn != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.whereNotIn,
             whereNotIn,
           ),
         if (isNull != null)
-          Filter(
+          RepositoryFilter(
             field,
             FilterOperator.isNull,
             isNull,
@@ -129,7 +129,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return FirestoreRepositoryQuery<Id, E>._(
       _repository,
       _filters,
-      [..._sorts, Sort(field, descending)],
+      [..._sorts, RepositorySort(field, descending)],
       _limitNum,
       _startAfterId,
     );

@@ -11,6 +11,10 @@ _$_Task _$$_TaskFromJson(Map<String, dynamic> json) => _$_Task(
       userId: const UserIdConverter().fromJson(json['userId'] as String),
       name: json['name'] as String,
       done: json['done'] as bool,
+      subTasks: (json['subTasks'] as List<dynamic>?)
+              ?.map((e) => SubTask.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       createdAt:
           const DateTimeConverter().fromJson(json['createdAt'] as Timestamp?),
       updatedAt:
@@ -22,6 +26,7 @@ Map<String, dynamic> _$$_TaskToJson(_$_Task instance) => <String, dynamic>{
       'userId': const UserIdConverter().toJson(instance.userId),
       'name': instance.name,
       'done': instance.done,
+      'subTasks': instance.subTasks.map((e) => e.toJson()).toList(),
       'createdAt': const DateTimeConverter().toJson(instance.createdAt),
       'updatedAt': const DateTimeConverter().toJson(instance.updatedAt),
     };

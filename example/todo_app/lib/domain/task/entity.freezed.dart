@@ -26,6 +26,8 @@ mixin _$Task {
   UserId get userId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   bool get done => throw _privateConstructorUsedError;
+  @JsonKey(defaultValue: <SubTask>[])
+  List<SubTask> get subTasks => throw _privateConstructorUsedError;
   @DateTimeConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
   @DateTimeConverter()
@@ -46,6 +48,7 @@ abstract class $TaskCopyWith<$Res> {
       @UserIdConverter() UserId userId,
       String name,
       bool done,
+      @JsonKey(defaultValue: <SubTask>[]) List<SubTask> subTasks,
       @DateTimeConverter() DateTime createdAt,
       @DateTimeConverter() DateTime updatedAt});
 }
@@ -67,6 +70,7 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
     Object? userId = null,
     Object? name = null,
     Object? done = null,
+    Object? subTasks = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -87,6 +91,10 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
           ? _value.done
           : done // ignore: cast_nullable_to_non_nullable
               as bool,
+      subTasks: null == subTasks
+          ? _value.subTasks
+          : subTasks // ignore: cast_nullable_to_non_nullable
+              as List<SubTask>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -110,6 +118,7 @@ abstract class _$$_TaskCopyWith<$Res> implements $TaskCopyWith<$Res> {
       @UserIdConverter() UserId userId,
       String name,
       bool done,
+      @JsonKey(defaultValue: <SubTask>[]) List<SubTask> subTasks,
       @DateTimeConverter() DateTime createdAt,
       @DateTimeConverter() DateTime updatedAt});
 }
@@ -127,6 +136,7 @@ class __$$_TaskCopyWithImpl<$Res> extends _$TaskCopyWithImpl<$Res, _$_Task>
     Object? userId = null,
     Object? name = null,
     Object? done = null,
+    Object? subTasks = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -147,6 +157,10 @@ class __$$_TaskCopyWithImpl<$Res> extends _$TaskCopyWithImpl<$Res, _$_Task>
           ? _value.done
           : done // ignore: cast_nullable_to_non_nullable
               as bool,
+      subTasks: null == subTasks
+          ? _value._subTasks
+          : subTasks // ignore: cast_nullable_to_non_nullable
+              as List<SubTask>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -168,9 +182,11 @@ class _$_Task extends _Task {
       @UserIdConverter() required this.userId,
       required this.name,
       required this.done,
+      @JsonKey(defaultValue: <SubTask>[]) required final List<SubTask> subTasks,
       @DateTimeConverter() required this.createdAt,
       @DateTimeConverter() required this.updatedAt})
-      : super._();
+      : _subTasks = subTasks,
+        super._();
 
   factory _$_Task.fromJson(Map<String, dynamic> json) => _$$_TaskFromJson(json);
 
@@ -184,6 +200,15 @@ class _$_Task extends _Task {
   final String name;
   @override
   final bool done;
+  final List<SubTask> _subTasks;
+  @override
+  @JsonKey(defaultValue: <SubTask>[])
+  List<SubTask> get subTasks {
+    if (_subTasks is EqualUnmodifiableListView) return _subTasks;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_subTasks);
+  }
+
   @override
   @DateTimeConverter()
   final DateTime createdAt;
@@ -193,7 +218,7 @@ class _$_Task extends _Task {
 
   @override
   String toString() {
-    return 'Task(id: $id, userId: $userId, name: $name, done: $done, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Task(id: $id, userId: $userId, name: $name, done: $done, subTasks: $subTasks, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -205,6 +230,7 @@ class _$_Task extends _Task {
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.done, done) || other.done == done) &&
+            const DeepCollectionEquality().equals(other._subTasks, _subTasks) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -213,8 +239,8 @@ class _$_Task extends _Task {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, userId, name, done, createdAt, updatedAt);
+  int get hashCode => Object.hash(runtimeType, id, userId, name, done,
+      const DeepCollectionEquality().hash(_subTasks), createdAt, updatedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -236,6 +262,7 @@ abstract class _Task extends Task {
       @UserIdConverter() required final UserId userId,
       required final String name,
       required final bool done,
+      @JsonKey(defaultValue: <SubTask>[]) required final List<SubTask> subTasks,
       @DateTimeConverter() required final DateTime createdAt,
       @DateTimeConverter() required final DateTime updatedAt}) = _$_Task;
   const _Task._() : super._();
@@ -252,6 +279,9 @@ abstract class _Task extends Task {
   String get name;
   @override
   bool get done;
+  @override
+  @JsonKey(defaultValue: <SubTask>[])
+  List<SubTask> get subTasks;
   @override
   @DateTimeConverter()
   DateTime get createdAt;
