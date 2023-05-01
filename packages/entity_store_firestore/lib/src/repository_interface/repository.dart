@@ -13,7 +13,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
 
   Future<Result<E?, Exception>> findOne();
 
-  IRepositoryQuery query();
+  IRepositoryQuery<Id, E> query();
 
   Future<Result<E, Exception>> save(
     E entity, {
