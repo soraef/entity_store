@@ -1,13 +1,8 @@
-import 'package:collection/collection.dart';
-import 'package:entity_store/entity_store.dart';
-import 'package:entity_store_firestore/src/in_memory_repository.dart';
-import 'package:type_result/type_result.dart';
+part of '../local_storage_repository.dart';
 
-import '../repository_interface.dart';
-
-class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
+class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
     implements IRepositoryQuery<Id, E> {
-  final InMemoryRepository _repository;
+  final LocalStorageRepository<Id, E> _repository;
   final List<RepositoryFilter> _filters;
   final List<RepositorySort> _sorts;
   final int? _limitNum;
@@ -18,7 +13,7 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
   int? get getLimit => _limitNum;
   Id? get getStartAfterId => _startAfterId;
 
-  InMemoryRepositoryQuery._(
+  LocalStorageRepositoryQuery._(
     this._repository,
     this._filters,
     this._sorts,
@@ -26,14 +21,14 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
     this._startAfterId,
   );
 
-  const InMemoryRepositoryQuery(this._repository)
+  const LocalStorageRepositoryQuery(this._repository)
       : _filters = const [],
         _sorts = const [],
         _limitNum = null,
         _startAfterId = null;
 
   @override
-  InMemoryRepositoryQuery<Id, E> where(
+  LocalStorageRepositoryQuery<Id, E> where(
     Object field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -47,7 +42,7 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
     List<Object?>? whereNotIn,
     bool? isNull,
   }) {
-    return InMemoryRepositoryQuery._(
+    return LocalStorageRepositoryQuery._(
       _repository,
       [
         ..._filters,
@@ -87,7 +82,7 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
             FilterOperator.isGreaterThanOrEqualTo,
             isGreaterThanOrEqualTo,
           ),
-        if (arrayContainsAny != null)
+        if (arrayContains != null)
           RepositoryFilter(
             field,
             FilterOperator.arrayContains,
@@ -125,31 +120,39 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  InMemoryRepositoryQuery<Id, E> orderBy(Object field,
-      {bool descending = false}) {
-    return InMemoryRepositoryQuery<Id, E>._(
+  LocalStorageRepositoryQuery<Id, E> orderBy(
+    Object field, {
+    bool descending = false,
+  }) {
+    return LocalStorageRepositoryQuery._(
       _repository,
       _filters,
-      [..._sorts, RepositorySort(field, descending)],
+      [
+        ..._sorts,
+        RepositorySort(
+          field,
+          descending,
+        ),
+      ],
       _limitNum,
       _startAfterId,
     );
   }
 
   @override
-  InMemoryRepositoryQuery<Id, E> limit(int num) {
-    return InMemoryRepositoryQuery<Id, E>._(
+  LocalStorageRepositoryQuery<Id, E> limit(int count) {
+    return LocalStorageRepositoryQuery._(
       _repository,
       _filters,
       _sorts,
-      num,
+      count,
       _startAfterId,
     );
   }
 
   @override
-  InMemoryRepositoryQuery<Id, E> startAfterId(Id id) {
-    return InMemoryRepositoryQuery<Id, E>._(
+  LocalStorageRepositoryQuery<Id, E> startAfterId(Id id) {
+    return LocalStorageRepositoryQuery._(
       _repository,
       _filters,
       _sorts,
@@ -165,13 +168,13 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
 
   @override
   Future<Result<List<E>, Exception>> findAll() async {
-    var entities = _repository.controller
-        .where<Id, E>(
-          (e) => test(
-            _repository.toJson(e),
-          ),
-        )
-        .toList();
+    final result = await _repository.localStorageEntityHander.loadEntityList();
+
+    if (result.isErr) {
+      return Result.err(result.err);
+    }
+
+    var entities = result.ok.where((e) => test(_repository.toJson(e))).toList();
 
     final sorts = getSorts;
     for (final sort in sorts.reversed) {

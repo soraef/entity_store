@@ -83,4 +83,20 @@ void main() {
     controller.dispatch(event3);
     await Future.delayed(const Duration(milliseconds: 100));
   });
+
+  test("entity map", () {
+    final user = User(id: "1", name: "soraef");
+    final group = Group(id: "1", memberUserIds: ["1"]);
+    final map = const EntityMap<String, User>({}).put(user);
+    final map2 = const EntityMap<String, User>({}).put(user);
+
+    expect(map == map2, true);
+
+    var entityStore = EntityStore.empty();
+    entityStore = entityStore.put<String, User>(user);
+    final map3 = entityStore.where<String, User>();
+    entityStore.put<String, Group>(group);
+    final map4 = entityStore.where<String, User>();
+    expect(map3 == map4, true);
+  });
 }

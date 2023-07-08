@@ -11,7 +11,7 @@ part of "../store.dart";
 ///
 /// [EntityMap] class internally holds [Entity] as Map<Id, Entity>,
 /// so [Entity] does not allow duplicate [Id]
-class EntityMap<Id, E extends Entity<Id>> {
+class EntityMap<Id, E extends Entity<Id>> extends Equatable {
   final Map<Id, E> _entities;
 
   const EntityMap(this._entities);
@@ -138,4 +138,7 @@ class EntityMap<Id, E extends Entity<Id>> {
   List<E> sorted(int Function(E a, E b) compare) {
     return entities.sorted(compare);
   }
+
+  @override
+  List<Object?> get props => [...entities];
 }

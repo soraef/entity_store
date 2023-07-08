@@ -21,7 +21,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   });
 
   Future<Result<Id, Exception>> delete(
-    Id entity, {
+    Id id, {
     IDeleteOptions? options,
   });
 

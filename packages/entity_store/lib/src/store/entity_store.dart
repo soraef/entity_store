@@ -1,12 +1,12 @@
 part of "../store.dart";
 
-class EntityStore {
+class EntityStore extends Equatable {
   final Map<Type, EntityMap<dynamic, dynamic>> _entityMaps;
 
-  EntityStore._(this._entityMaps);
+  const EntityStore._(this._entityMaps);
 
   factory EntityStore.empty() {
-    return EntityStore._({});
+    return const EntityStore._({});
   }
 
   EntityStore put<Id, E extends Entity<Id>>(E entity) {
@@ -50,6 +50,9 @@ class EntityStore {
   String toString() {
     return _entityMaps.toString();
   }
+
+  @override
+  List<Object?> get props => [..._entityMaps.values];
 }
 
 bool testAlwaysTrue(dynamic param) => true;
