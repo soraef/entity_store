@@ -78,7 +78,7 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   }
 
   String _getEntityListKey() {
-    return E.runtimeType.toString();
+    return E.toString();
   }
 
   final Map<String, dynamic> Function(E entity) toJson;

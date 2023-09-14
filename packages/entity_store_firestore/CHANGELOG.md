@@ -17,3 +17,20 @@
 ## 2.1.1
 
 * Fix import
+
+## 2.1.2
+
+* Fix import
+
+## 2.1.3
+
+* Fix LocalStorage key
+
+## 2.1.4
+
+* Change merge to false even by default in save and createOrUpdate methods
+
+
+## 2.2.0
+
+* Add count method to Repository

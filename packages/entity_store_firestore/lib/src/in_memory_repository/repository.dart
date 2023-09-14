@@ -25,6 +25,11 @@ abstract class InMemoryRepository<Id, E extends Entity<Id>>
   }
 
   @override
+  Future<Result<int, Exception>> count() {
+    return query().count();
+  }
+
+  @override
   Future<Result<Id, Exception>> delete(
     Id id, {
     IDeleteOptions? options,

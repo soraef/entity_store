@@ -207,4 +207,9 @@ class InMemoryRepositoryQuery<Id, E extends Entity<Id>>
   Future<Result<E?, Exception>> findOne() async {
     return (await findAll()).mapOk((ok) => ok.firstOrNull);
   }
+
+  @override
+  Future<Result<int, Exception>> count() async {
+    return (await findAll()).mapOk((ok) => ok.length);
+  }
 }

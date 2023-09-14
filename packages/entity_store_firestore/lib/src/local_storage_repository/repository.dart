@@ -84,6 +84,11 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
+  Future<Result<int, Exception>> count() {
+    return query().count();
+  }
+
+  @override
   IRepositoryQuery<Id, E> query() {
     return LocalStorageRepositoryQuery(this);
   }

@@ -83,4 +83,6 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
   Future<Result<List<E>, Exception>> findAll();
 
   Future<Result<E?, Exception>> findOne();
+
+  Future<Result<int, Exception>> count();
 }

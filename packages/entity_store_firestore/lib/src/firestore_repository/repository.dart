@@ -94,6 +94,11 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   }
 
   @override
+  Future<Result<int, Exception>> count() {
+    return query().count();
+  }
+
+  @override
   Future<Result<E?, Exception>> findById(
     Id id, {
     IGetOptions? options,
@@ -125,7 +130,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       return protectedSaveAndNotify(
         collectionRef,
         entity,
-        merge: true,
+        merge: false,
       );
     }
   }
@@ -151,7 +156,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
         id,
         creater,
         updater,
-        merge: true,
+        merge: false,
       );
     }
   }

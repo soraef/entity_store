@@ -242,4 +242,12 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return (await _repository.protectedListAndNotify(ref.limit(1)))
         .mapOk((ok) => ok.firstOrNull);
   }
+
+  @override
+  Future<Result<int, Exception>> count() async {
+    final ref = await _build();
+    final countQuery = ref.count();
+    final result = await countQuery.get();
+    return Result.ok(result.count);
+  }
 }
