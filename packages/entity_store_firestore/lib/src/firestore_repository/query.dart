@@ -221,12 +221,14 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
 
   Future<Query> _build() async {
     var ref = _buildFilterQuery(_repository.collectionRef);
+    ref = _buildSortQuery(ref);
+    ref = _buildLimitQuery(ref);
+
     if (_startAfterId != null) {
       final doc = await _repository.getDocumentRef(_startAfterId as Id).get();
       ref = ref.startAfterDocument(doc);
     }
-    ref = _buildSortQuery(ref);
-    ref = _buildLimitQuery(ref);
+
     return ref;
   }
 

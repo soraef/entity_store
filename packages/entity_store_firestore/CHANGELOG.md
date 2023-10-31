@@ -34,3 +34,7 @@
 ## 2.2.0
 
 * Add count method to Repository
+
+## 2.2.1
+
+* [FIX] Changed the order in which startAfterDocument is called (Firestore specification required it to be called after orderBy).
