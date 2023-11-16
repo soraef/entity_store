@@ -1,9 +1,4 @@
-import 'dart:convert';
-
-import 'package:entity_store/entity_store.dart';
-import 'package:type_result/type_result.dart';
-
-import '../local_storage_repository.dart';
+part of '../local_storage_repository.dart';
 
 class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   final LocalStorageHandler localStorageHandler;
