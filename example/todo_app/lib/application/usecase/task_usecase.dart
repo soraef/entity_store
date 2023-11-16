@@ -18,11 +18,11 @@ import 'package:type_result/type_result.dart';
 
 final taskUsecase = Provider(
   (ref) => TaskUsecase(
-    ref.watch(
-      entityStore.select(
-        (value) => value.get<CommonId, Auth>(CommonId.singleton())?.userId,
-      ),
-    ),
+    ref
+        .read(entityStore)
+        .value
+        .get<CommonId, Auth>(CommonId.singleton())
+        ?.userId!,
     ref.read(userRepo),
     ref.read(authRepo),
   ),

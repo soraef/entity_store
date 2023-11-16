@@ -16,15 +16,8 @@ class TaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasks = ref.watch(
-      entityStore.select((value) => value.where<TaskId, Task>()),
-    );
-
-    final userId = ref
-        .watch(entityStore.select(
-          (value) => value.where<CommonId, Auth>().atOrNull(0),
-        ))
-        ?.userId;
+    final tasks = context.watchEntities<TaskId, Task>();
+    final userId = context.watchEntities<CommonId, Auth>().atOrNull(0)?.userId;
 
     if (userId == null) {
       return Container();
@@ -193,13 +186,9 @@ class SubTaskListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final task = ref.watch(
-      entityStore.select(
-        (value) => value.where<TaskId, Task>().byId(taskId),
-      ),
-    )!;
+    final task = context.watchEntities<TaskId, Task>().byId(taskId);
 
-    final subTasks = task.subTasks;
+    final subTasks = task!.subTasks;
 
     return Scaffold(
       body: SafeArea(

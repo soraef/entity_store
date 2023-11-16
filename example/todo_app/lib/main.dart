@@ -27,12 +27,15 @@ class MyApp extends ConsumerWidget {
     // final store = ref.watch(source);
     // final tasks = ref.watch(source).whereType<TaskId, Task>();
 
-    return MaterialApp(
-      title: 'Task Sample',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return EntityStoreProviderScope(
+      entityStoreNotifier: ref.read(entityStore),
+      child: MaterialApp(
+        title: 'Task Sample',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const RootPage(),
       ),
-      home: const RootPage(),
     );
   }
 }
@@ -42,11 +45,7 @@ class RootPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref
-        .watch(entityStore.select(
-          (value) => value.where<CommonId, Auth>(),
-        ))
-        .atOrNull(0);
+    final auth = context.watchEntities<CommonId, Auth>().atOrNull(0);
 
     if (auth == null || !auth.isLogin) {
       return const AuthPage();

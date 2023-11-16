@@ -9,32 +9,31 @@ import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 import 'entity.dart';
 import 'id.dart';
 
-final userRepo = Provider(
-  (ref) => UserRepository(
-    ref.read(entityStoreController),
-  )
-    ..registRepository(
-      (parent, id) => TaskRepository(
-        controller: parent.controller,
-        parentRepository: parent,
-        parentDocumentId: id.value,
-      ),
-    )
-    ..registRepository(
-      (parent, id) => WeeklyActivityRepository(
-        controller: parent.controller,
-        parentRepository: parent,
-        parentDocumentId: id.value,
-      ),
-    ),
-);
+final userRepo = Provider((ref) => UserRepository(
+      ref.read(entityStoreController),
+    ));
 
 class UserRepository extends RootCollectionRepository<UserId, User> {
   UserRepository(EntityStoreController controller)
       : super(
           controller: controller,
           instance: FirebaseFirestore.instance,
-        );
+        ) {
+    registRepository(
+      (parent, id) => TaskRepository(
+        controller: parent.controller,
+        parentRepository: parent,
+        parentDocumentId: id.value,
+      ),
+    );
+    registRepository(
+      (parent, id) => WeeklyActivityRepository(
+        controller: parent.controller,
+        parentRepository: parent,
+        parentDocumentId: id.value,
+      ),
+    );
+  }
 
   @override
   User fromJson(Map<String, dynamic> json) {

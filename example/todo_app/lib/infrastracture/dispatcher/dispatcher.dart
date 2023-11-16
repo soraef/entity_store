@@ -1,12 +1,12 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final entityStore = StateNotifierProvider<EntityStoreNotifier, EntityStore>(
+final entityStore = Provider(
   (ref) => EntityStoreNotifier(),
 );
 
 final entityStoreController = Provider(
-  (ref) => EntityStoreController(ref.read(entityStore.notifier)),
+  (ref) => EntityStoreController(ref.read(entityStore)),
 );
 
 final debugger = Provider(
