@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final todoIds = context.selectEntities<int, Todo, List<int>>(
+    final todoIds = context.selectAll<int, Todo, List<int>>(
       (value) => value.ids.toList(),
     );
 
@@ -86,7 +86,7 @@ class TodoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final todo = context.watchEntity<int, Todo>(todoId);
+    final todo = context.watchOne<int, Todo>(todoId);
     if (todo == null) {
       return const SizedBox();
     }

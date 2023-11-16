@@ -22,7 +22,7 @@ class EntityStoreProviderScope extends StatelessWidget {
 }
 
 extension BuildContextEntityStoreProviderScope on BuildContext {
-  T selectEntities<Id, E extends Entity<Id>, T>(
+  T selectAll<Id, E extends Entity<Id>, T>(
     T Function(EntityMap<Id, E>) selector,
   ) {
     return select<EntityStoreNotifier, T>(
@@ -30,7 +30,7 @@ extension BuildContextEntityStoreProviderScope on BuildContext {
     );
   }
 
-  T? selectEntity<Id, E extends Entity<Id>, T>(
+  T? selectOne<Id, E extends Entity<Id>, T>(
     Id id,
     T Function(E) selector,
   ) {
@@ -40,27 +40,23 @@ extension BuildContextEntityStoreProviderScope on BuildContext {
     });
   }
 
-  EntityMap<Id, E> watchEntities<Id, E extends Entity<Id>>([
+  EntityMap<Id, E> watchAll<Id, E extends Entity<Id>>([
     bool Function(E) test = testAlwaysTrue,
   ]) {
-    return select<EntityStoreNotifier, EntityMap<Id, E>>(
-      (value) => value.state.where<Id, E>(test),
-    );
+    return selectAll<Id, E, EntityMap<Id, E>>((value) => value.where(test));
   }
 
-  E? watchEntity<Id, E extends Entity<Id>>(Id id) {
-    return select<EntityStoreNotifier, E?>(
-      (value) => value.state.get<Id, E>(id),
-    );
+  E? watchOne<Id, E extends Entity<Id>>(Id id) {
+    return selectOne<Id, E, E?>(id, (value) => value);
   }
 
-  EntityMap<Id, E> readEntities<Id, E extends Entity<Id>>([
+  EntityMap<Id, E> readAll<Id, E extends Entity<Id>>([
     bool Function(E) test = testAlwaysTrue,
   ]) {
     return read<EntityStoreNotifier>().value.where<Id, E>(test);
   }
 
-  E? readEntity<Id, E extends Entity<Id>>(Id id) {
+  E? readOne<Id, E extends Entity<Id>>(Id id) {
     return read<EntityStoreNotifier>().value.get<Id, E>(id);
   }
 }

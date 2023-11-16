@@ -13,8 +13,8 @@ class TaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasks = context.watchEntities<TaskId, Task>();
-    final userId = context.watchEntities<CommonId, Auth>().atOrNull(0)?.userId;
+    final tasks = context.watchAll<TaskId, Task>();
+    final userId = context.watchAll<CommonId, Auth>().atOrNull(0)?.userId;
 
     if (userId == null) {
       return Container();
@@ -182,7 +182,7 @@ class SubTaskListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final task = context.watchEntities<TaskId, Task>().byId(taskId);
+    final task = context.watchAll<TaskId, Task>().byId(taskId);
 
     final subTasks = task!.subTasks;
 
