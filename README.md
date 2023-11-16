@@ -2,17 +2,38 @@
 
 # EntityStore Package
 ## Introduction
-EntityStore is a state management library designed for Flutter applications, centered around encapsulating core business logic as entities. Entities are defined as immutable objects with unique identifiers, ensuring data integrity and predictable behavior of the application.
+EntityStore enhances Flutter application development by offering state management centered around entities. This library encapsulates the application's business logic within immutable entities and maintains UI consistency through centralized state management.
+
+The following TodoTile component example demonstrates how EntityStore connects UI components with their state.
+
+```dart
+class TodoTile extends StatelessWidget {
+  // ...
+  @override
+  Widget build(BuildContext context) {
+    // Monitor a specific Todo
+    final todo = context.watchOne<int, Todo>(todoId)!;
+
+    // Toggle the completion state of Todo
+    return CheckboxListTile(
+      title: Text(todo.name),
+      value: todo.isDone,
+      onChanged: (bool? value) {
+        if (value != null) {
+          todoRepository.save(todo.toggle());
+        }
+      },
+    );
+  }
+}
+```
 
 ## Features
-
-- **Immutable Entity Design**: All entities are immutable, and a new instance is generated when the state changes. This prevents side effects and keeps state management simple.
-- **Reactive UI Updates**: When entities are manipulated through the repository, the changes are automatically reflected in the UI. This is essential for users to intuitively interact with the application.
-- **Easy Persistence to Firestore**: You can easily implement entity persistence to Firebase Firestore using `entity_store_firestore`.
-- **Dependency Injection Support**: EntityStore can be used in combination with dependency injection libraries like Riverpod or GetIt, making application design more flexible and facilitating testing and maintenance.
-
-Through these features, EntityStore provides developers with a powerful tool to efficiently and effectively manage the state of Flutter applications.
-
+- **Reactive UI Synchronization**: EntityStore reflects state changes reactively on the UI. In the code example above, the `watchOne` method is used to monitor a specific Todo entity, and updates the checkbox display when its state changes.
+- **Concise State Updates**: The state of an entity is updated through a new instance only when necessary. Toggling the completion state of a Todo is easily done by calling `todo.toggle()`, and the result is persisted through the repository.
+- **Central Handling of Entities**: EntityStore focuses on the entities that form the core part of the application, allowing developers to concentrate on business logic.
+- **Flexible Database Integration**: EntityStore facilitates the integration with external data sources. By swapping out repository implementations, it is possible to connect with Firebase Firestore, local databases, or other data storages.
+- **Boilerplate Reduction**: The use of pre-prepared repository implementations eliminates the need for developers to write repetitive database operation code. This accelerates the development process and eases the maintenance of applications.
 ## Installation
 To introduce the EntityStore package into your Flutter project, add the following to your `pubspec.yaml` file:
 
