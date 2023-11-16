@@ -38,3 +38,7 @@
 ## 2.2.1
 
 * [FIX] Changed the order in which startAfterDocument is called (Firestore specification required it to be called after orderBy).
+
+## 3.0.0-dev.1
+
+* REFACTOR: Move Repository interface and LocalStorageRepository from entity_store_firestore to entity_store
