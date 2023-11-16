@@ -3,10 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/domain/auth/entity.dart';
-import 'package:todo_app/domain/user/repository.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
-import 'domain/user/id.dart';
 import 'firebase_options.dart';
 import 'presentation/page/auth/auth_page.dart';
 import 'presentation/page/task/task_page.dart';

@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore_for_file: invalid_annotation_target
+
 import 'package:entity_store/entity_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:todo_app/domain/user/id.dart';
 import 'package:todo_app/domain/weekly_activity/activity.dart';
-import 'package:todo_app/infrastracture/converter/datetime_conveter.dart';
 
 part 'weekly_activity.freezed.dart';
 part 'weekly_activity.g.dart';

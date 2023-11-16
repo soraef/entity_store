@@ -1,8 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:entity_store/entity_store.dart';
-import 'package:entity_store_firestore/entity_store_firestore.dart';
-import 'package:meta/meta.dart';
-import 'package:type_result/type_result.dart';
+part of '../firestore_repository.dart';
 
 abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   @protected

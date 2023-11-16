@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_annotation_target
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entity_store/entity_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';

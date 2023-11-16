@@ -5,11 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/application/usecase/task_usecase.dart';
 import 'package:todo_app/domain/auth/entity.dart';
-import 'package:todo_app/domain/sub_task/entity.dart';
-import 'package:todo_app/domain/sub_task/id.dart';
 import 'package:todo_app/domain/task/entity.dart';
 import 'package:todo_app/domain/task/id.dart';
-import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
 class TaskPage extends HookConsumerWidget {
   const TaskPage({super.key});
@@ -111,7 +108,6 @@ class _TaskCheckBox extends HookWidget {
   final Function()? onTapSecondary;
 
   const _TaskCheckBox({
-    super.key,
     required this.checked,
     required this.title,
     required this.onTapCheck,

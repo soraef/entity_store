@@ -10,6 +10,11 @@ class JsonConverterFailure extends FirestoreRepositoryFailure {
     required this.fetched,
     required this.exception,
   });
+
+  @override
+  String toString() {
+    return 'JsonConverterFailure{entityType: $entityType, fetched: $fetched, exception: $exception}';
+  }
 }
 
 class FirestoreRequestFailure extends FirestoreRepositoryFailure {
@@ -24,4 +29,9 @@ class FirestoreRequestFailure extends FirestoreRepositoryFailure {
     required this.message,
     required this.exception,
   });
+
+  @override
+  String toString() {
+    return 'FirestoreRequestFailure{entityType: $entityType, code: $code, message: $message, exception: $exception}';
+  }
 }
