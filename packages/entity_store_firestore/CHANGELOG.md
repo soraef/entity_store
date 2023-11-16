@@ -42,3 +42,7 @@
 ## 3.0.0-dev.1
 
 * REFACTOR: Move Repository interface and LocalStorageRepository from entity_store_firestore to entity_store
+
+## 3.0.0
+
+* FIX: change createOrUpdate to upsert

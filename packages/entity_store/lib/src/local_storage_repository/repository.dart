@@ -17,7 +17,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   );
 
   @override
-  Future<Result<E?, Exception>> createOrUpdate(
+  Future<Result<E?, Exception>> upsert(
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,

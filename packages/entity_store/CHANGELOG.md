@@ -14,3 +14,7 @@
 
 * FEAT: Introduce state management using Provider package
 * REFACTOR: Move Repository interface and LocalStorageRepository from entity_store_firestore to entity_store
+
+## 3.0.0
+
+* FEAT:  Added ability to read Entity with watchAll, watchOne, selectAll, selectOne, readAll, readOne

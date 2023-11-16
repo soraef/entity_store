@@ -27,7 +27,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     IDeleteOptions? options,
   });
 
-  Future<Result<E?, Exception>> createOrUpdate(
+  Future<Result<E?, Exception>> upsert(
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,

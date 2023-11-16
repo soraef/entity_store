@@ -14,7 +14,7 @@ String getRandomTodoName() {
   return todoNames[random.nextInt(todoNames.length)];
 }
 
-class Todo extends Entity<int> {
+class Todo implements Entity<int> {
   @override
   final int id;
   final String name;

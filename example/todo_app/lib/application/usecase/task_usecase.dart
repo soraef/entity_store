@@ -51,7 +51,7 @@ class TaskUsecase {
 
     await _taskRepo(userId!).save(newTask);
 
-    _activityRepository(userId!).createOrUpdate(
+    _activityRepository(userId!).upsert(
       WeeklyActivityId.create(userId!, DateTime.now()),
       creater: () => WeeklyActivity.createNow(
         userId: userId!,
@@ -62,7 +62,7 @@ class TaskUsecase {
   }
 
   Future<Result<Task, Exception>> check(TaskId id, bool done) async {
-    final result = await _taskRepo(userId!).createOrUpdate(
+    final result = await _taskRepo(userId!).upsert(
       id,
       creater: () => null,
       updater: (prev) => done ? prev.complete() : prev.uncomplete(),
@@ -75,7 +75,7 @@ class TaskUsecase {
       return Result.ok(result.ok!);
     }
 
-    _activityRepository(userId!).createOrUpdate(
+    _activityRepository(userId!).upsert(
       WeeklyActivityId.create(userId!, DateTime.now()),
       creater: () => WeeklyActivity.createNow(
         userId: userId!,
@@ -94,7 +94,7 @@ class TaskUsecase {
   }
 
   Future<void> delete(Task task) async {
-    _activityRepository(userId!).createOrUpdate(
+    _activityRepository(userId!).upsert(
       WeeklyActivityId.create(userId!, DateTime.now()),
       creater: () => WeeklyActivity.createNow(
         userId: userId!,
@@ -116,7 +116,7 @@ class TaskUsecase {
   }
 
   Future<void> createSubTask(TaskId taskId, String name) async {
-    _activityRepository(userId!).createOrUpdate(
+    _activityRepository(userId!).upsert(
       WeeklyActivityId.create(userId!, DateTime.now()),
       creater: () => WeeklyActivity.createNow(
         userId: userId!,
@@ -124,7 +124,7 @@ class TaskUsecase {
       ),
       updater: (prev) => prev.addActivity("Create SubTask: $name"),
     );
-    await _taskRepo(userId!).createOrUpdate(
+    await _taskRepo(userId!).upsert(
       taskId,
       creater: () => null,
       updater: (prev) => prev.addSubTask(name),
@@ -136,7 +136,7 @@ class TaskUsecase {
     SubTaskId subTaskId,
     bool done,
   ) async {
-    final result = await _taskRepo(userId!).createOrUpdate(
+    final result = await _taskRepo(userId!).upsert(
       taskId,
       creater: () => null,
       updater: (prev) => done
@@ -144,7 +144,7 @@ class TaskUsecase {
           : prev.uncompleteSubTask(subTaskId),
     );
 
-    _activityRepository(userId!).createOrUpdate(
+    _activityRepository(userId!).upsert(
       WeeklyActivityId.create(userId!, DateTime.now()),
       creater: () => WeeklyActivity.createNow(
         userId: userId!,
@@ -170,7 +170,7 @@ class TaskUsecase {
   }
 
   Future<void> deleteSubTask(TaskId taskId, SubTask task) async {
-    _activityRepository(userId!).createOrUpdate(
+    _activityRepository(userId!).upsert(
       WeeklyActivityId.create(userId!, DateTime.now()),
       creater: () => WeeklyActivity.createNow(
         userId: userId!,
@@ -179,7 +179,7 @@ class TaskUsecase {
       updater: (prev) => prev.addActivity("Delete Task: ${task.name}"),
     );
 
-    await _taskRepo(userId!).createOrUpdate(
+    await _taskRepo(userId!).upsert(
       taskId,
       creater: () => null,
       updater: (prev) => prev.removeSubTask(task.id),
