@@ -22,6 +22,24 @@ class EntityStoreProviderScope extends StatelessWidget {
 }
 
 extension BuildContextEntityStoreProviderScope on BuildContext {
+  T selectEntities<Id, E extends Entity<Id>, T>(
+    T Function(EntityMap<Id, E>) selector,
+  ) {
+    return select<EntityStoreNotifier, T>(
+      (value) => selector(value.state.where<Id, E>()),
+    );
+  }
+
+  T? selectEntity<Id, E extends Entity<Id>, T>(
+    Id id,
+    T Function(E) selector,
+  ) {
+    return select<EntityStoreNotifier, T?>((value) {
+      final entity = value.state.get<Id, E>(id);
+      return entity != null ? selector(entity) : null;
+    });
+  }
+
   EntityMap<Id, E> watchEntities<Id, E extends Entity<Id>>([
     bool Function(E) test = testAlwaysTrue,
   ]) {
