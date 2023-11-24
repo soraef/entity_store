@@ -1,4 +1,4 @@
-part of "../store.dart";
+part of '../../store.dart';
 
 abstract class Id {
   final String value;

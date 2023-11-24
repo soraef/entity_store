@@ -1,4 +1,4 @@
-part of '../local_storage_repository.dart';
+part of '../../local_storage_repository.dart';
 
 abstract class LocalStorageRepository<Id, E extends Entity<Id>>
     with EntityChangeNotifier<Id, E>

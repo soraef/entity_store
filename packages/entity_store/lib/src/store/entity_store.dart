@@ -1,4 +1,4 @@
-part of "../store.dart";
+part of '../../store.dart';
 
 class EntityStore extends Equatable {
   final Map<Type, EntityMap<dynamic, dynamic>> _entityMaps;

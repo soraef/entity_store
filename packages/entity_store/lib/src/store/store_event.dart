@@ -1,6 +1,6 @@
-part of "../store.dart";
+part of '../../store.dart';
 
-abstract class StoreEventHandler {
+abstract class IStoreEventHandler {
   void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
   bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
 }
@@ -14,7 +14,7 @@ abstract class StoreEvent<Id, E extends Entity<Id>> {
   Type get idType => Id;
   final DateTime eventTime;
 
-  void apply(StoreEventHandler handler) {
+  void apply(IStoreEventHandler handler) {
     if (handler.shouldListenTo<Id, E>(this)) {
       handler.handleEvent<Id, E>(this);
     }

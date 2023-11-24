@@ -1,4 +1,4 @@
-part of '../repository_interface.dart';
+part of '../../repository_interface.dart';
 
 enum FilterOperator {
   isEqualTo,

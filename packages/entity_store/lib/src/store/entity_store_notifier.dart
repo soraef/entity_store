@@ -1,4 +1,4 @@
-part of "../store.dart";
+part of '../../store.dart';
 
 class EntityStoreNotifier extends ChangeNotifier with EntityStoreMixin {
   EntityStore state = EntityStore.empty();
@@ -13,7 +13,7 @@ class EntityStoreNotifier extends ChangeNotifier with EntityStoreMixin {
   EntityStore get value => state;
 }
 
-mixin EntityStoreMixin implements StoreEventHandler, Updatable<EntityStore> {
+mixin EntityStoreMixin implements IStoreEventHandler, Updatable<EntityStore> {
   @override
   void handleEvent<Id, E extends Entity<Id>>(
     StoreEvent<Id, E> event,

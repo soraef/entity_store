@@ -1,4 +1,4 @@
-part of '../repository_interface.dart';
+part of '../../repository_interface.dart';
 
 abstract class IGetOptions {
   final bool useCache;

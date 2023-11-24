@@ -1,4 +1,4 @@
-part of '../repository_interface.dart';
+part of '../../repository_interface.dart';
 
 abstract class IRepository<Id, E extends Entity<Id>> {
   final EntityStoreController controller;

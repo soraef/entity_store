@@ -1,4 +1,4 @@
-part of "../store.dart";
+part of '../../store.dart';
 
 abstract class EntityStoreDebugger {
   final Stream<StoreEvent> eventStream;

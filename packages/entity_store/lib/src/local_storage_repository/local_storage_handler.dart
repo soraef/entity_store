@@ -1,4 +1,4 @@
-part of '../local_storage_repository.dart';
+part of '../../local_storage_repository.dart';
 
 abstract class LocalStorageHandler {
   Future<Result<void, Exception>> save(String key, String value);

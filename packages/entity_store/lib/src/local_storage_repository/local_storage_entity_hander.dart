@@ -1,4 +1,4 @@
-part of '../local_storage_repository.dart';
+part of '../../local_storage_repository.dart';
 
 class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   final LocalStorageHandler localStorageHandler;
