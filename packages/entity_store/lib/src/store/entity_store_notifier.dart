@@ -13,7 +13,7 @@ class EntityStoreNotifier extends ChangeNotifier with EntityStoreMixin {
   EntityStore get value => state;
 }
 
-mixin EntityStoreMixin implements IStoreEventHandler, Updatable<EntityStore> {
+mixin EntityStoreMixin implements IStoreEventHandler, IUpdatable<EntityStore> {
   @override
   void handleEvent<Id, E extends Entity<Id>>(
     StoreEvent<Id, E> event,
@@ -41,7 +41,7 @@ mixin EntityStoreMixin implements IStoreEventHandler, Updatable<EntityStore> {
 
 typedef Updater<T> = T Function(T prev);
 
-abstract class Updatable<T> {
+abstract class IUpdatable<T> {
   T get value;
   void update(Updater<T> updater);
 }
