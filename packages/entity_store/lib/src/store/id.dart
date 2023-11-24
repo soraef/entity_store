@@ -17,12 +17,3 @@ abstract class Id {
     return "$runtimeType($value)";
   }
 }
-
-class CommonId extends Id {
-  CommonId(super.value);
-
-  /// Same ID in the application
-  factory CommonId.singleton() {
-    return CommonId("singleton_id");
-  }
-}
