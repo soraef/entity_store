@@ -7,7 +7,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
 
   @override
   final EntityStoreController controller;
-  final LocalStorageHandler localStorageHandler;
+  final ILocalStorageHandler localStorageHandler;
 
   late final LocalStorageEntityHander<Id, E> localStorageEntityHander =
       LocalStorageEntityHander<Id, E>(
