@@ -1,5 +1,32 @@
 part of '../../local_storage_repository.dart';
 
+/// A handler for storing and retrieving entities in local storage.
+///
+/// This class provides methods for loading, saving, and deleting entities
+/// using a specified local storage handler. It supports converting entities
+/// to JSON and vice versa using the provided `toJson` and `fromJson` functions.
+///
+/// The `LocalStorageEntityHander` class is generic, with two type parameters:
+/// - `Id`: The type of the entity's identifier.
+/// - `E`: The type of the entity, which must extend the `Entity` class.
+///
+/// Example usage:
+/// ```dart
+/// final handler = LocalStorageEntityHander<MyId, MyEntity>(
+///   localStorageHandler,
+///   (entity) => entity.toJson(),
+///   (json) => MyEntity.fromJson(json),
+/// );
+///
+/// final result = await handler.loadEntityList();
+/// if (result.isOk) {
+///   final entities = result.ok;
+///   // Do something with the loaded entities...
+/// } else {
+///   final error = result.err;
+///   // Handle the error...
+/// }
+/// ```
 class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   final ILocalStorageHandler localStorageHandler;
   LocalStorageEntityHander(
@@ -8,6 +35,10 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
     this.fromJson,
   );
 
+  /// Loads a list of entities from the local storage.
+  /// Returns a [Result] object containing either a list of entities or an exception.
+  /// If the local storage does not contain the entity list, an empty list is returned.
+  /// If there is an error during the loading process, the exception is returned.
   Future<Result<List<E>, Exception>> loadEntityList() async {
     final entityListResult =
         await localStorageHandler.load(_getEntityListKey());
@@ -29,6 +60,13 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
     }
   }
 
+  /// Saves the given entity to the local storage.
+  /// Returns a [Result] indicating success or failure.
+  /// If the current list of entities cannot be loaded, returns an error result.
+  /// Otherwise, updates the list by replacing the entity with the same ID,
+  /// or adds the entity if it doesn't exist in the list.
+  /// Finally, encodes the updated list to JSON and saves it to the local storage.
+  /// Returns the result of the save operation.
   Future<Result<void, Exception>> save(E entity) async {
     final currentListResult = await loadEntityList();
     if (currentListResult.isErr) {
@@ -51,6 +89,11 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
     }
   }
 
+  /// Deletes an entity with the specified [id] from the local storage.
+  /// Returns a [Result] indicating success or failure.
+  /// If the current entity list cannot be loaded, returns an error [Result].
+  /// If the entity is successfully deleted and saved to the local storage, returns a success [Result].
+  /// If an exception occurs during the deletion or saving process, returns an error [Result] with the exception.
   Future<Result<void, Exception>> delete(Id id) async {
     final currentListResult = await loadEntityList();
     if (currentListResult.isErr) {
