@@ -43,7 +43,7 @@ class RootPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = context.watchAll<CommonId, Auth>().atOrNull(0);
+    final auth = context.watchAll<AuthId, Auth>().atOrNull(0);
 
     if (auth == null || !auth.isLogin) {
       return const AuthPage();

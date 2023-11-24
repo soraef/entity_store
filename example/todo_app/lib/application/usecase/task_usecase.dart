@@ -18,11 +18,7 @@ import 'package:type_result/type_result.dart';
 
 final taskUsecase = Provider(
   (ref) => TaskUsecase(
-    ref
-        .read(entityStore)
-        .value
-        .get<CommonId, Auth>(CommonId.singleton())
-        ?.userId!,
+    ref.read(entityStore).value.get<AuthId, Auth>(AuthId("authId"))?.userId!,
     ref.read(userRepo),
     ref.read(authRepo),
   ),
@@ -107,7 +103,7 @@ class TaskUsecase {
   }
 
   Future<void> loadUserAll() async {
-    final auth = (await authRepo.findById(CommonId.singleton())).ok;
+    final auth = (await authRepo.findById(AuthId("authId"))).ok;
     assert(auth?.isLogin == true);
     await _taskRepo(userId!)
         .query()

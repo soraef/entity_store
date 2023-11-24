@@ -14,7 +14,7 @@ class TaskPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = context.watchAll<TaskId, Task>();
-    final userId = context.watchAll<CommonId, Auth>().atOrNull(0)?.userId;
+    final userId = context.watchAll<AuthId, Auth>().atOrNull(0)?.userId;
 
     if (userId == null) {
       return Container();
