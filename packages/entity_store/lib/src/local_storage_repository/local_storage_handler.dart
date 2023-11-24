@@ -1,13 +1,13 @@
 part of '../../local_storage_repository.dart';
 
-abstract class LocalStorageHandler {
+abstract class ILocalStorageHandler {
   Future<Result<void, Exception>> save(String key, String value);
   Future<Result<String?, Exception>> load(String key);
   Future<Result<void, Exception>> delete(String key);
   Future<Result<void, Exception>> clear();
 }
 
-class InMemoryStorageHandler extends LocalStorageHandler {
+class InMemoryStorageHandler extends ILocalStorageHandler {
   final Map<String, String> _storage = {};
 
   @override
