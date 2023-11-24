@@ -18,3 +18,6 @@
 ## 3.0.0
 
 * FEAT:  Added ability to read Entity with watchAll, watchOne, selectAll, selectOne, readAll, readOne
+
+## 3.0.1
+* REDACTOR: import paths in entity_store library
