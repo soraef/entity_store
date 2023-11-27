@@ -1,4 +1,5 @@
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store/local_storage_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'entity.dart';

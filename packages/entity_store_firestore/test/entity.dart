@@ -1,4 +1,5 @@
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store/local_storage_repository.dart';
 import 'package:type_result/src/result.dart';
 
 class UserId extends Id {
@@ -61,7 +62,7 @@ final users = [
   User(id: UserId("10"), name: "aca", age: 4),
 ];
 
-class InMemoryLocalStorageHandler implements LocalStorageHandler {
+class InMemoryLocalStorageHandler implements ILocalStorageHandler {
   final Map<String, String> _map = {};
 
   @override

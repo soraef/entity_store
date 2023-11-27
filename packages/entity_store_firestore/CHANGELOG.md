@@ -46,3 +46,8 @@
 ## 3.0.0
 
 * FIX: change createOrUpdate to upsert
+
+
+## 4.0.0-dev.1
+
+* FIX: upgrade entity_store 4.0.0-dev.1
