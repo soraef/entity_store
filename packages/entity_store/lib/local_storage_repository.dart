@@ -1,3 +1,5 @@
+library local_storage_repository;
+
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
