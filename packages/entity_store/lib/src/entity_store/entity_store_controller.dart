@@ -1,4 +1,4 @@
-part of '../../store.dart';
+part of '../../entity_store.dart';
 
 class EntityStoreController {
   final _controller = StreamController<StoreEvent>.broadcast();

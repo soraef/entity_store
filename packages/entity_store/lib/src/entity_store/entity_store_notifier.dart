@@ -1,4 +1,4 @@
-part of '../../store.dart';
+part of '../../entity_store.dart';
 
 class EntityStoreNotifier extends ChangeNotifier with EntityStoreMixin {
   EntityStore state = EntityStore.empty();

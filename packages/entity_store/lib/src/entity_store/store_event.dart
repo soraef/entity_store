@@ -1,4 +1,4 @@
-part of '../../store.dart';
+part of '../../entity_store.dart';
 
 abstract class IStoreEventHandler {
   void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);

@@ -1,6 +1,6 @@
 library repositry_interface;
 
-import 'store.dart';
+import 'entity_store.dart';
 import 'package:type_result/type_result.dart';
 
 part '../src/repository_interface/options.dart';

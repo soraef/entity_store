@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:type_result/type_result.dart';
 
 import 'repository_interface.dart';
-import 'store.dart';
+import 'entity_store.dart';
 
 part '../src/local_storage_repository/local_storage_entity_hander.dart';
 part '../src/local_storage_repository/local_storage_handler.dart';

@@ -1,6 +1,6 @@
 // ignore_for_file: unnecessary_type_check
 
-import 'package:entity_store/store.dart';
+import 'package:entity_store/entity_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class User extends Entity<String> {
