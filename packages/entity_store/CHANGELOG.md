@@ -21,3 +21,7 @@
 
 ## 3.0.1
 * REDACTOR: import paths in entity_store library
+
+
+## 4.0.0-dev.1
+* FEAT: Changed repository implementation to another library.
