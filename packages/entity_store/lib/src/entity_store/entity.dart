@@ -1,4 +1,4 @@
-part of '../../entity_store.dart';
+part of '../entity_store.dart';
 
 /// An abstract class representing an entity with a unique identifier.
 ///

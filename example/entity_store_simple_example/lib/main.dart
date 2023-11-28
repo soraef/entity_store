@@ -9,9 +9,7 @@ final storageHandler = InMemoryStorageHandler();
 final todoRepository = TodoRepository(entityStoreController, storageHandler);
 
 void main() {
-  runApp(
-    const MyApp(),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

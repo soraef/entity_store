@@ -1,4 +1,4 @@
-part of '../../entity_store.dart';
+part of '../entity_store.dart';
 
 class EntityStoreProviderScope extends StatelessWidget {
   final Widget child;

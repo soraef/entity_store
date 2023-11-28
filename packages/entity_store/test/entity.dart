@@ -1,4 +1,4 @@
-import 'package:entity_store/entity_store.dart';
+import 'package:entity_store/src/entity_store.dart';
 
 class UserId extends Id {
   UserId(super.value);

@@ -1,4 +1,4 @@
-part of '../../repository_interface.dart';
+part of '../repository_interface.dart';
 
 /// An interface for a repository that handles CRUD operations for entities.
 ///

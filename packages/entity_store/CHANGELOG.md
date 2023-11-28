@@ -25,3 +25,6 @@
 
 ## 4.0.0-dev.1
 * FEAT: Changed repository implementation to another library.
+
+## 3.0.2
+* FIX: Reverted the import method back to 3.0.0.

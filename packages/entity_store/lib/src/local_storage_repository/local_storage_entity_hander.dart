@@ -1,4 +1,4 @@
-part of '../../local_storage_repository.dart';
+part of '../local_storage_repository.dart';
 
 /// A handler for storing and retrieving entities in local storage.
 ///

@@ -1,4 +1,4 @@
-part of '../../local_storage_repository.dart';
+part of '../local_storage_repository.dart';
 
 /// An abstract class representing a local storage handler.
 ///

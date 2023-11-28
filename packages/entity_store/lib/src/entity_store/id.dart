@@ -1,4 +1,4 @@
-part of '../../entity_store.dart';
+part of '../entity_store.dart';
 
 abstract class Id {
   final String value;
