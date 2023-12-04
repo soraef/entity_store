@@ -51,3 +51,11 @@
 ## 4.0.0-dev.1
 
 * FIX: upgrade entity_store 4.0.0-dev.1
+
+## 3.0.3
+
+* FIX: upgrade entity_store 3.0.3
+
+## 3.0.4
+
+* FIX: fix import error
