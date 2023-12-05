@@ -1,7 +1,7 @@
 part of '../entity_store.dart';
 
 abstract class EntityStoreDebugger {
-  final Stream<StoreEvent> eventStream;
+  final Stream<PersistenceEvent> eventStream;
 
   EntityStoreDebugger(this.eventStream) {
     eventStream.listen((event) {
@@ -11,7 +11,7 @@ abstract class EntityStoreDebugger {
     });
   }
 
-  void onEvent(StoreEvent<dynamic, Entity<dynamic>> event);
+  void onEvent(PersistenceEvent<dynamic, Entity<dynamic>> event);
 }
 
 class EntityStorePrintDebugger extends EntityStoreDebugger {
@@ -22,7 +22,7 @@ class EntityStorePrintDebugger extends EntityStoreDebugger {
   });
 
   @override
-  void onEvent(StoreEvent<dynamic, Entity> event) {
+  void onEvent(PersistenceEvent<dynamic, Entity> event) {
     if (event is GetEvent) {
       debugPrint(
         "[GetEvent:${event.entityType}] ${_entityString(

@@ -57,8 +57,8 @@ void main() {
   test("a", () {
     final event =
         GetEvent<String, User>.now("1", User(id: "1", name: "soraef"));
-    expect(event is StoreEvent<String, User>, true);
-    expect(event is StoreEvent<String, Group>, false);
+    expect(event is PersistenceEvent<String, User>, true);
+    expect(event is PersistenceEvent<String, Group>, false);
   });
 
   test("b", () async {

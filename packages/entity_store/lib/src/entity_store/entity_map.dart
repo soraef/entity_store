@@ -139,6 +139,26 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
     return entities.sorted(compare);
   }
 
+  EntityEvent<Id, E> eventWhenPut(E entity) {
+    if (exist(entity.id)) {
+      return EntityUpdatedEvent<Id, E>(entity);
+    } else {
+      return EntityCreatedEvent<Id, E>(entity);
+    }
+  }
+
+  List<EntityEvent<Id, E>> eventWhenPutAll(Iterable<E> entities) {
+    return entities.map((e) => eventWhenPut(e)).toList();
+  }
+
+  EntityEvent<Id, E>? eventWhenRemove(Id id) {
+    if (exist(id)) {
+      return EntityDeletedEvent<Id, E>(byId(id)!);
+    } else {
+      return null;
+    }
+  }
+
   @override
   List<Object?> get props => [...entities];
 }

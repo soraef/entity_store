@@ -1,12 +1,12 @@
 part of '../entity_store.dart';
 
-abstract class IStoreEventHandler {
-  void handleEvent<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
-  bool shouldListenTo<Id, E extends Entity<Id>>(StoreEvent<Id, E> event);
+abstract class IPersistenceEventHandler {
+  void handleEvent<Id, E extends Entity<Id>>(PersistenceEvent<Id, E> event);
+  bool shouldListenTo<Id, E extends Entity<Id>>(PersistenceEvent<Id, E> event);
 }
 
-abstract class StoreEvent<Id, E extends Entity<Id>> {
-  const StoreEvent({
+abstract class PersistenceEvent<Id, E extends Entity<Id>> {
+  const PersistenceEvent({
     required this.eventTime,
   });
 
@@ -14,14 +14,14 @@ abstract class StoreEvent<Id, E extends Entity<Id>> {
   Type get idType => Id;
   final DateTime eventTime;
 
-  void apply(IStoreEventHandler handler) {
+  void apply(IPersistenceEventHandler handler) {
     if (handler.shouldListenTo<Id, E>(this)) {
       handler.handleEvent<Id, E>(this);
     }
   }
 }
 
-class GetEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
+class GetEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
   final Id id;
   final E? entity;
   GetEvent({
@@ -39,7 +39,7 @@ class GetEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
   }
 }
 
-class ListEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
+class ListEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
   final List<E> entities;
   const ListEvent({
     required this.entities,
@@ -54,7 +54,7 @@ class ListEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
   }
 }
 
-class SaveEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
+class SaveEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
   final E entity;
   const SaveEvent({
     required this.entity,
@@ -69,7 +69,7 @@ class SaveEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
   }
 }
 
-class DeleteEvent<Id, E extends Entity<Id>> extends StoreEvent<Id, E> {
+class DeleteEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
   final Id entityId;
   const DeleteEvent({
     required this.entityId,

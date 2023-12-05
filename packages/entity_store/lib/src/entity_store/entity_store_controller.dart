@@ -1,20 +1,38 @@
 part of '../entity_store.dart';
 
 class EntityStoreController {
-  final _controller = StreamController<StoreEvent>.broadcast();
+  final _controller = StreamController<PersistenceEvent>.broadcast();
   final EntityStoreMixin _entityStore;
+  final List<EntityEventListener> _listeners = [];
+  late final StreamSubscription<EntityEvent> entityEventSubscription;
 
-  Stream<StoreEvent> get eventStream => _controller.stream;
+  Stream<PersistenceEvent> get eventStream => _controller.stream;
+  Stream<EntityEvent> get entityEventStream => _entityStore.entityEventStream;
 
-  EntityStoreController(this._entityStore);
+  EntityStoreController(this._entityStore) {
+    _listenToEntityEvent();
+  }
 
-  void dispatch<Id, E extends Entity<Id>>(StoreEvent<Id, E> event) {
+  void dispatch<Id, E extends Entity<Id>>(PersistenceEvent<Id, E> event) {
     event.apply(_entityStore);
     _controller.sink.add(event);
   }
 
   void clearAll() {
     _entityStore.update((prev) => EntityStore.empty());
+  }
+
+  void put<Id, E extends Entity<Id>>(E entity) {
+    _entityStore.update((prev) => prev.put<Id, E>(entity));
+  }
+
+  void delete<Id, E extends Entity<Id>>(Id id) {
+    _entityStore.update((prev) => prev.delete<Id, E>(id));
+  }
+
+  void registEntityEventListener(EntityEventListener listener) {
+    listener.setController(this);
+    _listeners.add(listener);
   }
 
   E? getById<Id, E extends Entity<Id>>(Id id) {
@@ -26,12 +44,22 @@ class EntityStoreController {
   ]) {
     return _entityStore.value.where(test);
   }
+
+  void _listenToEntityEvent<Id, E extends Entity<Id>>() {
+    entityEventSubscription = entityEventStream.listen((event) {
+      for (var listener in _listeners) {
+        if (listener.shouldListenTo(event)) {
+          listener.handleEvent(event);
+        }
+      }
+    });
+  }
 }
 
 class StoreEventCache {
-  final Map<Type, List<StoreEvent>> _cache = {};
+  final Map<Type, List<PersistenceEvent>> _cache = {};
 
-  Future<void> put(StoreEvent event) async {
+  Future<void> put(PersistenceEvent event) async {
     _cache[event.entityType] ??= [];
     _cache[event.entityType]!.add(event);
   }
@@ -44,7 +72,7 @@ class StoreEventCache {
     _cache.clear();
   }
 
-  Future<List<StoreEvent>> getEvents<Id, E extends Entity<Id>>() async {
+  Future<List<PersistenceEvent>> getEvents<Id, E extends Entity<Id>>() async {
     return _cache[E] ?? [];
   }
 }

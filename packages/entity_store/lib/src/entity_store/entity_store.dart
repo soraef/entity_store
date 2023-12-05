@@ -38,12 +38,31 @@ class EntityStore extends Equatable {
   EntityMap<Id, E> where<Id, E extends Entity<Id>>([
     bool Function(E entity) test = testAlwaysTrue,
   ]) {
-    return (_entityMaps[E] as EntityMap<Id, E>? ?? EntityMap<Id, E>.empty())
-        .where(test);
+    return (getEntityMap<Id, E>() ?? EntityMap<Id, E>.empty()).where(test);
   }
 
   List<E> toList<E>() {
     return (_entityMaps[E]?.toList() ?? <E>[]) as List<E>;
+  }
+
+  EntityEvent<Id, E> eventWhenPut<Id, E extends Entity<Id>>(E entity) {
+    return getEntityMap<Id, E>()?.eventWhenPut(entity) ??
+        EntityCreatedEvent<Id, E>(entity);
+  }
+
+  List<EntityEvent<Id, E>> eventWhenPutAll<Id, E extends Entity<Id>>(
+    Iterable<E> entities,
+  ) {
+    return getEntityMap<Id, E>()?.eventWhenPutAll(entities) ??
+        entities.map((e) => EntityCreatedEvent<Id, E>(e)).toList();
+  }
+
+  EntityEvent? eventWhenDelete<Id, E extends Entity<Id>>(Id id) {
+    return getEntityMap<Id, E>()?.eventWhenRemove(id);
+  }
+
+  EntityMap<Id, E>? getEntityMap<Id, E extends Entity<Id>>() {
+    return _entityMaps[E] as EntityMap<Id, E>?;
   }
 
   @override
