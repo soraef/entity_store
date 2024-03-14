@@ -26,6 +26,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   Future<Result<E?, Exception>> findById(
     Id id, {
     IGetOptions? options,
+    ITransaction? transaction,
   });
 
   /// Finds all entities of type `E`.
@@ -55,6 +56,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   Future<Result<E, Exception>> save(
     E entity, {
     ISaveOptions? options,
+    ITransaction? transaction,
   });
 
   /// Deletes an entity by its `id`.
@@ -64,6 +66,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   Future<Result<Id, Exception>> delete(
     Id id, {
     IDeleteOptions? options,
+    ITransaction? transaction,
   });
 
   /// Upserts an entity by its `id`.

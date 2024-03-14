@@ -1,6 +1,6 @@
 name: entity_store_firestore
 description: firestore operations for entity_store package
-version: 3.0.4
+version: 3.0.5
 homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_firestore
 
 environment:

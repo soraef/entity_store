@@ -39,8 +39,15 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<Id, Exception>> delete(Id id, {IDeleteOptions? options}) async {
-    final deleteResult = await localStorageEntityHander.delete(id);
+  Future<Result<Id, Exception>> delete(
+    Id id, {
+    IDeleteOptions? options,
+    covariant LocalStorageTransaction? transaction,
+  }) async {
+    final deleteResult = await localStorageEntityHander.delete(
+      id,
+      transaction: transaction,
+    );
 
     return deleteResult.map(
       (ok) {
@@ -59,8 +66,14 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E?, Exception>> findById(Id id, {IGetOptions? options}) async {
-    final loadResult = await localStorageEntityHander.loadEntityList();
+  Future<Result<E?, Exception>> findById(
+    Id id, {
+    IGetOptions? options,
+    covariant LocalStorageTransaction? transaction,
+  }) async {
+    final loadResult = await localStorageEntityHander.loadEntityList(
+      transaction: transaction,
+    );
 
     return loadResult.map(
       (ok) {
@@ -94,8 +107,15 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E, Exception>> save(E entity, {ISaveOptions? options}) async {
-    final saveResult = await localStorageEntityHander.save(entity);
+  Future<Result<E, Exception>> save(
+    E entity, {
+    ISaveOptions? options,
+    covariant LocalStorageTransaction? transaction,
+  }) async {
+    final saveResult = await localStorageEntityHander.save(
+      entity,
+      transaction: transaction,
+    );
 
     return saveResult.map(
       (ok) {

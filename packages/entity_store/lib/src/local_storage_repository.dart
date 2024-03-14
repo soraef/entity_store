@@ -12,3 +12,4 @@ part '../src/local_storage_repository/local_storage_entity_hander.dart';
 part '../src/local_storage_repository/local_storage_handler.dart';
 part '../src/local_storage_repository/query.dart';
 part '../src/local_storage_repository/repository.dart';
+part '../src/local_storage_repository/transaction.dart';

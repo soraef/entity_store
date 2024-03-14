@@ -59,3 +59,9 @@
 ## 3.0.4
 
 * FIX: fix import error
+
+## 3.0.5
+
+* FIX: fix count() methods 
+
+## 3.0.6

@@ -39,14 +39,22 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   /// Returns a [Result] object containing either a list of entities or an exception.
   /// If the local storage does not contain the entity list, an empty list is returned.
   /// If there is an error during the loading process, the exception is returned.
-  Future<Result<List<E>, Exception>> loadEntityList() async {
-    final entityListResult =
-        await localStorageHandler.load(_getEntityListKey());
-    if (entityListResult.isErr) {
-      return Result.err(entityListResult.err);
+  Future<Result<List<E>, Exception>> loadEntityList({
+    LocalStorageTransaction? transaction,
+  }) async {
+    String? entityListJsonString;
+
+    if (transaction != null) {
+      entityListJsonString = await transaction.get(_getEntityListKey());
+    } else {
+      final entityListResult =
+          await localStorageHandler.load(_getEntityListKey());
+      if (entityListResult.isErr) {
+        return Result.err(entityListResult.err);
+      }
+      entityListJsonString = entityListResult.ok;
     }
 
-    final entityListJsonString = entityListResult.ok;
     if (entityListJsonString == null) {
       return Result.ok(<E>[]);
     }
@@ -67,7 +75,10 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   /// or adds the entity if it doesn't exist in the list.
   /// Finally, encodes the updated list to JSON and saves it to the local storage.
   /// Returns the result of the save operation.
-  Future<Result<void, Exception>> save(E entity) async {
+  Future<Result<void, Exception>> save(
+    E entity, {
+    LocalStorageTransaction? transaction,
+  }) async {
     final currentListResult = await loadEntityList();
     if (currentListResult.isErr) {
       return Result.err(currentListResult.err);
@@ -81,9 +92,14 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
 
     try {
       final jsonString = jsonEncode(newList.map((e) => toJson(e)).toList());
-      final saveResult =
-          await localStorageHandler.save(_getEntityListKey(), jsonString);
-      return saveResult;
+      if (transaction != null) {
+        await transaction.put(_getEntityListKey(), jsonString);
+        return Result.ok(null);
+      } else {
+        final saveResult =
+            await localStorageHandler.save(_getEntityListKey(), jsonString);
+        return saveResult;
+      }
     } on Exception catch (e) {
       return Result.err(e);
     }
@@ -94,7 +110,10 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   /// If the current entity list cannot be loaded, returns an error [Result].
   /// If the entity is successfully deleted and saved to the local storage, returns a success [Result].
   /// If an exception occurs during the deletion or saving process, returns an error [Result] with the exception.
-  Future<Result<void, Exception>> delete(Id id) async {
+  Future<Result<void, Exception>> delete(
+    Id id, {
+    LocalStorageTransaction? transaction,
+  }) async {
     final currentListResult = await loadEntityList();
     if (currentListResult.isErr) {
       return Result.err(currentListResult.err);
@@ -107,9 +126,14 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
 
     try {
       final jsonString = jsonEncode(newList.map((e) => toJson(e)).toList());
-      final saveResult =
-          await localStorageHandler.save(_getEntityListKey(), jsonString);
-      return saveResult;
+      if (transaction != null) {
+        await transaction.put(_getEntityListKey(), jsonString);
+        return Result.ok(null);
+      } else {
+        final saveResult =
+            await localStorageHandler.save(_getEntityListKey(), jsonString);
+        return saveResult;
+      }
     } on Exception catch (e) {
       return Result.err(e);
     }
