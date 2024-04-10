@@ -250,6 +250,10 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     final ref = await _build();
     final countQuery = ref.count();
     final result = await countQuery.get();
-    return Result.ok(result.count);
+    final count = result.count;
+    if (count == null) {
+      return Result.err(Exception("Count is null"));
+    }
+    return Result.ok(count);
   }
 }
