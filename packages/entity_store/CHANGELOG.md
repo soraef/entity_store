@@ -29,5 +29,5 @@
 ## 3.0.3
 * FIX: Reverted the import method back to 3.0.0.
 
-## 4.0.0-dev.2
+## 4.0.0
 * FEAT:  Changed the way LocalStorageEntityHandler stores data 

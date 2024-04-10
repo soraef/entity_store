@@ -1,6 +1,6 @@
 name: entity_store_firestore
 description: firestore operations for entity_store package
-version: 3.0.4
+version: 4.0.0
 homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_firestore
 
 environment:
@@ -17,12 +17,12 @@ dependencies:
   collection: ^1.16.0
   type_result: ^1.0.2
 
-  entity_store: ^3.0.3
+  entity_store: ^4.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

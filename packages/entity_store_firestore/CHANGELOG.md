@@ -59,3 +59,8 @@
 ## 3.0.4
 
 * FIX: fix import error
+
+## 4.0.0
+
+* FIX: upgrade entity_store 4.0.0
+* FIX: upgrade dependency
