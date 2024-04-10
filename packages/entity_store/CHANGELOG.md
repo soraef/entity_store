@@ -17,7 +17,7 @@
 
 ## 3.0.0
 
-* FEAT:  Added ability to read Entity with watchAll, watchOne, selectAll, selectOne, readAll, readOne
+* FEAT: Added ability to read Entity with watchAll, watchOne, selectAll, selectOne, readAll, readOne
 
 ## 3.0.1
 * REDACTOR: import paths in entity_store library
@@ -28,3 +28,6 @@
 
 ## 3.0.3
 * FIX: Reverted the import method back to 3.0.0.
+
+## 4.0.0-dev.2
+* FEAT:  Changed the way LocalStorageEntityHandler stores data 
