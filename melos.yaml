@@ -4,8 +4,40 @@ packages:
   - packages/**
 
 scripts:
-  analyze: melos exec -- "dart analyze ."
-  gen: melos exec -- "flutter pub run build_runner watch --delete-conflicting-outputs"
-  get: melos exec -- "flutter pub get"
-  upgrade: melos exec -- "flutter pub upgrade"
-  upgrade_major: melos exec -- "fvm flutter pub upgrade --major-versions"
+  analyze:
+    name: analyze
+    exec: dart analyze .
+
+  clean:
+    name: clean
+    exec: fvm flutter clean
+
+  repair:
+    name: repair
+    exec: fvm flutter pub cache repair
+
+  fix_dry-run:
+    name: fix dry-run
+    exec: dart fix --dry-run .
+
+  fix_apply:
+    name: fix apply
+    exec: dart fix --apply .
+
+  pub_upgrade_major:
+    name: pub_upgrade_major
+    exec: fvm flutter pub upgrade --major-versions
+
+  # パッケージの更新
+  pub_get:
+    name: pub_get
+    exec: fvm flutter pub get
+
+  pub_upgrade:
+    name: pub_upgrade
+    exec: fvm flutter pub upgrade
+
+  # コード生成
+  build_runner_watch:
+    name: build_runner
+    exec: fvm flutter pub run build_runner watch --delete-conflicting-outputs
