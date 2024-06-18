@@ -31,3 +31,13 @@
 
 ## 4.0.0
 * FEAT:  Changed the way LocalStorageEntityHandler stores data 
+
+## 4.1.0
+* FEAT: Add Entity watch method
+
+## 5.0.0
+* BREAKING CHANGE: IGetOptions changed to FindByIdOptions
+* BREAKING CHANGE: ISaveOptions changed to SaveOptions
+* BREAKING CHANGE: IDeleteOptions changed to DeleteOptions
+* BREAKING CHANGE: ICreateOrUpdateOptions changed to UpsertOptions
+* FEAT: Add FetchPolicy

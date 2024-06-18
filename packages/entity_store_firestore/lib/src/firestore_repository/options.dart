@@ -1,17 +1,17 @@
 part of '../firestore_repository.dart';
 
-class FirestoreSaveOptions extends ISaveOptions {
+class FirestoreSaveOptions extends SaveOptions {
   final bool merge;
 
   FirestoreSaveOptions(this.merge);
 }
 
-class FirestoreCreateOrUpdateOptions extends ICreateOrUpdateOptions {
+class FirestoreCreateOrUpdateOptions extends UpsertOptions {
   final bool merge;
 
   FirestoreCreateOrUpdateOptions({
     super.useTransaction = true,
-    super.useCache = false,
+    super.fetchPolicy = FetchPolicy.persistent,
     this.merge = true,
   });
 }

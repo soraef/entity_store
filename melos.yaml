@@ -6,5 +6,6 @@ packages:
 scripts:
   analyze: melos exec -- "dart analyze ."
   gen: melos exec -- "flutter pub run build_runner watch --delete-conflicting-outputs"
-  get: melos exec -- "flutter pub get" 
+  get: melos exec -- "flutter pub get"
   upgrade: melos exec -- "flutter pub upgrade"
+  upgrade_major: melos exec -- "fvm flutter pub upgrade --major-versions"

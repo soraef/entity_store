@@ -1,57 +1,55 @@
 name: todo_app
 description: A new Flutter project.
 
-publish_to: 'none' 
-
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.2 <3.0.0'
+  sdk: ">=2.18.2 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
 
-  firebase_core: ^2.1.1
-  cloud_firestore: ^4.0.3
+  firebase_core: ^3.1.0
+  cloud_firestore: ^5.0.1
 
   # State Management
   hooks_riverpod: ^2.1.1
-  flutter_hooks: ^0.18.5+1
+  flutter_hooks: ^0.20.5
 
   # Freezed
   freezed_annotation: ^2.0.3
   json_annotation: ^4.5.0
 
   # Dialog UI Helper
-  adaptive_dialog: ^1.8.0+1
+  adaptive_dialog: ^2.1.0
 
-  uuid: ^3.0.6
+  uuid: ^4.4.0
   type_result: ^1.0.2
-  
+
   collection: ^1.16.0
 
-  entity_store: 
+  entity_store:
     path: ../../packages/entity_store
-  
-  entity_store_firestore: 
+
+  entity_store_firestore:
     path: ../../packages/entity_store_firestore
 
 dependency_overrides:
-  entity_store: 
+  entity_store:
     path: ../../packages/entity_store
-  
-  entity_store_firestore: 
-    path: ../../packages/entity_store_firestore
 
+  entity_store_firestore:
+    path: ../../packages/entity_store_firestore
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^2.0.0
+  flutter_lints: ^4.0.0
   build_runner: ^2.1.11
   freezed: ^2.0.3+1
   json_serializable: ^6.2.0

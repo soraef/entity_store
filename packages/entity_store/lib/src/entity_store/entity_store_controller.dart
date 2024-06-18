@@ -39,6 +39,10 @@ class EntityStoreController {
     return _entityStore.value.get<Id, E>(id);
   }
 
+  List<E> getAll<Id, E extends Entity<Id>>() {
+    return _entityStore.value.getEntityMap<Id, E>()?.entities.toList() ?? [];
+  }
+
   EntityMap<Id, E> where<Id, E extends Entity<Id>>([
     bool Function(E) test = testAlwaysTrue,
   ]) {

@@ -242,7 +242,10 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2024-04-03T23:41:04.485284Z",
+  "generated": "2024-06-18T05:37:21.612149Z",
   "generator": "pub",
-  "generatorVersion": "3.2.6"
+  "generatorVersion": "3.4.3",
+  "flutterRoot": "file:///Users/fukui/fvm/versions/3.22.2",
+  "flutterVersion": "3.22.2",
+  "pubCache": "file:///Users/fukui/.pub-cache"
 }

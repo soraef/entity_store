@@ -5,7 +5,7 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   Future<Result<E?, Exception>> protectedGetAndNotify(
     CollectionReference collection,
     Id id, {
-    bool? useCache,
+    FetchPolicy fetchPolicy = FetchPolicy.persistent,
   });
   @protected
   Future<Result<Id, Exception>> protectedDeleteAndNotify(
@@ -28,6 +28,7 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
     Id id,
     E? Function() creater,
     E? Function(E prev) updater, {
+    FetchPolicy fetchPolicy = FetchPolicy.persistent,
     bool? merge,
     bool? useTransaction,
     List<Object>? mergeFields,
@@ -44,14 +45,18 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
   Future<Result<E?, Exception>> protectedGetAndNotify(
     CollectionReference collection,
     Id id, {
-    bool? useCache,
+    FetchPolicy fetchPolicy = FetchPolicy.persistent,
   }) async {
     late DocumentSnapshot<dynamic> doc;
 
-    if (useCache == true) {
-      final entity = controller.getById<Id, E>(id);
+    var entity = controller.getById<Id, E>(id);
+
+    if (fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.ok(entity);
+    }
+
+    if (fetchPolicy == FetchPolicy.storeFirst) {
       if (entity != null) {
-        notifyGetComplete(entity);
         return Result.ok(entity);
       }
     }
@@ -176,16 +181,11 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     Id id,
     E? Function() creater,
     E? Function(E prev) updater, {
+    FetchPolicy fetchPolicy = FetchPolicy.persistent,
     bool? merge,
     bool? useTransaction,
-    bool? useCache,
     List<Object>? mergeFields,
   }) async {
-    assert(
-      !(useTransaction == true && useCache == true),
-      'useTransaction and useCache cannot be true at the same time.',
-    );
-
     /// get and set using transaction
     Future<E?> getAndSetTransaction() async {
       return await collection.firestore.runTransaction((transaction) async {
@@ -209,11 +209,14 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     /// get and set using no transaction
     Future<E?> getAndSetNoTransaction() async {
       E? entity;
-      if (useCache == true) {
+
+      if (fetchPolicy == FetchPolicy.storeOnly ||
+          fetchPolicy == FetchPolicy.storeFirst) {
         entity = controller.getById<Id, E>(id);
       }
 
-      if (entity == null) {
+      if (fetchPolicy == FetchPolicy.persistent ||
+          (entity == null && fetchPolicy == FetchPolicy.storeFirst)) {
         final doc = await collection.doc(idToString(id)).get();
         entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
       }
@@ -282,23 +285,5 @@ extension _BoolX on bool {
 }
 
 extension _BoolOrNullX on bool? {
-  // T ifMap<T>({
-  //   required T Function() ifTrue,
-  //   required T Function() ifFalse,
-  //   required T Function() ifNull,
-  // }) {
-  //   if (this == null) {
-  //     return ifNull();
-  //   } else if (this!) {
-  //     return ifTrue();
-  //   } else {
-  //     return ifFalse();
-  //   }
-  // }
-
-  // /// if null, return false
-  // bool get orFalse => this ?? false;
-
-  /// if null, return true
   bool get orTrue => this ?? true;
 }

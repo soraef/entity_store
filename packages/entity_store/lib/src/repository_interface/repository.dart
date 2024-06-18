@@ -25,18 +25,22 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// An optional `options` parameter can be provided to customize the query behavior.
   Future<Result<E?, Exception>> findById(
     Id id, {
-    IGetOptions? options,
+    FindByIdOptions? options,
   });
 
   /// Finds all entities of type `E`.
   ///
   /// Returns a `Result` object that contains a list of entities or an exception if an error occurs.
-  Future<Result<List<E>, Exception>> findAll();
+  Future<Result<List<E>, Exception>> findAll({
+    FindAllOptions? options,
+  });
 
   /// Finds a single entity of type `E`.
   ///
   /// Returns a `Result` object that contains the found entity or an exception if an error occurs.
-  Future<Result<E?, Exception>> findOne();
+  Future<Result<E?, Exception>> findOne({
+    FindOneOptions? options,
+  });
 
   /// Counts the number of entities of type `E`.
   ///
@@ -54,7 +58,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// An optional `options` parameter can be provided to customize the save behavior.
   Future<Result<E, Exception>> save(
     E entity, {
-    ISaveOptions? options,
+    SaveOptions? options,
   });
 
   /// Deletes an entity by its `id`.
@@ -63,7 +67,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// An optional `options` parameter can be provided to customize the delete behavior.
   Future<Result<Id, Exception>> delete(
     Id id, {
-    IDeleteOptions? options,
+    DeleteOptions? options,
   });
 
   /// Upserts an entity by its `id`.
@@ -77,6 +81,9 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
-    ICreateOrUpdateOptions? options,
+    UpsertOptions? options,
   });
+
+  Map<String, dynamic> toJson(E entity);
+  E fromJson(Map<String, dynamic> json);
 }

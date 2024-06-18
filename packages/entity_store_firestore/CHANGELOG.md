@@ -64,3 +64,9 @@
 
 * FIX: upgrade entity_store 4.0.0
 * FIX: upgrade dependency
+
+## 4.1.0
+* FIX: upgrade entity_store 4.0.0
+
+## 4.1.1
+* FIX: upgrade firebase SDK version up

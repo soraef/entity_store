@@ -21,9 +21,10 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
-    ICreateOrUpdateOptions? options,
+    UpsertOptions? options,
   }) async {
-    final findResult = await findById(id);
+    final findResult = await findById(id,
+        options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeOnly));
     if (findResult.isErr) {
       return Result.err(findResult.err);
     }
@@ -39,7 +40,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<Id, Exception>> delete(Id id, {IDeleteOptions? options}) async {
+  Future<Result<Id, Exception>> delete(Id id, {DeleteOptions? options}) async {
     final deleteResult = await localStorageEntityHander.delete(id);
 
     return deleteResult.map(
@@ -54,14 +55,31 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll() {
+  Future<Result<List<E>, Exception>> findAll({
+    FindAllOptions? options,
+  }) {
     return query().findAll();
   }
 
   @override
-  Future<Result<E?, Exception>> findById(Id id, {IGetOptions? options}) async {
-    final loadResult = await localStorageEntityHander.loadEntityList();
+  Future<Result<E?, Exception>> findById(
+    Id id, {
+    FindByIdOptions? options,
+  }) async {
+    options ??= const FindByIdOptions();
 
+    final storeEntity = controller.getById<Id, E>(id);
+    if (options.fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.ok(storeEntity);
+    }
+
+    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+      if (storeEntity != null) {
+        return Result.ok(storeEntity);
+      }
+    }
+
+    final loadResult = await localStorageEntityHander.loadEntityList();
     return loadResult.map(
       (ok) {
         final entity = ok.firstWhereOrNull((e) => e.id == id);
@@ -79,7 +97,9 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E?, Exception>> findOne() {
+  Future<Result<E?, Exception>> findOne({
+    FindOneOptions? options,
+  }) {
     return query().findOne();
   }
 
@@ -94,7 +114,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E, Exception>> save(E entity, {ISaveOptions? options}) async {
+  Future<Result<E, Exception>> save(E entity, {SaveOptions? options}) async {
     final saveResult = await localStorageEntityHander.save(entity);
 
     return saveResult.map(
@@ -107,7 +127,4 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
       },
     );
   }
-
-  Map<String, dynamic> toJson(E entity);
-  E fromJson(Map<String, dynamic> json);
 }

@@ -5,13 +5,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/domain/auth/entity.dart';
 import 'package:todo_app/infrastracture/dispatcher/dispatcher.dart';
 
-import 'firebase_options.dart';
+// import 'firebase_options.dart';
 import 'presentation/page/auth/auth_page.dart';
 import 'presentation/page/task/task_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const ProviderScope(child: MyApp()));
 }
 

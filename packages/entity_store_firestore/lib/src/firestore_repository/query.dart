@@ -5,29 +5,33 @@ part of '../firestore_repository.dart';
 class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     implements IRepositoryQuery<Id, E> {
   final BaseFirestoreRepository<Id, E> _repository;
-  final List<RepositoryFilter> _filters;
-  final List<RepositorySort> _sorts;
-  final int? _limitNum;
-  final Id? _startAfterId;
+  @override
+  final List<RepositoryFilter> filters;
+  @override
+  final List<RepositorySort> sorts;
+  @override
+  final int? limitNum;
+  @override
+  final Id? startAfterId;
 
-  List<RepositoryFilter> get getFilters => _filters;
-  List<RepositorySort> get getSorts => _sorts;
-  int? get getLimit => _limitNum;
-  Id? get getStartAfterId => _startAfterId;
+  List<RepositoryFilter> get getFilters => filters;
+  List<RepositorySort> get getSorts => sorts;
+  int? get getLimit => limitNum;
+  Id? get getStartAfterId => startAfterId;
 
   FirestoreRepositoryQuery._(
     this._repository,
-    this._filters,
-    this._sorts,
-    this._limitNum,
-    this._startAfterId,
+    this.filters,
+    this.sorts,
+    this.limitNum,
+    this.startAfterId,
   );
 
   const FirestoreRepositoryQuery(this._repository)
-      : _filters = const [],
-        _sorts = const [],
-        _limitNum = null,
-        _startAfterId = null;
+      : filters = const [],
+        sorts = const [],
+        limitNum = null,
+        startAfterId = null;
 
   @override
   FirestoreRepositoryQuery<Id, E> where(
@@ -47,7 +51,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return FirestoreRepositoryQuery._(
       _repository,
       [
-        ..._filters,
+        ...filters,
         if (isEqualTo != null)
           RepositoryFilter(
             field,
@@ -115,9 +119,9 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
             isNull,
           ),
       ],
-      _sorts,
-      _limitNum,
-      _startAfterId,
+      sorts,
+      limitNum,
+      startAfterId,
     );
   }
 
@@ -128,10 +132,10 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }) {
     return FirestoreRepositoryQuery<Id, E>._(
       _repository,
-      _filters,
-      [..._sorts, RepositorySort(field, descending)],
-      _limitNum,
-      _startAfterId,
+      filters,
+      [...sorts, RepositorySort(field, descending)],
+      limitNum,
+      startAfterId,
     );
   }
 
@@ -139,27 +143,27 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   FirestoreRepositoryQuery<Id, E> limit(int num) {
     return FirestoreRepositoryQuery<Id, E>._(
       _repository,
-      _filters,
-      _sorts,
+      filters,
+      sorts,
       num,
-      _startAfterId,
+      startAfterId,
     );
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> startAfterId(Id id) {
+  FirestoreRepositoryQuery<Id, E> startAfter(Id id) {
     return FirestoreRepositoryQuery<Id, E>._(
       _repository,
-      _filters,
-      _sorts,
-      _limitNum,
+      filters,
+      sorts,
+      limitNum,
       id,
     );
   }
 
   @override
   bool test(Map<String, dynamic> object) {
-    return _filters.map((e) => e.test(object)).every((e) => e);
+    return filters.map((e) => e.test(object)).every((e) => e);
   }
 
   Query _buildFilterQuery(Query query) {
@@ -224,8 +228,8 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     ref = _buildSortQuery(ref);
     ref = _buildLimitQuery(ref);
 
-    if (_startAfterId != null) {
-      final doc = await _repository.getDocumentRef(_startAfterId as Id).get();
+    if (startAfterId != null) {
+      final doc = await _repository.getDocumentRef(startAfterId as Id).get();
       ref = ref.startAfterDocument(doc);
     }
 
@@ -233,13 +237,56 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll() async {
+  Future<Result<List<E>, Exception>> findAll({
+    FindAllOptions? options,
+  }) async {
+    options = options ?? const FindAllOptions();
+    final objects = _repository.controller
+        .getAll<Id, E>()
+        .map((e) => _repository.toJson(e))
+        .toList();
+    final storeEntities = IRepositoryQuery.findEntities(objects, this)
+        .map((e) => _repository.fromJson(e))
+        .toList();
+
+    if (options.fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.ok(storeEntities);
+    }
+
+    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+      if (storeEntities.isNotEmpty) {
+        return Result.ok(storeEntities);
+      }
+    }
+
     final ref = await _build();
     return _repository.protectedListAndNotify(ref);
   }
 
   @override
-  Future<Result<E?, Exception>> findOne() async {
+  Future<Result<E?, Exception>> findOne({
+    FindOneOptions? options,
+  }) async {
+    options = options ?? const FindOneOptions();
+    final objects = _repository.controller
+        .getAll<Id, E>()
+        .map((e) => _repository.toJson(e))
+        .toList();
+    final storeEntity = IRepositoryQuery.findEntities(objects, this)
+        .map((e) => _repository.fromJson(e))
+        .take(1)
+        .firstOrNull;
+
+    if (options.fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.ok(storeEntity);
+    }
+
+    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+      if (storeEntity != null) {
+        return Result.ok(storeEntity);
+      }
+    }
+
     final ref = await _build();
     return (await _repository.protectedListAndNotify(ref.limit(1)))
         .mapOk((ok) => ok.firstOrNull);

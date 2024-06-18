@@ -31,15 +31,45 @@ void main() {
     repo = UserRepository(controller);
   });
 
-  test("get", () async {
-    await repo.save(users.first);
-    final userGet = await repo.findById(users.first.id);
+  test("findById", () async {
+    await repo.save(users[0]);
+    final userGet = await repo.findById(users[0].id);
 
-    expect(userGet.ok!.id, users.first.id);
+    expect(userGet.ok!.id, users[0].id);
     expect(
       controller.getById<UserId, User>(userGet.ok!.id)!.id,
-      users.first.id,
+      users[0].id,
     );
+
+    /// FindByIdOptions.fetchPolicy = FetchPolicy.storeOnly
+    controller.put(users[1]);
+    final userGet2 = await repo.findById(
+      users[1].id,
+      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
+    );
+    expect(userGet2.ok!.id, users[1].id);
+
+    final userGet3 = await repo.findById(
+      users[2].id,
+      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
+    );
+    expect(userGet3.ok, null);
+
+    /// FindByIdOptions.fetchPolicy = FetchPolicy.storeFirst
+    final userGet4 = await repo.findById(
+      users[1].id,
+      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(userGet4.ok!.id, users[1].id);
+
+    await repo.save(users[2]);
+    controller.delete<UserId, User>(users[2].id);
+
+    final userGet5 = await repo.findById(
+      users[2].id,
+      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(userGet5.ok!.id, users[2].id);
   });
 
   test("delete", () async {
@@ -51,7 +81,7 @@ void main() {
     expect(controller.getById<UserId, User>(users.first.id), null);
   });
 
-  test("list", () async {
+  test("findAll", () async {
     for (final user in users) {
       await repo.save(user);
     }
@@ -65,6 +95,38 @@ void main() {
 
     final list3 = await repo.query().where('id', isEqualTo: '5').findAll();
     expect(list3.ok.first.id.value, "5");
+
+    /// FindAllOptions.fetchPolicy = FetchPolicy.storeOnly
+    controller.delete<UserId, User>(users[0].id);
+    final list4 = await repo.query().where('id', isEqualTo: '1').findAll(
+          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeOnly),
+        );
+    expect(list4.ok.length, 0);
+
+    /// FindAllOptions.fetchPolicy = FetchPolicy.storeFirst
+    final list5 = await repo.query().where('id', isEqualTo: '1').findAll(
+          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+        );
+    expect(list5.ok.length, 1);
+
+    await repo.save(users[0]);
+    controller.delete<UserId, User>(users[0].id);
+    final list6 = await repo.query().where('id', isEqualTo: '1').findAll(
+          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+        );
+    expect(list6.ok.length, 1);
+
+    await repo.save(users[0]);
+    controller.delete<UserId, User>(users[0].id);
+    final list7 = await repo.query().where('age', isEqualTo: 1).findAll(
+          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+        );
+    expect(list7.ok.length, 2);
+
+    final list8 = await repo.query().where('age', isEqualTo: 1).findAll(
+          options: const FindAllOptions(fetchPolicy: FetchPolicy.persistent),
+        );
+    expect(list8.ok.length, 3);
   });
 
   test("count", () async {

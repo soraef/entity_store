@@ -78,19 +78,27 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<Id, Exception>> delete(
     Id id, {
-    IDeleteOptions? options,
+    DeleteOptions? options,
   }) async {
     return protectedDeleteAndNotify(collectionRef, id);
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll() {
-    return query().findAll();
+  Future<Result<List<E>, Exception>> findAll({
+    FindAllOptions? options,
+  }) {
+    return query().findAll(
+      options: options,
+    );
   }
 
   @override
-  Future<Result<E?, Exception>> findOne() {
-    return query().findOne();
+  Future<Result<E?, Exception>> findOne({
+    FindOneOptions? options,
+  }) {
+    return query().findOne(
+      options: options,
+    );
   }
 
   @override
@@ -101,12 +109,13 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findById(
     Id id, {
-    IGetOptions? options,
+    FindByIdOptions? options,
   }) async {
+    options = options ?? const FindByIdOptions();
     return protectedGetAndNotify(
       collectionRef,
       id,
-      useCache: options?.useCache,
+      fetchPolicy: options.fetchPolicy,
     );
   }
 
@@ -118,7 +127,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E, Exception>> save(
     E entity, {
-    ISaveOptions? options,
+    SaveOptions? options,
   }) {
     if (options is FirestoreSaveOptions) {
       return protectedSaveAndNotify(
@@ -140,7 +149,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
-    ICreateOrUpdateOptions? options,
+    UpsertOptions? options,
   }) {
     if (options is FirestoreCreateOrUpdateOptions) {
       return protectedCreateOrUpdateAndNotify(

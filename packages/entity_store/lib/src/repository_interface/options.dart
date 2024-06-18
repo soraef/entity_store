@@ -21,3 +21,49 @@ abstract class ICreateOrUpdateOptions {
     assert(!(useTransaction && useCache));
   }
 }
+
+enum FetchPolicy {
+  /// Fetch the data from the [EntityStore] first.
+  /// If the data is not found, fetch from the persisten.
+  storeFirst,
+
+  /// Fetch the data from the [EntityStore] only.
+  storeOnly,
+
+  /// Fetch the data from the persistent.
+  persistent,
+}
+
+class FindByIdOptions {
+  final FetchPolicy fetchPolicy;
+  const FindByIdOptions({
+    this.fetchPolicy = FetchPolicy.persistent,
+  });
+}
+
+class FindOneOptions {
+  final FetchPolicy fetchPolicy;
+  const FindOneOptions({
+    this.fetchPolicy = FetchPolicy.persistent,
+  });
+}
+
+class FindAllOptions {
+  final FetchPolicy fetchPolicy;
+  const FindAllOptions({
+    this.fetchPolicy = FetchPolicy.persistent,
+  });
+}
+
+class UpsertOptions {
+  final FetchPolicy fetchPolicy;
+  final bool useTransaction;
+  const UpsertOptions({
+    this.fetchPolicy = FetchPolicy.persistent,
+    this.useTransaction = true,
+  });
+}
+
+class SaveOptions {}
+
+class DeleteOptions {}

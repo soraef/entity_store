@@ -1,2 +1,5 @@
 .DS_Store
 example/listener_example/
+
+# FVM Version Cache
+.fvm/

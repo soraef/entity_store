@@ -7,6 +7,8 @@ final entityStoreNotifier = EntityStoreNotifier();
 final entityStoreController = EntityStoreController(entityStoreNotifier);
 final storageHandler = InMemoryStorageHandler();
 final todoRepository = TodoRepository(entityStoreController, storageHandler);
+final subTodoRepository =
+    SubTodoRepository(entityStoreController, storageHandler);
 
 void main() {
   runApp(const MyApp());
@@ -85,19 +87,52 @@ class TodoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final todo = context.watchOne<int, Todo>(todoId);
+    final subTodoList = context
+        .watchById<int, Todo>(todoId)
+        .watchWhere<int, SubTodo>(
+          (todo, subTodo) => todo?.id == subTodo.todoId,
+        )
+        .value;
+
     if (todo == null) {
       return const SizedBox();
     }
 
-    return CheckboxListTile(
-      title: Text(todo.name),
-      value: todo.isDone,
-      onChanged: (bool? value) {
-        if (value == null) {
-          return;
-        }
-        todoRepository.save(todo.toggle());
-      },
+    return Column(
+      children: [
+        CheckboxListTile(
+          title: Text(todo.name),
+          value: todo.isDone,
+          onChanged: (bool? value) {
+            if (value == null) {
+              return;
+            }
+            todoRepository.save(todo.toggle());
+          },
+        ),
+        const Divider(),
+        for (final subTodo in subTodoList.entities)
+          CheckboxListTile(
+            title: Text("   ${subTodo.name}"),
+            value: subTodo.isDone,
+            onChanged: (bool? value) {
+              if (value == null) {
+                return;
+              }
+              subTodoRepository.save(subTodo.toggle());
+            },
+          ),
+        TextButton.icon(
+          icon: const Icon(Icons.add),
+          label: const Text('Add Sub Todo'),
+          onPressed: () {
+            subTodoRepository.save(
+              SubTodo.create(subTodoList.length + todo.id * 100, todoId),
+            );
+          },
+        ),
+        const Divider(),
+      ],
     );
   }
 }

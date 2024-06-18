@@ -3,29 +3,34 @@ part of '../local_storage_repository.dart';
 class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
     implements IRepositoryQuery<Id, E> {
   final LocalStorageRepository<Id, E> _repository;
-  final List<RepositoryFilter> _filters;
-  final List<RepositorySort> _sorts;
-  final int? _limitNum;
-  final Id? _startAfterId;
 
-  List<RepositoryFilter> get getFilters => _filters;
-  List<RepositorySort> get getSorts => _sorts;
-  int? get getLimit => _limitNum;
-  Id? get getStartAfterId => _startAfterId;
+  @override
+  final List<RepositoryFilter> filters;
+  @override
+  final List<RepositorySort> sorts;
+  @override
+  final int? limitNum;
+  @override
+  final Id? startAfterId;
+
+  List<RepositoryFilter> get getFilters => filters;
+  List<RepositorySort> get getSorts => sorts;
+  int? get getLimit => limitNum;
+  Id? get getStartAfterId => startAfterId;
 
   LocalStorageRepositoryQuery._(
     this._repository,
-    this._filters,
-    this._sorts,
-    this._limitNum,
-    this._startAfterId,
+    this.filters,
+    this.sorts,
+    this.limitNum,
+    this.startAfterId,
   );
 
   const LocalStorageRepositoryQuery(this._repository)
-      : _filters = const [],
-        _sorts = const [],
-        _limitNum = null,
-        _startAfterId = null;
+      : filters = const [],
+        sorts = const [],
+        limitNum = null,
+        startAfterId = null;
 
   @override
   LocalStorageRepositoryQuery<Id, E> where(
@@ -45,7 +50,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
     return LocalStorageRepositoryQuery._(
       _repository,
       [
-        ..._filters,
+        ...filters,
         if (isEqualTo != null)
           RepositoryFilter(
             field,
@@ -113,9 +118,9 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
             isNull,
           ),
       ],
-      _sorts,
-      _limitNum,
-      _startAfterId,
+      sorts,
+      limitNum,
+      startAfterId,
     );
   }
 
@@ -126,16 +131,16 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   }) {
     return LocalStorageRepositoryQuery._(
       _repository,
-      _filters,
+      filters,
       [
-        ..._sorts,
+        ...sorts,
         RepositorySort(
           field,
           descending,
         ),
       ],
-      _limitNum,
-      _startAfterId,
+      limitNum,
+      startAfterId,
     );
   }
 
@@ -143,31 +148,52 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   LocalStorageRepositoryQuery<Id, E> limit(int count) {
     return LocalStorageRepositoryQuery._(
       _repository,
-      _filters,
-      _sorts,
+      filters,
+      sorts,
       count,
-      _startAfterId,
+      startAfterId,
     );
   }
 
   @override
-  LocalStorageRepositoryQuery<Id, E> startAfterId(Id id) {
+  LocalStorageRepositoryQuery<Id, E> startAfter(Id id) {
     return LocalStorageRepositoryQuery._(
       _repository,
-      _filters,
-      _sorts,
-      _limitNum,
+      filters,
+      sorts,
+      limitNum,
       id,
     );
   }
 
   @override
   bool test(Map<String, dynamic> object) {
-    return _filters.map((e) => e.test(object)).every((e) => e);
+    return filters.map((e) => e.test(object)).every((e) => e);
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll() async {
+  Future<Result<List<E>, Exception>> findAll({
+    FindAllOptions? options,
+  }) async {
+    options = options ?? const FindAllOptions();
+    final objects = _repository.controller
+        .getAll<Id, E>()
+        .map((e) => _repository.toJson(e))
+        .toList();
+    var storeEntities = IRepositoryQuery.findEntities(objects, this)
+        .map((e) => _repository.fromJson(e))
+        .toList();
+
+    if (options.fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.ok(storeEntities);
+    }
+
+    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+      if (storeEntities.isNotEmpty) {
+        return Result.ok(storeEntities);
+      }
+    }
+
     final result = await _repository.localStorageEntityHander.loadEntityList();
 
     if (result.isErr) {
@@ -207,8 +233,14 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E?, Exception>> findOne() async {
-    return (await findAll()).mapOk((ok) => ok.firstOrNull);
+  Future<Result<E?, Exception>> findOne({
+    FindOneOptions? options,
+  }) async {
+    options ??= const FindOneOptions();
+
+    return (await findAll(
+            options: FindAllOptions(fetchPolicy: options.fetchPolicy)))
+        .mapOk((ok) => ok.firstOrNull);
   }
 
   @override
