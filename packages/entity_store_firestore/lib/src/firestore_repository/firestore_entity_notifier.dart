@@ -14,6 +14,7 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   );
   @protected
   Future<Result<List<E>, Exception>> protectedListAndNotify(Query ref);
+
   @protected
   Future<Result<E, Exception>> protectedSaveAndNotify(
     CollectionReference collection,
@@ -33,6 +34,17 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
     bool? useTransaction,
     List<Object>? mergeFields,
   });
+
+  @protected
+  Stream<Result<E?, Exception>> protectedObserveById(
+    CollectionReference<Map<String, dynamic>> collectionRef,
+    Id id,
+  );
+
+  @protected
+  Stream<Result<List<EntityChange<E>>, Exception>> protectedObserveCollection(
+    Query collection,
+  );
 }
 
 mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
@@ -257,6 +269,73 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
         ),
       );
     }
+  }
+
+  @override
+  Stream<Result<E?, Exception>> protectedObserveById(
+    CollectionReference<Map<String, dynamic>> collectionRef,
+    Id id,
+  ) {
+    return collectionRef.doc(idToString(id)).snapshots().map((event) {
+      if (event.exists) {
+        try {
+          final entity = fromJson(event.data() as dynamic);
+          notifyGetComplete(entity);
+          return Result.ok(entity);
+        } on Exception catch (e) {
+          return Result.err(
+            JsonConverterFailure(
+              entityType: E,
+              fetched: event.data(),
+              exception: e,
+            ),
+          );
+        }
+      } else {
+        notifyEntityNotFound(id);
+        return Result.ok(null);
+      }
+    });
+  }
+
+  @override
+  Stream<Result<List<EntityChange<E>>, Exception>> protectedObserveCollection(
+    Query collection,
+  ) {
+    return collection.snapshots().map((event) {
+      final changes = event.docChanges.map((e) {
+        final entity = fromJson(e.doc.data() as dynamic);
+        if (e.type == DocumentChangeType.added) {
+          return EntityChange<E>(
+            entity: entity,
+            changeType: ChangeType.created,
+          );
+        } else if (e.type == DocumentChangeType.modified) {
+          return EntityChange<E>(
+            entity: entity,
+            changeType: ChangeType.updated,
+          );
+        } else if (e.type == DocumentChangeType.removed) {
+          return EntityChange<E>(
+            entity: entity,
+            changeType: ChangeType.deleted,
+          );
+        } else {
+          throw UnimplementedError();
+        }
+      }).toList();
+
+      for (final change in changes) {
+        if (change.changeType == ChangeType.created) {
+          notifyGetComplete(change.entity);
+        } else if (change.changeType == ChangeType.updated) {
+          notifyGetComplete(change.entity);
+        } else if (change.changeType == ChangeType.deleted) {
+          notifyDeleteComplete(change.entity.id);
+        }
+      }
+      return Result.ok(changes);
+    });
   }
 
   List<E> _convert(List<QueryDocumentSnapshot<dynamic>> docs) {

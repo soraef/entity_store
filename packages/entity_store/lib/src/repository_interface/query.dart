@@ -88,6 +88,10 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
     FindOneOptions? options,
   });
 
+  Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
+    ObserveAllOptions? options,
+  });
+
   Future<Result<int, Exception>> count();
 
   List<RepositoryFilter> get filters;
@@ -127,4 +131,20 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
 
     return entites.toList();
   }
+}
+
+class EntityChange<E> {
+  final E entity;
+  final ChangeType changeType;
+
+  EntityChange({
+    required this.entity,
+    required this.changeType,
+  });
+}
+
+enum ChangeType {
+  created,
+  updated,
+  deleted,
 }

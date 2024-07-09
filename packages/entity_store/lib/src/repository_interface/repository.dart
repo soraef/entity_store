@@ -84,6 +84,9 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     UpsertOptions? options,
   });
 
+  Stream<Result<E?, Exception>> observeById(Id id,
+      {ObserveByIdOptions? options});
+
   Map<String, dynamic> toJson(E entity);
   E fromJson(Map<String, dynamic> json);
 }

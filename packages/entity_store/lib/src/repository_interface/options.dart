@@ -67,3 +67,7 @@ class UpsertOptions {
 class SaveOptions {}
 
 class DeleteOptions {}
+
+class ObserveAllOptions {}
+
+class ObserveByIdOptions {}

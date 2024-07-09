@@ -170,5 +170,13 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     }
   }
 
+  @override
+  Stream<Result<E?, Exception>> observeById(
+    Id id, {
+    ObserveByIdOptions? options,
+  }) {
+    return protectedObserveById(collectionRef, id);
+  }
+
   DocumentReference getDocumentRef(Id id);
 }

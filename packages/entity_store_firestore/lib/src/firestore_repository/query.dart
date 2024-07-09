@@ -303,4 +303,12 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     }
     return Result.ok(count);
   }
+
+  @override
+  Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
+    ObserveAllOptions? options,
+  }) async* {
+    final ref = await _build();
+    yield* _repository.protectedObserveCollection(ref);
+  }
 }

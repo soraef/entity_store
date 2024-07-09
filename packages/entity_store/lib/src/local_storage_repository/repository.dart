@@ -127,4 +127,10 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
       },
     );
   }
+
+  @override
+  Stream<Result<E?, Exception>> observeById(Id id,
+      {ObserveByIdOptions? options}) {
+    throw UnimplementedError();
+  }
 }

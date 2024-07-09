@@ -247,4 +247,12 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   Future<Result<int, Exception>> count() async {
     return (await findAll()).mapOk((ok) => ok.length);
   }
+
+  @override
+  Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
+    ObserveAllOptions? options,
+  }) {
+    // TODO: implement watchAll
+    throw UnimplementedError();
+  }
 }
