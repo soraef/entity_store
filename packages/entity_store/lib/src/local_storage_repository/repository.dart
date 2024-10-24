@@ -40,7 +40,16 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<Id, Exception>> delete(Id id, {DeleteOptions? options}) async {
+  Future<Result<Id, Exception>> delete(
+    Id id, {
+    DeleteOptions? options,
+    ITransactionContext? transaction,
+  }) async {
+    if (transaction != null) {
+      throw UnimplementedError(
+          'Transaction is not supported in LocalStorageRepository');
+    }
+
     final deleteResult = await localStorageEntityHander.delete(id);
 
     return deleteResult.map(
@@ -57,7 +66,13 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
+    ITransactionContext? transaction,
   }) {
+    if (transaction != null) {
+      throw UnimplementedError(
+          'Transaction is not supported in LocalStorageRepository');
+    }
+
     return query().findAll();
   }
 
@@ -65,7 +80,13 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   Future<Result<E?, Exception>> findById(
     Id id, {
     FindByIdOptions? options,
+    ITransactionContext? transaction,
   }) async {
+    if (transaction != null) {
+      throw UnimplementedError(
+          'Transaction is not supported in LocalStorageRepository');
+    }
+
     options ??= const FindByIdOptions();
 
     final storeEntity = controller.getById<Id, E>(id);
@@ -99,7 +120,14 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
+    ITransactionContext? transaction,
   }) {
+    if (transaction != null) {
+      throw UnimplementedError(
+        'Transaction is not supported in LocalStorageRepository',
+      );
+    }
+
     return query().findOne();
   }
 
@@ -114,7 +142,17 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E, Exception>> save(E entity, {SaveOptions? options}) async {
+  Future<Result<E, Exception>> save(
+    E entity, {
+    SaveOptions? options,
+    ITransactionContext? transaction,
+  }) async {
+    if (transaction != null) {
+      throw UnimplementedError(
+        'Transaction is not supported in LocalStorageRepository',
+      );
+    }
+
     final saveResult = await localStorageEntityHander.save(entity);
 
     return saveResult.map(

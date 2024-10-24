@@ -82,10 +82,12 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
 
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
+    ITransactionContext? transaction,
   });
 
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
+    ITransactionContext? transaction,
   });
 
   Stream<Result<List<EntityChange<E>>, Exception>> observeAll({

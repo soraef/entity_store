@@ -26,6 +26,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   Future<Result<E?, Exception>> findById(
     Id id, {
     FindByIdOptions? options,
+    ITransactionContext? transaction,
   });
 
   /// Finds all entities of type `E`.
@@ -33,6 +34,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// Returns a `Result` object that contains a list of entities or an exception if an error occurs.
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
+    ITransactionContext? transaction,
   });
 
   /// Finds a single entity of type `E`.
@@ -59,6 +61,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   Future<Result<E, Exception>> save(
     E entity, {
     SaveOptions? options,
+    ITransactionContext? transaction,
   });
 
   /// Deletes an entity by its `id`.
@@ -68,6 +71,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   Future<Result<Id, Exception>> delete(
     Id id, {
     DeleteOptions? options,
+    ITransactionContext? transaction,
   });
 
   /// Upserts an entity by its `id`.
@@ -84,8 +88,10 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     UpsertOptions? options,
   });
 
-  Stream<Result<E?, Exception>> observeById(Id id,
-      {ObserveByIdOptions? options});
+  Stream<Result<E?, Exception>> observeById(
+    Id id, {
+    ObserveByIdOptions? options,
+  });
 
   Map<String, dynamic> toJson(E entity);
   E fromJson(Map<String, dynamic> json);

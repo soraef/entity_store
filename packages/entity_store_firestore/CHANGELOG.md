@@ -70,3 +70,7 @@
 
 ## 4.1.1
 * FIX: upgrade firebase SDK version up
+
+## 5.0.0
+* FIX: upgrade entity_store 5.0.0
+* FEAT: Add observeAll and observeById options to repository interface

@@ -71,3 +71,19 @@ class DeleteOptions {}
 class ObserveAllOptions {}
 
 class ObserveByIdOptions {}
+
+class QueryUpsertOptions {
+  final FetchPolicy fetchPolicy;
+  final bool useTransaction;
+  const QueryUpsertOptions({
+    this.fetchPolicy = FetchPolicy.persistent,
+    this.useTransaction = true,
+  });
+
+  UpsertOptions toUpsertOptions() {
+    return UpsertOptions(
+      fetchPolicy: fetchPolicy,
+      useTransaction: useTransaction,
+    );
+  }
+}

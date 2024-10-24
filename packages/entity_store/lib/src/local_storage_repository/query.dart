@@ -174,7 +174,14 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
+    ITransactionContext? transaction,
   }) async {
+    if (transaction != null) {
+      throw UnimplementedError(
+        'Transaction is not supported in LocalStorageRepository',
+      );
+    }
+
     options = options ?? const FindAllOptions();
     final objects = _repository.controller
         .getAll<Id, E>()
@@ -235,7 +242,14 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
+    ITransactionContext? transaction,
   }) async {
+    if (transaction != null) {
+      throw UnimplementedError(
+        'Transaction is not supported in LocalStorageRepository',
+      );
+    }
+
     options ??= const FindOneOptions();
 
     return (await findAll(

@@ -79,6 +79,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   Future<Result<Id, Exception>> delete(
     Id id, {
     DeleteOptions? options,
+    ITransactionContext? transaction,
   }) async {
     return protectedDeleteAndNotify(collectionRef, id);
   }
@@ -86,7 +87,11 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
+    ITransactionContext? transaction,
   }) {
+    if (transaction != null) {
+      throw UnimplementedError("findAll with transaction is not implemented");
+    }
     return query().findAll(
       options: options,
     );
@@ -95,7 +100,11 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
+    ITransactionContext? transaction,
   }) {
+    if (transaction != null) {
+      throw UnimplementedError("findOne with transaction is not implemented");
+    }
     return query().findOne(
       options: options,
     );
@@ -110,7 +119,16 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   Future<Result<E?, Exception>> findById(
     Id id, {
     FindByIdOptions? options,
+    ITransactionContext? transaction,
   }) async {
+    if (transaction != null && transaction is! FirestoreTransactionContext) {
+      throw ArgumentError("transaction must be FirestoreTransactionContext");
+    }
+
+    if (transaction != null) {
+      (transaction as FirestoreTransactionContext).value.get();
+    }
+
     options = options ?? const FindByIdOptions();
     return protectedGetAndNotify(
       collectionRef,

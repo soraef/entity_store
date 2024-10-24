@@ -11,3 +11,4 @@ part 'firestore_repository/query.dart';
 part "firestore_repository/options.dart";
 part 'firestore_repository/repository.dart';
 part 'firestore_repository/firestore_entity_notifier.dart';
+part 'firestore_repository/transaction.dart';
