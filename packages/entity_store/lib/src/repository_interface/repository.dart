@@ -42,6 +42,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// Returns a `Result` object that contains the found entity or an exception if an error occurs.
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
+    ITransactionContext? transaction,
   });
 
   /// Counts the number of entities of type `E`.
