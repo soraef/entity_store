@@ -20,12 +20,12 @@ part of '../entity_store.dart';
 ///  });
 /// }
 /// ```
-abstract class Entity<Id> {
+abstract class Entity {
   /// The unique identifier of the entity.
-  Id get id;
+  String get id;
 }
 
-class EntityJsonConverter<Id, E extends Entity<Id>> {
+class EntityJsonConverter<E extends Entity> {
   final E Function(Map<String, dynamic>) fromJson;
   final Map<String, dynamic> Function(E) toJson;
 

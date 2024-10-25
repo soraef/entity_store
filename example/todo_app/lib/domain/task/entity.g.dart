@@ -6,7 +6,7 @@ part of 'entity.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$_Task _$$_TaskFromJson(Map<String, dynamic> json) => _$_Task(
+_$TaskImpl _$$TaskImplFromJson(Map<String, dynamic> json) => _$TaskImpl(
       id: const TaskIdConverter().fromJson(json['id'] as String),
       userId: const UserIdConverter().fromJson(json['userId'] as String),
       name: json['name'] as String,
@@ -21,7 +21,8 @@ _$_Task _$$_TaskFromJson(Map<String, dynamic> json) => _$_Task(
           const DateTimeConverter().fromJson(json['updatedAt'] as Timestamp?),
     );
 
-Map<String, dynamic> _$$_TaskToJson(_$_Task instance) => <String, dynamic>{
+Map<String, dynamic> _$$TaskImplToJson(_$TaskImpl instance) =>
+    <String, dynamic>{
       'id': const TaskIdConverter().toJson(instance.id),
       'userId': const UserIdConverter().toJson(instance.userId),
       'name': instance.name,

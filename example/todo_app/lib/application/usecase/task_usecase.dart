@@ -17,7 +17,7 @@ import 'package:type_result/type_result.dart';
 
 final taskUsecase = Provider(
   (ref) => TaskUsecase(
-    ref.read(entityStore).value.get<AuthId, Auth>(AuthId("authId"))?.userId!,
+    ref.read(entityStore).value.get<Auth>(AuthId("authId"))?.userId!,
     ref.read(userRepo),
     ref.read(authRepo),
   ),

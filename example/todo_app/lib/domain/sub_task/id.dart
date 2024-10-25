@@ -2,9 +2,7 @@ import 'package:entity_store/entity_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-class SubTaskId extends Id {
-  const SubTaskId(String value) : super(value);
-
+extension type SubTaskId(String value) implements String {
   factory SubTaskId.create() {
     return SubTaskId(const Uuid().v4());
   }

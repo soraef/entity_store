@@ -2,9 +2,9 @@
 
 part of '../firestore_repository.dart';
 
-class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
-    implements IRepositoryQuery<Id, E> {
-  final BaseFirestoreRepository<Id, E> _repository;
+class FirestoreRepositoryQuery<E extends Entity>
+    implements IRepositoryQuery<E> {
+  final BaseFirestoreRepository<E> _repository;
   @override
   final List<RepositoryFilter> filters;
   @override
@@ -12,12 +12,12 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   @override
   final int? limitNum;
   @override
-  final Id? startAfterId;
+  final String? startAfterId;
 
   List<RepositoryFilter> get getFilters => filters;
   List<RepositorySort> get getSorts => sorts;
   int? get getLimit => limitNum;
-  Id? get getStartAfterId => startAfterId;
+  String? get getStartAfterId => startAfterId;
 
   FirestoreRepositoryQuery._(
     this._repository,
@@ -34,7 +34,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
         startAfterId = null;
 
   @override
-  FirestoreRepositoryQuery<Id, E> where(
+  FirestoreRepositoryQuery<E> where(
     Object field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -126,11 +126,11 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> orderBy(
+  FirestoreRepositoryQuery<E> orderBy(
     Object field, {
     bool descending = false,
   }) {
-    return FirestoreRepositoryQuery<Id, E>._(
+    return FirestoreRepositoryQuery<E>._(
       _repository,
       filters,
       [...sorts, RepositorySort(field, descending)],
@@ -140,8 +140,8 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> limit(int num) {
-    return FirestoreRepositoryQuery<Id, E>._(
+  FirestoreRepositoryQuery<E> limit(int num) {
+    return FirestoreRepositoryQuery<E>._(
       _repository,
       filters,
       sorts,
@@ -151,8 +151,8 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> startAfter(Id id) {
-    return FirestoreRepositoryQuery<Id, E>._(
+  FirestoreRepositoryQuery<E> startAfter(String id) {
+    return FirestoreRepositoryQuery<E>._(
       _repository,
       filters,
       sorts,
@@ -229,7 +229,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     ref = _buildLimitQuery(ref);
 
     if (startAfterId != null) {
-      final doc = await _repository.getDocumentRef(startAfterId as Id).get();
+      final doc = await _repository.getDocumentRef(startAfterId!).get();
       ref = ref.startAfterDocument(doc);
     }
 
@@ -242,7 +242,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }) async {
     options = options ?? const FindAllOptions();
     final objects = _repository.controller
-        .getAll<Id, E>()
+        .getAll<E>()
         .map((e) => _repository.toJson(e))
         .toList();
     final storeEntities = IRepositoryQuery.findEntities(objects, this)
@@ -269,7 +269,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }) async {
     options = options ?? const FindOneOptions();
     final objects = _repository.controller
-        .getAll<Id, E>()
+        .getAll<E>()
         .map((e) => _repository.toJson(e))
         .toList();
     final storeEntity = IRepositoryQuery.findEntities(objects, this)

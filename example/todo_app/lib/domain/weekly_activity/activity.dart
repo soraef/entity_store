@@ -8,7 +8,7 @@ part 'activity.freezed.dart';
 part 'activity.g.dart';
 
 @freezed
-class Activity with _$Activity implements Entity<ActivityId> {
+class Activity with _$Activity implements Entity {
   const Activity._();
   @JsonSerializable(explicitToJson: true)
   const factory Activity({
@@ -20,9 +20,7 @@ class Activity with _$Activity implements Entity<ActivityId> {
       _$ActivityFromJson(json);
 }
 
-class ActivityId extends Id {
-  const ActivityId(String value) : super(value);
-
+extension type ActivityId(String value) implements String {
   factory ActivityId.create() {
     return ActivityId(const Uuid().v4());
   }

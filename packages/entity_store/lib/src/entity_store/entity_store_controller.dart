@@ -13,7 +13,7 @@ class EntityStoreController {
     _listenToEntityEvent();
   }
 
-  void dispatch<Id, E extends Entity<Id>>(PersistenceEvent<Id, E> event) {
+  void dispatch<E extends Entity>(PersistenceEvent<E> event) {
     event.apply(_entityStore);
     _controller.sink.add(event);
   }
@@ -22,12 +22,12 @@ class EntityStoreController {
     _entityStore.update((prev) => EntityStore.empty());
   }
 
-  void put<Id, E extends Entity<Id>>(E entity) {
-    _entityStore.update((prev) => prev.put<Id, E>(entity));
+  void put<E extends Entity>(E entity) {
+    _entityStore.update((prev) => prev.put<E>(entity));
   }
 
-  void delete<Id, E extends Entity<Id>>(Id id) {
-    _entityStore.update((prev) => prev.delete<Id, E>(id));
+  void delete<E extends Entity>(String id) {
+    _entityStore.update((prev) => prev.delete<E>(id));
   }
 
   void registEntityEventListener(EntityEventListener listener) {
@@ -35,21 +35,21 @@ class EntityStoreController {
     _listeners.add(listener);
   }
 
-  E? getById<Id, E extends Entity<Id>>(Id id) {
-    return _entityStore.value.get<Id, E>(id);
+  E? getById<E extends Entity>(String id) {
+    return _entityStore.value.get<E>(id);
   }
 
-  List<E> getAll<Id, E extends Entity<Id>>() {
-    return _entityStore.value.getEntityMap<Id, E>()?.entities.toList() ?? [];
+  List<E> getAll<E extends Entity>() {
+    return _entityStore.value.getEntityMap<E>()?.entities.toList() ?? [];
   }
 
-  EntityMap<Id, E> where<Id, E extends Entity<Id>>([
+  EntityMap<E> where<E extends Entity>([
     bool Function(E) test = testAlwaysTrue,
   ]) {
     return _entityStore.value.where(test);
   }
 
-  void _listenToEntityEvent<Id, E extends Entity<Id>>() {
+  void _listenToEntityEvent<E extends Entity>() {
     entityEventSubscription = entityEventStream.listen((event) {
       for (var listener in _listeners) {
         if (listener.shouldListenTo(event)) {
@@ -68,7 +68,7 @@ class StoreEventCache {
     _cache[event.entityType]!.add(event);
   }
 
-  Future<void> clear<Id, E extends Entity<Id>>() async {
+  Future<void> clear<E extends Entity>() async {
     _cache[E] = [];
   }
 
@@ -76,31 +76,31 @@ class StoreEventCache {
     _cache.clear();
   }
 
-  Future<List<PersistenceEvent>> getEvents<Id, E extends Entity<Id>>() async {
+  Future<List<PersistenceEvent>> getEvents<E extends Entity>() async {
     return _cache[E] ?? [];
   }
 }
 
-mixin EntityChangeNotifier<Id, E extends Entity<Id>> {
+mixin EntityChangeNotifier<E extends Entity> {
   EntityStoreController get controller;
 
   void notifyGetComplete(E entity) {
-    controller.dispatch(GetEvent<Id, E>.now(entity.id, entity));
+    controller.dispatch(GetEvent<E>.now(entity.id, entity));
   }
 
-  void notifyEntityNotFound(Id id) {
-    controller.dispatch(GetEvent<Id, E>.now(id, null));
+  void notifyEntityNotFound(String id) {
+    controller.dispatch(GetEvent<E>.now(id, null));
   }
 
   void notifyListComplete(List<E> entities) {
-    controller.dispatch(ListEvent<Id, E>.now(entities));
+    controller.dispatch(ListEvent<E>.now(entities));
   }
 
   void notifySaveComplete(E entity) {
-    controller.dispatch(SaveEvent<Id, E>.now(entity));
+    controller.dispatch(SaveEvent<E>.now(entity));
   }
 
-  void notifyDeleteComplete(Id id) {
-    controller.dispatch(DeleteEvent<Id, E>.now(id));
+  void notifyDeleteComplete(String id) {
+    controller.dispatch(DeleteEvent<E>.now(id));
   }
 }

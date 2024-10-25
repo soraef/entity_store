@@ -15,7 +15,7 @@ part 'entity.freezed.dart';
 part 'entity.g.dart';
 
 @freezed
-class Task with _$Task implements Entity<TaskId> {
+class Task with _$Task implements Entity {
   const Task._();
   @JsonSerializable(explicitToJson: true)
   const factory Task({
@@ -121,4 +121,4 @@ class Task with _$Task implements Entity<TaskId> {
   }
 }
 
-typedef Tasks = EntityMap<TaskId, Task>;
+typedef Tasks = EntityMap<Task>;

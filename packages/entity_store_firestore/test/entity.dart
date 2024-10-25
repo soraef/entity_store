@@ -1,13 +1,9 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:type_result/src/result.dart';
 
-class UserId extends Id {
-  UserId(super.value);
-}
-
-class User extends Entity<UserId> {
+class User extends Entity {
   @override
-  final UserId id;
+  final String id;
   final String name;
   final int age;
 
@@ -23,14 +19,14 @@ class User extends Entity<UserId> {
   }
 }
 
-final userConverter = EntityJsonConverter<UserId, User>(
+final userConverter = EntityJsonConverter<User>(
   fromJson: (json) => User(
-    id: UserId(json["id"]),
+    id: json["id"],
     name: json["name"],
     age: json["age"],
   ),
   toJson: (e) => {
-    "id": e.id.value,
+    "id": e.id,
     "name": e.name,
     "age": e.age,
   },
@@ -49,16 +45,16 @@ class Store with EntityStoreMixin {
 }
 
 final users = [
-  User(id: UserId("1"), name: "aaa", age: 1),
-  User(id: UserId("2"), name: "aab", age: 1),
-  User(id: UserId("3"), name: "aba", age: 1),
-  User(id: UserId("4"), name: "abb", age: 2),
-  User(id: UserId("5"), name: "baa", age: 2),
-  User(id: UserId("6"), name: "bab", age: 2),
-  User(id: UserId("7"), name: "bba", age: 3),
-  User(id: UserId("8"), name: "bbb", age: 3),
-  User(id: UserId("9"), name: "aac", age: 3),
-  User(id: UserId("10"), name: "aca", age: 4),
+  User(id: "1", name: "aaa", age: 1),
+  User(id: "2", name: "aab", age: 1),
+  User(id: "3", name: "aba", age: 1),
+  User(id: "4", name: "abb", age: 2),
+  User(id: "5", name: "baa", age: 2),
+  User(id: "6", name: "bab", age: 2),
+  User(id: "7", name: "bba", age: 3),
+  User(id: "8", name: "bbb", age: 3),
+  User(id: "9", name: "aac", age: 3),
+  User(id: "10", name: "aca", age: 4),
 ];
 
 class InMemoryLocalStorageHandler implements ILocalStorageHandler {
@@ -88,13 +84,13 @@ class InMemoryLocalStorageHandler implements ILocalStorageHandler {
   }
 }
 
-class UserRepo extends LocalStorageRepository<UserId, User> {
+class UserRepo extends LocalStorageRepository<User> {
   UserRepo(super.controller, super.localStorageHandler);
 
   @override
   User fromJson(Map<String, dynamic> json) {
     return User(
-      id: UserId(json["id"]),
+      id: json["id"],
       name: json["name"],
       age: json["age"],
     );
@@ -103,7 +99,7 @@ class UserRepo extends LocalStorageRepository<UserId, User> {
   @override
   Map<String, dynamic> toJson(User entity) {
     return {
-      "id": entity.id.value,
+      "id": entity.id,
       "name": entity.name,
       "age": entity.age,
     };

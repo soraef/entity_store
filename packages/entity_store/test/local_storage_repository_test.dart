@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'entity.dart';
 
-class UserRepository extends LocalStorageRepository<UserId, User> {
+class UserRepository extends LocalStorageRepository<User> {
   UserRepository(EntityStoreController controller)
       : super(
           controller,
@@ -37,7 +37,7 @@ void main() {
 
     expect(userGet.ok!.id, users[0].id);
     expect(
-      controller.getById<UserId, User>(userGet.ok!.id)!.id,
+      controller.getById<User>(userGet.ok!.id)!.id,
       users[0].id,
     );
 
@@ -63,7 +63,7 @@ void main() {
     expect(userGet4.ok!.id, users[1].id);
 
     await repo.save(users[2]);
-    controller.delete<UserId, User>(users[2].id);
+    controller.delete<User>(users[2].id);
 
     final userGet5 = await repo.findById(
       users[2].id,
@@ -78,7 +78,7 @@ void main() {
     final userGet = await repo.findById(users.first.id);
 
     expect(userGet.ok, null);
-    expect(controller.getById<UserId, User>(users.first.id), null);
+    expect(controller.getById<User>(users.first.id), null);
   });
 
   test("findAll", () async {
@@ -88,16 +88,16 @@ void main() {
 
     final list = await repo.findAll();
     expect(list.ok.length, users.length);
-    expect(controller.where<UserId, User>().length, users.length);
+    expect(controller.where<User>().length, users.length);
 
     final list2 = await repo.query().limit(3).findAll();
     expect(list2.ok.length, 3);
 
     final list3 = await repo.query().where('id', isEqualTo: '5').findAll();
-    expect(list3.ok.first.id.value, "5");
+    expect(list3.ok.first.id, "5");
 
     /// FindAllOptions.fetchPolicy = FetchPolicy.storeOnly
-    controller.delete<UserId, User>(users[0].id);
+    controller.delete<User>(users[0].id);
     final list4 = await repo.query().where('id', isEqualTo: '1').findAll(
           options: const FindAllOptions(fetchPolicy: FetchPolicy.storeOnly),
         );
@@ -110,14 +110,14 @@ void main() {
     expect(list5.ok.length, 1);
 
     await repo.save(users[0]);
-    controller.delete<UserId, User>(users[0].id);
+    controller.delete<User>(users[0].id);
     final list6 = await repo.query().where('id', isEqualTo: '1').findAll(
           options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
         );
     expect(list6.ok.length, 1);
 
     await repo.save(users[0]);
-    controller.delete<UserId, User>(users[0].id);
+    controller.delete<User>(users[0].id);
     final list7 = await repo.query().where('age', isEqualTo: 1).findAll(
           options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
         );
@@ -143,8 +143,8 @@ void main() {
       await repo.save(user);
     }
 
-    final user = User(id: UserId("1"), name: "aaa", age: 1);
-    final user2 = User(id: UserId("1"), name: "bbb", age: 2);
+    final user = User(id: "1", name: "aaa", age: 1);
+    final user2 = User(id: "1", name: "bbb", age: 2);
 
     // updated user because user is already exists
     await repo.upsert(
@@ -157,14 +157,14 @@ void main() {
     expect(userGet.ok!.name, "bbb");
 
     // created new user because user is not exists
-    final user3 = User(id: UserId("11"), name: "aaa", age: 1);
+    final user3 = User(id: "11", name: "aaa", age: 1);
     await repo.upsert(
       user3.id,
       creater: () => user3,
       updater: (prev) => user2,
     );
 
-    final userGet2 = await repo.findById(UserId("11"));
+    final userGet2 = await repo.findById(user3.id);
     expect(userGet2.ok!.name, "aaa");
   });
 }

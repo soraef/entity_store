@@ -1,7 +1,7 @@
 // Entity操作に関連する基本イベントクラス
 part of '../entity_store.dart';
 
-abstract class EntityEvent<Id, E extends Entity<Id>> {
+abstract class EntityEvent<E extends Entity> {
   final E entity;
   EntityEvent(this.entity);
 
@@ -9,17 +9,17 @@ abstract class EntityEvent<Id, E extends Entity<Id>> {
 }
 
 // Entity追加イベント
-class EntityCreatedEvent<Id, E extends Entity<Id>> extends EntityEvent<Id, E> {
+class EntityCreatedEvent<E extends Entity> extends EntityEvent<E> {
   EntityCreatedEvent(super.entity);
 }
 
 // Entity変更イベント
-class EntityUpdatedEvent<Id, E extends Entity<Id>> extends EntityEvent<Id, E> {
+class EntityUpdatedEvent<E extends Entity> extends EntityEvent<E> {
   EntityUpdatedEvent(super.entity);
 }
 
 // Entity削除イベント
-class EntityDeletedEvent<Id, E extends Entity<Id>> extends EntityEvent<Id, E> {
+class EntityDeletedEvent<E extends Entity> extends EntityEvent<E> {
   EntityDeletedEvent(super.entity);
 }
 
@@ -30,18 +30,18 @@ abstract class EntityEventListener {
     this.controller = controller;
   }
 
-  E? getById<Id, E extends Entity<Id>>(Id id) {
-    return controller?.getById<Id, E>(id);
+  E? getById<E extends Entity>(String id) {
+    return controller?.getById<E>(id);
   }
 
-  void put<Id, E extends Entity<Id>>(E entity) {
-    controller?.put<Id, E>(entity);
+  void put<E extends Entity>(E entity) {
+    controller?.put<E>(entity);
   }
 
-  void delete<Id, E extends Entity<Id>>(Id id) {
-    controller?.delete<Id, E>(id);
+  void delete<E extends Entity>(String id) {
+    controller?.delete<E>(id);
   }
 
-  bool shouldListenTo<Id, E extends Entity<Id>>(EntityEvent<Id, E> event);
-  void handleEvent<Id, E extends Entity<Id>>(EntityEvent<Id, E> event);
+  bool shouldListenTo<E extends Entity>(EntityEvent<E> event);
+  void handleEvent<E extends Entity>(EntityEvent<E> event);
 }

@@ -56,8 +56,8 @@ class RepositorySort {
   RepositorySort(this.field, this.descending);
 }
 
-abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
-  IRepositoryQuery<Id, E> where(
+abstract class IRepositoryQuery<E extends Entity> {
+  IRepositoryQuery<E> where(
     Object field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -72,11 +72,11 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
     bool? isNull,
   });
 
-  IRepositoryQuery<Id, E> orderBy(Object field, {bool descending = false});
+  IRepositoryQuery<E> orderBy(Object field, {bool descending = false});
 
-  IRepositoryQuery<Id, E> limit(int count);
+  IRepositoryQuery<E> limit(int count);
 
-  IRepositoryQuery<Id, E> startAfter(Id id);
+  IRepositoryQuery<E> startAfter(String id);
 
   bool test(Map<String, dynamic> object);
 
@@ -97,11 +97,11 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
   List<RepositoryFilter> get filters;
   List<RepositorySort> get sorts;
   int? get limitNum;
-  Id? get startAfterId;
+  String? get startAfterId;
 
-  static List<Map<String, dynamic>> findEntities<E extends Entity<Id>, Id>(
+  static List<Map<String, dynamic>> findEntities<E extends Entity>(
     List<Map<String, dynamic>> objects,
-    IRepositoryQuery<Id, E> query,
+    IRepositoryQuery<E> query,
   ) {
     bool test(Map<String, dynamic> object) {
       return query.filters.map((e) => e.test(object)).every((e) => e);

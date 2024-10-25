@@ -27,7 +27,7 @@ part of '../local_storage_repository.dart';
 ///   // Handle the error...
 /// }
 /// ```
-class LocalStorageEntityHander<Id, E extends Entity<Id>> {
+class LocalStorageEntityHander<E extends Entity> {
   final ILocalStorageHandler localStorageHandler;
   LocalStorageEntityHander(
     this.localStorageHandler,
@@ -104,7 +104,7 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   /// If the current entity list cannot be loaded, returns an error [Result].
   /// If the entity is successfully deleted and saved to the local storage, returns a success [Result].
   /// If an exception occurs during the deletion or saving process, returns an error [Result] with the exception.
-  Future<Result<void, Exception>> delete(Id id) async {
+  Future<Result<void, Exception>> delete(String id) async {
     try {
       final deleteResult =
           await localStorageHandler.delete(_getEntityKey(id.toString()));

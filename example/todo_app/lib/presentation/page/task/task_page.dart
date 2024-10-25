@@ -13,8 +13,8 @@ class TaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasks = context.watchAll<TaskId, Task>();
-    final userId = context.watchAll<AuthId, Auth>().atOrNull(0)?.userId;
+    final tasks = context.watchAll<Task>();
+    final userId = context.watchAll<Auth>().atOrNull(0)?.userId;
 
     if (userId == null) {
       return Container();
@@ -182,7 +182,7 @@ class SubTaskListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final task = context.watchAll<TaskId, Task>().byId(taskId);
+    final task = context.watchAll<Task>().byId(taskId);
 
     final subTasks = task!.subTasks;
 
@@ -299,7 +299,7 @@ class SubTaskListPage extends ConsumerWidget {
 // //   }
 // // }
 
-// // class EntityListView<Id, E extends Entity<Id>> extends StatelessWidget {
+// // class EntityListView<E extends Entity> extends StatelessWidget {
 // //   const EntityListView({
 // //     super.key,
 // //     required this.loading,
@@ -307,7 +307,7 @@ class SubTaskListPage extends ConsumerWidget {
 // //     required this.itemBuilder,
 // //   });
 
-// //   final InfiniteLoadingNotifier<Id, E> loading;
+// //   final InfiniteLoadingNotifier<E> loading;
 // //   final List<E> entities;
 // //   final Widget Function(E entity) itemBuilder;
 

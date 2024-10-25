@@ -2,7 +2,7 @@ import 'package:entity_store/entity_store.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:todo_app/domain/user/id.dart';
 
-class Auth extends Entity<AuthId> {
+class Auth extends Entity {
   @override
   final AuthId id = AuthId("authId");
   final UserId? userId;
@@ -26,8 +26,8 @@ class Auth extends Entity<AuthId> {
   }
 }
 
-class AuthId extends Id {
-  AuthId(super.value);
+extension type AuthId(String value) implements String {
+  AuthId get id => AuthId(this);
 }
 
 class AuthIdJsonConverter extends JsonConverter<AuthId, String> {

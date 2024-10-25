@@ -22,75 +22,75 @@ class EntityStoreProviderScope extends StatelessWidget {
 }
 
 extension BuildContextEntityStoreProviderScope on BuildContext {
-  T selectAll<Id, E extends Entity<Id>, T>(
-    T Function(EntityMap<Id, E>) selector,
+  T selectAll<E extends Entity, T>(
+    T Function(EntityMap<E>) selector,
   ) {
     return select<EntityStoreNotifier, T>(
-      (value) => selector(value.state.where<Id, E>()),
+      (value) => selector(value.state.where<E>()),
     );
   }
 
-  T? selectOne<Id, E extends Entity<Id>, T>(
-    Id id,
+  T? selectOne<E extends Entity, T>(
+    String id,
     T Function(E) selector,
   ) {
     return select<EntityStoreNotifier, T?>((value) {
-      final entity = value.state.get<Id, E>(id);
+      final entity = value.state.get<E>(id);
       return entity != null ? selector(entity) : null;
     });
   }
 
-  EntityMap<Id, E> watchAll<Id, E extends Entity<Id>>([
+  EntityMap<E> watchAll<E extends Entity>([
     bool Function(E) test = testAlwaysTrue,
   ]) {
-    return selectAll<Id, E, EntityMap<Id, E>>((value) => value.where(test));
+    return selectAll<E, EntityMap<E>>((value) => value.where(test));
   }
 
-  E? watchOne<Id, E extends Entity<Id>>(Id id) {
-    return selectOne<Id, E, E?>(id, (value) => value);
+  E? watchOne<E extends Entity>(String id) {
+    return selectOne<E, E?>(id, (value) => value);
   }
 
-  EntityMap<Id, E> readAll<Id, E extends Entity<Id>>([
+  EntityMap<E> readAll<E extends Entity>([
     bool Function(E) test = testAlwaysTrue,
   ]) {
-    return read<EntityStoreNotifier>().value.where<Id, E>(test);
+    return read<EntityStoreNotifier>().value.where<E>(test);
   }
 
-  E? readOne<Id, E extends Entity<Id>>(Id id) {
-    return read<EntityStoreNotifier>().value.get<Id, E>(id);
+  E? readOne<E extends Entity>(String id) {
+    return read<EntityStoreNotifier>().value.get<E>(id);
   }
 
-  WatcherWhere<E?, void> watchById<Id, E extends Entity<Id>>(Id id) {
-    return _watchById<Id, E, void>(null, (prevData) => id);
+  WatcherWhere<E?, void> watchById<E extends Entity>(String id) {
+    return _watchById<E, void>(null, (prevData) => id);
   }
 
-  WatcherWhere<EntityMap<Id, E>, void> watchWhere<Id, E extends Entity<Id>>([
+  WatcherWhere<EntityMap<E>, void> watchWhere<E extends Entity>([
     bool Function(E?)? test,
   ]) {
-    return _watchWhere<Id, E, void>(
+    return _watchWhere<E, void>(
       null,
       (__, entity) => test?.call(entity) ?? true,
     );
   }
 
-  WatcherWhere<E, U> _watchById<Id, E extends Entity<Id>, U>(
+  WatcherWhere<E, U> _watchById<E extends Entity, U>(
     WatcherWhere<U, dynamic>? prevChain,
-    Id Function(U? prevData) idSelector,
+    String Function(U? prevData) idSelector,
   ) {
     return WatcherWhere<E, U>._(
       this,
-      (prevData) => watchOne<Id, E>(idSelector(prevData))!,
+      (prevData) => watchOne<E>(idSelector(prevData))!,
       prevChain?.value,
     );
   }
 
-  WatcherWhere<EntityMap<Id, E>, U> _watchWhere<Id, E extends Entity<Id>, U>(
+  WatcherWhere<EntityMap<E>, U> _watchWhere<E extends Entity, U>(
     WatcherWhere<U, dynamic>? prevChain,
     bool Function(U? prevData, E entity) test,
   ) {
-    return WatcherWhere<EntityMap<Id, E>, U>._(
+    return WatcherWhere<EntityMap<E>, U>._(
       this,
-      (prevData) => watchAll<Id, E>(
+      (prevData) => watchAll<E>(
         (entity) => test(prevData, entity),
       ),
       prevChain?.value,
@@ -107,8 +107,8 @@ class WatcherWhere<T, U> {
 
   T get value => _watch(_prevData);
 
-  WatcherWhere<E, T> watchById<Id, E extends Entity<Id>>(
-    Id Function(T? prevData) idSelector,
+  WatcherWhere<E, T> watchById<E extends Entity>(
+    String Function(T? prevData) idSelector,
   ) {
     return _context._watchById(
       this,
@@ -116,10 +116,10 @@ class WatcherWhere<T, U> {
     );
   }
 
-  WatcherWhere<EntityMap<Id, E>, T> watchWhere<Id, E extends Entity<Id>>([
+  WatcherWhere<EntityMap<E>, T> watchWhere<E extends Entity>([
     bool Function(T? prevData, E entity)? test,
   ]) {
-    return _context._watchWhere<Id, E, T>(
+    return _context._watchWhere<E, T>(
       this,
       test ?? (__, ___) => true,
     );

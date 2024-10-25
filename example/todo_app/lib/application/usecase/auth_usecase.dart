@@ -22,12 +22,12 @@ class AuthUsecase {
   );
 
   Future<void> login() async {
-    const userId = UserId("user1");
+    final userId = UserId("user1");
     final user = await userRepo.findById(userId);
     if (user.isOk && user.ok == null) {
-      await userRepo.save(const User(id: userId));
+      await userRepo.save(User(id: userId));
     }
-    await authRepo.save(Auth.login(const UserId("user1")));
+    await authRepo.save(Auth.login(UserId("user1")));
   }
 
   Future<void> logout() async {

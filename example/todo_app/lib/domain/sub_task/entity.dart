@@ -13,11 +13,11 @@ part 'entity.freezed.dart';
 part 'entity.g.dart';
 
 @freezed
-class SubTask with _$SubTask implements Entity<SubTaskId> {
+class SubTask with _$SubTask implements Entity {
   const SubTask._();
   @JsonSerializable(explicitToJson: true)
   const factory SubTask({
-    @SubTaskIdConverter() required SubTaskId id,
+    required SubTaskId id,
     @TaskIdConverter() required TaskId taskId,
     @UserIdConverter() required UserId userId,
     required String name,

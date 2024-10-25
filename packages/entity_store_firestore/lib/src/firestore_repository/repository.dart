@@ -3,8 +3,8 @@ part of '../firestore_repository.dart';
 typedef CreateRepository<T, Id> = T Function(
     BaseFirestoreRepository parent, Id id);
 
-abstract class RootCollectionRepository<Id, E extends Entity<Id>>
-    extends FirestoreRepository<Id, E> {
+abstract class RootCollectionRepository<E extends Entity>
+    extends FirestoreRepository<E> {
   @override
   final EntityStoreController controller;
   final FirebaseFirestore instance;
@@ -20,8 +20,8 @@ abstract class RootCollectionRepository<Id, E extends Entity<Id>>
       instance.collection(collectionId);
 }
 
-abstract class SubCollectionRepository<Id, E extends Entity<Id>>
-    extends FirestoreRepository<Id, E> implements SubCollection {
+abstract class SubCollectionRepository<E extends Entity>
+    extends FirestoreRepository<E> implements SubCollection {
   @override
   final EntityStoreController controller;
   final String parentDocumentId;
@@ -44,14 +44,14 @@ abstract class SubCollectionRepository<Id, E extends Entity<Id>>
 
 abstract class SubCollection {}
 
-abstract class FirestoreRepository<Id, E extends Entity<Id>>
-    extends BaseFirestoreRepository<Id, E>
-    with EntityChangeNotifier<Id, E>, FirestoreEntityNotifier<Id, E>
-    implements IRepository<Id, E> {
-  final Map<Type, CreateRepository<Object?, Id>> _container = {};
+abstract class FirestoreRepository<E extends Entity>
+    extends BaseFirestoreRepository<E>
+    with EntityChangeNotifier<E>, FirestoreEntityNotifier<E>
+    implements IRepository<E> {
+  final Map<Type, CreateRepository<Object?, String>> _container = {};
 
   TRepo getRepository<TRepo extends SubCollection>(
-    Id id,
+    String id,
   ) {
     if (_container[TRepo] == null) {
       throw ArgumentError("$TRepo is Not regist in $runtimeType");
@@ -61,23 +61,23 @@ abstract class FirestoreRepository<Id, E extends Entity<Id>>
   }
 
   void registRepository<TRepo extends SubCollection>(
-      CreateRepository<TRepo, Id> repo) {
+      CreateRepository<TRepo, String> repo) {
     _container[TRepo] = repo;
   }
 
   @override
-  DocumentReference getDocumentRef(Id id) {
+  DocumentReference getDocumentRef(String id) {
     return collectionRef.doc(idToString(id));
   }
 }
 
-abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
-    implements IFirestoreEntityNotifier<Id, E>, IRepository<Id, E> {
+abstract class BaseFirestoreRepository<E extends Entity>
+    implements IFirestoreEntityNotifier<E>, IRepository<E> {
   CollectionReference<Map<String, dynamic>> get collectionRef;
 
   @override
-  Future<Result<Id, Exception>> delete(
-    Id id, {
+  Future<Result<String, Exception>> delete(
+    String id, {
     DeleteOptions? options,
   }) async {
     return protectedDeleteAndNotify(collectionRef, id);
@@ -108,7 +108,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
 
   @override
   Future<Result<E?, Exception>> findById(
-    Id id, {
+    String id, {
     FindByIdOptions? options,
   }) async {
     options = options ?? const FindByIdOptions();
@@ -120,7 +120,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  IRepositoryQuery<Id, E> query() {
+  IRepositoryQuery<E> query() {
     return FirestoreRepositoryQuery(this);
   }
 
@@ -146,7 +146,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
 
   @override
   Future<Result<E?, Exception>> upsert(
-    Id id, {
+    String id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
     UpsertOptions? options,
@@ -172,11 +172,11 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
 
   @override
   Stream<Result<E?, Exception>> observeById(
-    Id id, {
+    String id, {
     ObserveByIdOptions? options,
   }) {
     return protectedObserveById(collectionRef, id);
   }
 
-  DocumentReference getDocumentRef(Id id);
+  DocumentReference getDocumentRef(String id);
 }

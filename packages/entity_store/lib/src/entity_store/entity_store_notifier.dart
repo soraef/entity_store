@@ -20,49 +20,49 @@ mixin EntityStoreMixin
   Stream<EntityEvent> get entityEventStream => _entityEventController.stream;
 
   @override
-  void handleEvent<Id, E extends Entity<Id>>(
-    PersistenceEvent<Id, E> event,
+  void handleEvent<E extends Entity>(
+    PersistenceEvent<E> event,
   ) {
-    if (event is GetEvent<Id, E>) {
+    if (event is GetEvent<E>) {
       update((prev) {
         if (event.entity != null) {
-          _entityEventController.add(prev.eventWhenPut<Id, E>(event.entity!));
-          return prev.put<Id, E>(event.entity!);
+          _entityEventController.add(prev.eventWhenPut<E>(event.entity!));
+          return prev.put<E>(event.entity!);
         } else {
-          final deleteEvent = prev.eventWhenDelete<Id, E>(event.id);
+          final deleteEvent = prev.eventWhenDelete<E>(event.id);
           if (deleteEvent != null) {
             _entityEventController.add(deleteEvent);
           }
 
-          return prev.delete<Id, E>(event.id);
+          return prev.delete<E>(event.id);
         }
       });
-    } else if (event is ListEvent<Id, E>) {
+    } else if (event is ListEvent<E>) {
       update((prev) {
-        final entityEvents = prev.eventWhenPutAll<Id, E>(event.entities);
+        final entityEvents = prev.eventWhenPutAll<E>(event.entities);
         entityEvents.forEach(_entityEventController.add);
 
-        return prev.putAll<Id, E>(event.entities);
+        return prev.putAll<E>(event.entities);
       });
-    } else if (event is SaveEvent<Id, E>) {
+    } else if (event is SaveEvent<E>) {
       update((prev) {
-        _entityEventController.add(prev.eventWhenPut<Id, E>(event.entity));
-        return prev.put<Id, E>(event.entity);
+        _entityEventController.add(prev.eventWhenPut<E>(event.entity));
+        return prev.put<E>(event.entity);
       });
-    } else if (event is DeleteEvent<Id, E>) {
+    } else if (event is DeleteEvent<E>) {
       update((prev) {
-        final deleteEvent = prev.eventWhenDelete<Id, E>(event.entityId);
+        final deleteEvent = prev.eventWhenDelete<E>(event.entityId);
         if (deleteEvent != null) {
           _entityEventController.add(deleteEvent);
         }
-        return prev.delete<Id, E>(event.entityId);
+        return prev.delete<E>(event.entityId);
       });
     }
   }
 
   @override
-  bool shouldListenTo<Id, E extends Entity<Id>>(PersistenceEvent event) {
-    return event is PersistenceEvent<Id, E>;
+  bool shouldListenTo<E extends Entity>(PersistenceEvent event) {
+    return event is PersistenceEvent<E>;
   }
 }
 

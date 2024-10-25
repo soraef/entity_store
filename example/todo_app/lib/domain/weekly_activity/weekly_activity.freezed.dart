@@ -12,7 +12,7 @@ part of 'weekly_activity.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 WeeklyActivity _$WeeklyActivityFromJson(Map<String, dynamic> json) {
   return _WeeklyActivity.fromJson(json);
@@ -20,7 +20,6 @@ WeeklyActivity _$WeeklyActivityFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$WeeklyActivity {
-  @WeeklyActivityIdConverter()
   WeeklyActivityId get id => throw _privateConstructorUsedError;
   @UserIdConverter()
   UserId get userId => throw _privateConstructorUsedError;
@@ -40,7 +39,7 @@ abstract class $WeeklyActivityCopyWith<$Res> {
       _$WeeklyActivityCopyWithImpl<$Res, WeeklyActivity>;
   @useResult
   $Res call(
-      {@WeeklyActivityIdConverter() WeeklyActivityId id,
+      {WeeklyActivityId id,
       @UserIdConverter() UserId userId,
       List<Activity> activities,
       int count});
@@ -86,26 +85,26 @@ class _$WeeklyActivityCopyWithImpl<$Res, $Val extends WeeklyActivity>
 }
 
 /// @nodoc
-abstract class _$$_WeeklyActivityCopyWith<$Res>
+abstract class _$$WeeklyActivityImplCopyWith<$Res>
     implements $WeeklyActivityCopyWith<$Res> {
-  factory _$$_WeeklyActivityCopyWith(
-          _$_WeeklyActivity value, $Res Function(_$_WeeklyActivity) then) =
-      __$$_WeeklyActivityCopyWithImpl<$Res>;
+  factory _$$WeeklyActivityImplCopyWith(_$WeeklyActivityImpl value,
+          $Res Function(_$WeeklyActivityImpl) then) =
+      __$$WeeklyActivityImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
-      {@WeeklyActivityIdConverter() WeeklyActivityId id,
+      {WeeklyActivityId id,
       @UserIdConverter() UserId userId,
       List<Activity> activities,
       int count});
 }
 
 /// @nodoc
-class __$$_WeeklyActivityCopyWithImpl<$Res>
-    extends _$WeeklyActivityCopyWithImpl<$Res, _$_WeeklyActivity>
-    implements _$$_WeeklyActivityCopyWith<$Res> {
-  __$$_WeeklyActivityCopyWithImpl(
-      _$_WeeklyActivity _value, $Res Function(_$_WeeklyActivity) _then)
+class __$$WeeklyActivityImplCopyWithImpl<$Res>
+    extends _$WeeklyActivityCopyWithImpl<$Res, _$WeeklyActivityImpl>
+    implements _$$WeeklyActivityImplCopyWith<$Res> {
+  __$$WeeklyActivityImplCopyWithImpl(
+      _$WeeklyActivityImpl _value, $Res Function(_$WeeklyActivityImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -116,7 +115,7 @@ class __$$_WeeklyActivityCopyWithImpl<$Res>
     Object? activities = null,
     Object? count = null,
   }) {
-    return _then(_$_WeeklyActivity(
+    return _then(_$WeeklyActivityImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -140,20 +139,19 @@ class __$$_WeeklyActivityCopyWithImpl<$Res>
 /// @nodoc
 
 @JsonSerializable(explicitToJson: true)
-class _$_WeeklyActivity extends _WeeklyActivity {
-  const _$_WeeklyActivity(
-      {@WeeklyActivityIdConverter() required this.id,
+class _$WeeklyActivityImpl extends _WeeklyActivity {
+  const _$WeeklyActivityImpl(
+      {required this.id,
       @UserIdConverter() required this.userId,
       required final List<Activity> activities,
       required this.count})
       : _activities = activities,
         super._();
 
-  factory _$_WeeklyActivity.fromJson(Map<String, dynamic> json) =>
-      _$$_WeeklyActivityFromJson(json);
+  factory _$WeeklyActivityImpl.fromJson(Map<String, dynamic> json) =>
+      _$$WeeklyActivityImplFromJson(json);
 
   @override
-  @WeeklyActivityIdConverter()
   final WeeklyActivityId id;
   @override
   @UserIdConverter()
@@ -175,10 +173,10 @@ class _$_WeeklyActivity extends _WeeklyActivity {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_WeeklyActivity &&
+            other is _$WeeklyActivityImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             const DeepCollectionEquality()
@@ -194,12 +192,13 @@ class _$_WeeklyActivity extends _WeeklyActivity {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_WeeklyActivityCopyWith<_$_WeeklyActivity> get copyWith =>
-      __$$_WeeklyActivityCopyWithImpl<_$_WeeklyActivity>(this, _$identity);
+  _$$WeeklyActivityImplCopyWith<_$WeeklyActivityImpl> get copyWith =>
+      __$$WeeklyActivityImplCopyWithImpl<_$WeeklyActivityImpl>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_WeeklyActivityToJson(
+    return _$$WeeklyActivityImplToJson(
       this,
     );
   }
@@ -207,17 +206,16 @@ class _$_WeeklyActivity extends _WeeklyActivity {
 
 abstract class _WeeklyActivity extends WeeklyActivity {
   const factory _WeeklyActivity(
-      {@WeeklyActivityIdConverter() required final WeeklyActivityId id,
+      {required final WeeklyActivityId id,
       @UserIdConverter() required final UserId userId,
       required final List<Activity> activities,
-      required final int count}) = _$_WeeklyActivity;
+      required final int count}) = _$WeeklyActivityImpl;
   const _WeeklyActivity._() : super._();
 
   factory _WeeklyActivity.fromJson(Map<String, dynamic> json) =
-      _$_WeeklyActivity.fromJson;
+      _$WeeklyActivityImpl.fromJson;
 
   @override
-  @WeeklyActivityIdConverter()
   WeeklyActivityId get id;
   @override
   @UserIdConverter()
@@ -228,6 +226,6 @@ abstract class _WeeklyActivity extends WeeklyActivity {
   int get count;
   @override
   @JsonKey(ignore: true)
-  _$$_WeeklyActivityCopyWith<_$_WeeklyActivity> get copyWith =>
+  _$$WeeklyActivityImplCopyWith<_$WeeklyActivityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

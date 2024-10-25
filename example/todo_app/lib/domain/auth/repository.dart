@@ -9,7 +9,7 @@ final authRepo = Provider(
   (ref) => AuthRepo(ref.read(entityStoreController), InMemoryStorageHandler()),
 );
 
-class AuthRepo extends LocalStorageRepository<AuthId, Auth> {
+class AuthRepo extends LocalStorageRepository<Auth> {
   AuthRepo(super.controller, super.localStorageHandler);
 
   @override

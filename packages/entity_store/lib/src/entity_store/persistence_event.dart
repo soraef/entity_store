@@ -1,28 +1,28 @@
 part of '../entity_store.dart';
 
 abstract class IPersistenceEventHandler {
-  void handleEvent<Id, E extends Entity<Id>>(PersistenceEvent<Id, E> event);
-  bool shouldListenTo<Id, E extends Entity<Id>>(PersistenceEvent<Id, E> event);
+  void handleEvent<E extends Entity>(PersistenceEvent<E> event);
+  bool shouldListenTo<E extends Entity>(PersistenceEvent<E> event);
 }
 
-abstract class PersistenceEvent<Id, E extends Entity<Id>> {
+abstract class PersistenceEvent<E extends Entity> {
   const PersistenceEvent({
     required this.eventTime,
   });
 
   Type get entityType => E;
-  Type get idType => Id;
+  Type get idType => String;
   final DateTime eventTime;
 
   void apply(IPersistenceEventHandler handler) {
-    if (handler.shouldListenTo<Id, E>(this)) {
-      handler.handleEvent<Id, E>(this);
+    if (handler.shouldListenTo<E>(this)) {
+      handler.handleEvent<E>(this);
     }
   }
 }
 
-class GetEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
-  final Id id;
+class GetEvent<E extends Entity> extends PersistenceEvent<E> {
+  final String id;
   final E? entity;
   GetEvent({
     required this.id,
@@ -30,7 +30,7 @@ class GetEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
     required super.eventTime,
   }) : assert(entity == null || id == entity.id);
 
-  factory GetEvent.now(Id id, E? entity) {
+  factory GetEvent.now(String id, E? entity) {
     return GetEvent(
       id: id,
       entity: entity,
@@ -39,7 +39,7 @@ class GetEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
   }
 }
 
-class ListEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
+class ListEvent<E extends Entity> extends PersistenceEvent<E> {
   final List<E> entities;
   const ListEvent({
     required this.entities,
@@ -54,7 +54,7 @@ class ListEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
   }
 }
 
-class SaveEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
+class SaveEvent<E extends Entity> extends PersistenceEvent<E> {
   final E entity;
   const SaveEvent({
     required this.entity,
@@ -69,14 +69,14 @@ class SaveEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
   }
 }
 
-class DeleteEvent<Id, E extends Entity<Id>> extends PersistenceEvent<Id, E> {
-  final Id entityId;
+class DeleteEvent<E extends Entity> extends PersistenceEvent<E> {
+  final String entityId;
   const DeleteEvent({
     required this.entityId,
     required super.eventTime,
   });
 
-  factory DeleteEvent.now(Id entityId) {
+  factory DeleteEvent.now(String entityId) {
     return DeleteEvent(
       entityId: entityId,
       eventTime: DateTime.now(),

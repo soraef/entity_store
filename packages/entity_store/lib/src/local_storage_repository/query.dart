@@ -1,8 +1,8 @@
 part of '../local_storage_repository.dart';
 
-class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
-    implements IRepositoryQuery<Id, E> {
-  final LocalStorageRepository<Id, E> _repository;
+class LocalStorageRepositoryQuery<E extends Entity>
+    implements IRepositoryQuery<E> {
+  final LocalStorageRepository<E> _repository;
 
   @override
   final List<RepositoryFilter> filters;
@@ -11,12 +11,12 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   @override
   final int? limitNum;
   @override
-  final Id? startAfterId;
+  final String? startAfterId;
 
   List<RepositoryFilter> get getFilters => filters;
   List<RepositorySort> get getSorts => sorts;
   int? get getLimit => limitNum;
-  Id? get getStartAfterId => startAfterId;
+  String? get getStartAfterId => startAfterId;
 
   LocalStorageRepositoryQuery._(
     this._repository,
@@ -33,7 +33,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
         startAfterId = null;
 
   @override
-  LocalStorageRepositoryQuery<Id, E> where(
+  LocalStorageRepositoryQuery<E> where(
     Object field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -125,7 +125,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  LocalStorageRepositoryQuery<Id, E> orderBy(
+  LocalStorageRepositoryQuery<E> orderBy(
     Object field, {
     bool descending = false,
   }) {
@@ -145,7 +145,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  LocalStorageRepositoryQuery<Id, E> limit(int count) {
+  LocalStorageRepositoryQuery<E> limit(int count) {
     return LocalStorageRepositoryQuery._(
       _repository,
       filters,
@@ -156,7 +156,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  LocalStorageRepositoryQuery<Id, E> startAfter(Id id) {
+  LocalStorageRepositoryQuery<E> startAfter(String id) {
     return LocalStorageRepositoryQuery._(
       _repository,
       filters,
@@ -177,7 +177,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   }) async {
     options = options ?? const FindAllOptions();
     final objects = _repository.controller
-        .getAll<Id, E>()
+        .getAll<E>()
         .map((e) => _repository.toJson(e))
         .toList();
     var storeEntities = IRepositoryQuery.findEntities(objects, this)

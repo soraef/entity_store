@@ -9,11 +9,11 @@ part 'entity.freezed.dart';
 part 'entity.g.dart';
 
 @freezed
-class User with _$User implements Entity<UserId> {
+class User with _$User implements Entity {
   const User._();
   @JsonSerializable(explicitToJson: true)
   const factory User({
-    @UserIdConverter() required UserId id,
+    required UserId id,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

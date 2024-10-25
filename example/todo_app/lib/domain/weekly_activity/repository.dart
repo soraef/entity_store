@@ -2,8 +2,7 @@ import 'package:entity_store_firestore/entity_store_firestore.dart';
 
 import 'weekly_activity.dart';
 
-class WeeklyActivityRepository
-    extends SubCollectionRepository<WeeklyActivityId, WeeklyActivity> {
+class WeeklyActivityRepository extends SubCollectionRepository<WeeklyActivity> {
   WeeklyActivityRepository({
     required super.controller,
     required super.parentRepository,
@@ -16,8 +15,8 @@ class WeeklyActivityRepository
   }
 
   @override
-  String idToString(WeeklyActivityId id) {
-    return id.value;
+  String idToString(String id) {
+    return id;
   }
 
   @override

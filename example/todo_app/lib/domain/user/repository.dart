@@ -13,7 +13,7 @@ final userRepo = Provider((ref) => UserRepository(
       ref.read(entityStoreController),
     ));
 
-class UserRepository extends RootCollectionRepository<UserId, User> {
+class UserRepository extends RootCollectionRepository<User> {
   UserRepository(EntityStoreController controller)
       : super(
           controller: controller,
@@ -23,14 +23,14 @@ class UserRepository extends RootCollectionRepository<UserId, User> {
       (parent, id) => TaskRepository(
         controller: parent.controller,
         parentRepository: parent,
-        parentDocumentId: id.value,
+        parentDocumentId: id,
       ),
     );
     registRepository(
       (parent, id) => WeeklyActivityRepository(
         controller: parent.controller,
         parentRepository: parent,
-        parentDocumentId: id.value,
+        parentDocumentId: id,
       ),
     );
   }
@@ -41,8 +41,8 @@ class UserRepository extends RootCollectionRepository<UserId, User> {
   }
 
   @override
-  String idToString(UserId id) {
-    return id.value;
+  String idToString(String id) {
+    return id;
   }
 
   @override

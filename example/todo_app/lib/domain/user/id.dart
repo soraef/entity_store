@@ -1,8 +1,11 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:uuid/uuid.dart';
 
-class UserId extends Id {
-  const UserId(String value) : super(value);
+extension type UserId(String value) implements String {
+  factory UserId.create() {
+    return UserId(const Uuid().v4());
+  }
 }
 
 class UserIdConverter implements JsonConverter<UserId, String> {

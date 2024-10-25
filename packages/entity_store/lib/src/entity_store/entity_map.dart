@@ -11,17 +11,17 @@ part of '../entity_store.dart';
 ///
 /// [EntityMap] class internally holds [Entity] as Map<Id, Entity>,
 /// so [Entity] does not allow duplicate [Id]
-class EntityMap<Id, E extends Entity<Id>> extends Equatable {
-  final Map<Id, E> _entities;
+class EntityMap<E extends Entity> extends Equatable {
+  final Map<String, E> _entities;
 
   const EntityMap(this._entities);
 
   /// Create an empty [EntityMap]
-  factory EntityMap.empty() => EntityMap<Id, E>(const {});
+  factory EntityMap.empty() => EntityMap<E>(const {});
 
   /// Creates an [EntityMap] from an Iterable<Entity>.
   factory EntityMap.fromIterable(Iterable<E> entities) {
-    return EntityMap<Id, E>({for (final entity in entities) entity.id: entity});
+    return EntityMap<E>({for (final entity in entities) entity.id: entity});
   }
 
   /// Returns all Entities held by [this].
@@ -31,21 +31,21 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
   List<E> toList() => entities.toList();
 
   /// Returns all the Id's that [this] holds
-  Iterable<Id> get ids => _entities.keys;
+  Iterable<String> get ids => _entities.keys;
 
   /// Returns the number of Entities that [this] holds.
   int get length => entities.length;
 
-  EntityMap<Id2, E2> cast<Id2, E2 extends Entity<Id2>>() {
+  EntityMap<E2> cast<E2 extends Entity>() {
     final list = toList().map((e) => e as E2);
     return EntityMap.fromIterable(list);
   }
 
   /// returns true if this has an [id]
-  bool exist(Id id) => _entities[id] != null;
+  bool exist(String id) => _entities[id] != null;
 
   /// Returns the [Entity] of the [id] that this holds
-  E? byId(Id id) => _entities[id];
+  E? byId(String id) => _entities[id];
 
   /// Returns the [Entity] of the [index]
   E at(int index) => _entities.values.toList()[index];
@@ -59,7 +59,7 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
   }
 
   /// Returns the [Entity] of [ids] held by this as a new [EntityMap].
-  EntityMap<Id, E> byIds(Iterable<Id> ids) {
+  EntityMap<E> byIds(Iterable<String> ids) {
     return EntityMap.fromIterable(
       ids.where((id) => exist(id)).map((id) => byId(id)!),
     );
@@ -67,29 +67,29 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
 
   /// Returns a new [EntityMap] with additional [entity].
   /// If the [entity] already exists, it is overwritten.
-  EntityMap<Id, E> put(E entity) {
-    return EntityMap<Id, E>({..._entities, entity.id: entity});
+  EntityMap<E> put(E entity) {
+    return EntityMap<E>({..._entities, entity.id: entity});
   }
 
   /// Returns a new [EntityMap] with additional [entities].
   /// Existing [Entity] objects are overwritten.
-  EntityMap<Id, E> putAll(Iterable<E> entities) {
-    return EntityMap<Id, E>({
+  EntityMap<E> putAll(Iterable<E> entities) {
+    return EntityMap<E>({
       ..._entities,
       for (final entity in entities) entity.id: entity,
     });
   }
 
   /// Returns a new [EntityMap] with the [entity] removed.
-  EntityMap<Id, E> remove(E entity) {
-    return EntityMap<Id, E>(
+  EntityMap<E> remove(E entity) {
+    return EntityMap<E>(
       {..._entities}..removeWhere((id, _) => id == entity.id),
     );
   }
 
   /// Returns a new [EntityMap] with the [entities] removed.
-  EntityMap<Id, E> removeAll(Iterable<E> entities) {
-    return EntityMap<Id, E>(
+  EntityMap<E> removeAll(Iterable<E> entities) {
+    return EntityMap<E>(
       {..._entities}..removeWhere(
           (id, entity) => entities.map((e) => e.id).contains(id),
         ),
@@ -97,32 +97,32 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
   }
 
   /// Returns a new [EntityMap] with all Entities removed that satisfy the given [test].
-  EntityMap<Id, E> removeWhere(bool Function(E entity) test) {
-    return EntityMap<Id, E>(
+  EntityMap<E> removeWhere(bool Function(E entity) test) {
+    return EntityMap<E>(
       {..._entities}..removeWhere((id, e) => test(e)),
     );
   }
 
   /// Returns a new [EntityMap] with the Entity with [id] removed.
-  EntityMap<Id, E> removeById(Id id) {
-    return EntityMap<Id, E>(
+  EntityMap<E> removeById(String id) {
+    return EntityMap<E>(
       {..._entities}..removeWhere((eid, entity) => id == eid),
     );
   }
 
   /// Returns a new [EntityMap] with [other] merged.
-  EntityMap<Id, E> marge(EntityMap<Id, E> other) {
-    return EntityMap<Id, E>({..._entities, ...other._entities});
+  EntityMap<E> marge(EntityMap<E> other) {
+    return EntityMap<E>({..._entities, ...other._entities});
   }
 
   /// Returns a new [EntityMap] that holds all Entities that satisfy the given [test].
-  EntityMap<Id, E> where(bool Function(E) test) {
+  EntityMap<E> where(bool Function(E) test) {
     return EntityMap.fromIterable(_entities.values.where(test));
   }
 
-  EntityMap<Id, E> or(
-    EntityMap<Id, E> Function(EntityMap<Id, E> entityMap) f1,
-    EntityMap<Id, E> Function(EntityMap<Id, E> entityMap) f2,
+  EntityMap<E> or(
+    EntityMap<E> Function(EntityMap<E> entityMap) f1,
+    EntityMap<E> Function(EntityMap<E> entityMap) f2,
   ) {
     return f1(this).marge(f2(this));
   }
@@ -139,21 +139,21 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
     return entities.sorted(compare);
   }
 
-  EntityEvent<Id, E> eventWhenPut(E entity) {
+  EntityEvent<E> eventWhenPut(E entity) {
     if (exist(entity.id)) {
-      return EntityUpdatedEvent<Id, E>(entity);
+      return EntityUpdatedEvent<E>(entity);
     } else {
-      return EntityCreatedEvent<Id, E>(entity);
+      return EntityCreatedEvent<E>(entity);
     }
   }
 
-  List<EntityEvent<Id, E>> eventWhenPutAll(Iterable<E> entities) {
+  List<EntityEvent<E>> eventWhenPutAll(Iterable<E> entities) {
     return entities.map((e) => eventWhenPut(e)).toList();
   }
 
-  EntityEvent<Id, E>? eventWhenRemove(Id id) {
+  EntityEvent<E>? eventWhenRemove(String id) {
     if (exist(id)) {
-      return EntityDeletedEvent<Id, E>(byId(id)!);
+      return EntityDeletedEvent<E>(byId(id)!);
     } else {
       return null;
     }

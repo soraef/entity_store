@@ -13,7 +13,7 @@ part of '../repository_interface.dart';
 /// ```dart
 /// IRepository<int, User> userRepository = UserRepository(entityStoreController);
 /// ```
-abstract class IRepository<Id, E extends Entity<Id>> {
+abstract class IRepository<E extends Entity> {
   final EntityStoreController controller;
 
   /// Creates a new instance of the repository with the specified `controller`.
@@ -24,7 +24,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// Returns a `Result` object that contains the found entity or an exception if an error occurs.
   /// An optional `options` parameter can be provided to customize the query behavior.
   Future<Result<E?, Exception>> findById(
-    Id id, {
+    String id, {
     FindByIdOptions? options,
   });
 
@@ -50,7 +50,7 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// Creates a query object for querying entities of type `E`.
   ///
   /// Returns an `IRepositoryQuery` object that can be used to build and execute queries.
-  IRepositoryQuery<Id, E> query();
+  IRepositoryQuery<E> query();
 
   /// Saves an entity of type `E`.
   ///
@@ -65,8 +65,8 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   ///
   /// Returns a `Result` object that contains the deleted entity's `id` or an exception if an error occurs.
   /// An optional `options` parameter can be provided to customize the delete behavior.
-  Future<Result<Id, Exception>> delete(
-    Id id, {
+  Future<Result<String, Exception>> delete(
+    String id, {
     DeleteOptions? options,
   });
 
@@ -78,13 +78,13 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   /// Returns a `Result` object that contains the upserted entity or an exception if an error occurs.
   /// An optional `options` parameter can be provided to customize the upsert behavior.
   Future<Result<E?, Exception>> upsert(
-    Id id, {
+    String id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
     UpsertOptions? options,
   });
 
-  Stream<Result<E?, Exception>> observeById(Id id,
+  Stream<Result<E?, Exception>> observeById(String id,
       {ObserveByIdOptions? options});
 
   Map<String, dynamic> toJson(E entity);

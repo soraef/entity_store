@@ -12,7 +12,7 @@ part of 'activity.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Activity _$ActivityFromJson(Map<String, dynamic> json) {
   return _Activity.fromJson(json);
@@ -68,21 +68,22 @@ class _$ActivityCopyWithImpl<$Res, $Val extends Activity>
 }
 
 /// @nodoc
-abstract class _$$_ActivityCopyWith<$Res> implements $ActivityCopyWith<$Res> {
-  factory _$$_ActivityCopyWith(
-          _$_Activity value, $Res Function(_$_Activity) then) =
-      __$$_ActivityCopyWithImpl<$Res>;
+abstract class _$$ActivityImplCopyWith<$Res>
+    implements $ActivityCopyWith<$Res> {
+  factory _$$ActivityImplCopyWith(
+          _$ActivityImpl value, $Res Function(_$ActivityImpl) then) =
+      __$$ActivityImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({@ActivityIdConverter() ActivityId id, String name});
 }
 
 /// @nodoc
-class __$$_ActivityCopyWithImpl<$Res>
-    extends _$ActivityCopyWithImpl<$Res, _$_Activity>
-    implements _$$_ActivityCopyWith<$Res> {
-  __$$_ActivityCopyWithImpl(
-      _$_Activity _value, $Res Function(_$_Activity) _then)
+class __$$ActivityImplCopyWithImpl<$Res>
+    extends _$ActivityCopyWithImpl<$Res, _$ActivityImpl>
+    implements _$$ActivityImplCopyWith<$Res> {
+  __$$ActivityImplCopyWithImpl(
+      _$ActivityImpl _value, $Res Function(_$ActivityImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -91,7 +92,7 @@ class __$$_ActivityCopyWithImpl<$Res>
     Object? id = null,
     Object? name = null,
   }) {
-    return _then(_$_Activity(
+    return _then(_$ActivityImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -107,13 +108,13 @@ class __$$_ActivityCopyWithImpl<$Res>
 /// @nodoc
 
 @JsonSerializable(explicitToJson: true)
-class _$_Activity extends _Activity {
-  const _$_Activity(
+class _$ActivityImpl extends _Activity {
+  const _$ActivityImpl(
       {@ActivityIdConverter() required this.id, required this.name})
       : super._();
 
-  factory _$_Activity.fromJson(Map<String, dynamic> json) =>
-      _$$_ActivityFromJson(json);
+  factory _$ActivityImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ActivityImplFromJson(json);
 
   @override
   @ActivityIdConverter()
@@ -127,10 +128,10 @@ class _$_Activity extends _Activity {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_Activity &&
+            other is _$ActivityImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name));
   }
@@ -142,12 +143,12 @@ class _$_Activity extends _Activity {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_ActivityCopyWith<_$_Activity> get copyWith =>
-      __$$_ActivityCopyWithImpl<_$_Activity>(this, _$identity);
+  _$$ActivityImplCopyWith<_$ActivityImpl> get copyWith =>
+      __$$ActivityImplCopyWithImpl<_$ActivityImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_ActivityToJson(
+    return _$$ActivityImplToJson(
       this,
     );
   }
@@ -156,10 +157,11 @@ class _$_Activity extends _Activity {
 abstract class _Activity extends Activity {
   const factory _Activity(
       {@ActivityIdConverter() required final ActivityId id,
-      required final String name}) = _$_Activity;
+      required final String name}) = _$ActivityImpl;
   const _Activity._() : super._();
 
-  factory _Activity.fromJson(Map<String, dynamic> json) = _$_Activity.fromJson;
+  factory _Activity.fromJson(Map<String, dynamic> json) =
+      _$ActivityImpl.fromJson;
 
   @override
   @ActivityIdConverter()
@@ -168,6 +170,6 @@ abstract class _Activity extends Activity {
   String get name;
   @override
   @JsonKey(ignore: true)
-  _$$_ActivityCopyWith<_$_Activity> get copyWith =>
+  _$$ActivityImplCopyWith<_$ActivityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

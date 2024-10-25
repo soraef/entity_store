@@ -9,11 +9,11 @@ part 'weekly_activity.freezed.dart';
 part 'weekly_activity.g.dart';
 
 @freezed
-class WeeklyActivity with _$WeeklyActivity implements Entity<WeeklyActivityId> {
+class WeeklyActivity with _$WeeklyActivity implements Entity {
   const WeeklyActivity._();
   @JsonSerializable(explicitToJson: true)
   const factory WeeklyActivity({
-    @WeeklyActivityIdConverter() required WeeklyActivityId id,
+    required WeeklyActivityId id,
     @UserIdConverter() required UserId userId,
     required List<Activity> activities,
     required int count,
@@ -45,9 +45,8 @@ class WeeklyActivity with _$WeeklyActivity implements Entity<WeeklyActivityId> {
   }
 }
 
-class WeeklyActivityId extends Id {
-  const WeeklyActivityId(String value) : super(value);
-
+extension type WeeklyActivityId(String value) implements String {
+  /// datetimeを月曜の0時にする
   /// datetimeを月曜の0時にする
   /// 例: 2021/08/01 12:00:00 -> 2021/07/26 00:00:00
   static String _getMonday(DateTime dateTime) {

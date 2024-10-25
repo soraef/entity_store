@@ -12,7 +12,7 @@ part of 'entity.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 SubTask _$SubTaskFromJson(Map<String, dynamic> json) {
   return _SubTask.fromJson(json);
@@ -20,7 +20,6 @@ SubTask _$SubTaskFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$SubTask {
-  @SubTaskIdConverter()
   SubTaskId get id => throw _privateConstructorUsedError;
   @TaskIdConverter()
   TaskId get taskId => throw _privateConstructorUsedError;
@@ -44,7 +43,7 @@ abstract class $SubTaskCopyWith<$Res> {
       _$SubTaskCopyWithImpl<$Res, SubTask>;
   @useResult
   $Res call(
-      {@SubTaskIdConverter() SubTaskId id,
+      {SubTaskId id,
       @TaskIdConverter() TaskId taskId,
       @UserIdConverter() UserId userId,
       String name,
@@ -108,14 +107,14 @@ class _$SubTaskCopyWithImpl<$Res, $Val extends SubTask>
 }
 
 /// @nodoc
-abstract class _$$_SubTaskCopyWith<$Res> implements $SubTaskCopyWith<$Res> {
-  factory _$$_SubTaskCopyWith(
-          _$_SubTask value, $Res Function(_$_SubTask) then) =
-      __$$_SubTaskCopyWithImpl<$Res>;
+abstract class _$$SubTaskImplCopyWith<$Res> implements $SubTaskCopyWith<$Res> {
+  factory _$$SubTaskImplCopyWith(
+          _$SubTaskImpl value, $Res Function(_$SubTaskImpl) then) =
+      __$$SubTaskImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
-      {@SubTaskIdConverter() SubTaskId id,
+      {SubTaskId id,
       @TaskIdConverter() TaskId taskId,
       @UserIdConverter() UserId userId,
       String name,
@@ -125,10 +124,11 @@ abstract class _$$_SubTaskCopyWith<$Res> implements $SubTaskCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$_SubTaskCopyWithImpl<$Res>
-    extends _$SubTaskCopyWithImpl<$Res, _$_SubTask>
-    implements _$$_SubTaskCopyWith<$Res> {
-  __$$_SubTaskCopyWithImpl(_$_SubTask _value, $Res Function(_$_SubTask) _then)
+class __$$SubTaskImplCopyWithImpl<$Res>
+    extends _$SubTaskCopyWithImpl<$Res, _$SubTaskImpl>
+    implements _$$SubTaskImplCopyWith<$Res> {
+  __$$SubTaskImplCopyWithImpl(
+      _$SubTaskImpl _value, $Res Function(_$SubTaskImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -142,7 +142,7 @@ class __$$_SubTaskCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(_$_SubTask(
+    return _then(_$SubTaskImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -178,9 +178,9 @@ class __$$_SubTaskCopyWithImpl<$Res>
 /// @nodoc
 
 @JsonSerializable(explicitToJson: true)
-class _$_SubTask extends _SubTask {
-  const _$_SubTask(
-      {@SubTaskIdConverter() required this.id,
+class _$SubTaskImpl extends _SubTask {
+  const _$SubTaskImpl(
+      {required this.id,
       @TaskIdConverter() required this.taskId,
       @UserIdConverter() required this.userId,
       required this.name,
@@ -189,11 +189,10 @@ class _$_SubTask extends _SubTask {
       @DateTimeConverter() required this.updatedAt})
       : super._();
 
-  factory _$_SubTask.fromJson(Map<String, dynamic> json) =>
-      _$$_SubTaskFromJson(json);
+  factory _$SubTaskImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SubTaskImplFromJson(json);
 
   @override
-  @SubTaskIdConverter()
   final SubTaskId id;
   @override
   @TaskIdConverter()
@@ -218,10 +217,10 @@ class _$_SubTask extends _SubTask {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_SubTask &&
+            other is _$SubTaskImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.taskId, taskId) || other.taskId == taskId) &&
             (identical(other.userId, userId) || other.userId == userId) &&
@@ -241,12 +240,12 @@ class _$_SubTask extends _SubTask {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_SubTaskCopyWith<_$_SubTask> get copyWith =>
-      __$$_SubTaskCopyWithImpl<_$_SubTask>(this, _$identity);
+  _$$SubTaskImplCopyWith<_$SubTaskImpl> get copyWith =>
+      __$$SubTaskImplCopyWithImpl<_$SubTaskImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_SubTaskToJson(
+    return _$$SubTaskImplToJson(
       this,
     );
   }
@@ -254,19 +253,18 @@ class _$_SubTask extends _SubTask {
 
 abstract class _SubTask extends SubTask {
   const factory _SubTask(
-      {@SubTaskIdConverter() required final SubTaskId id,
+      {required final SubTaskId id,
       @TaskIdConverter() required final TaskId taskId,
       @UserIdConverter() required final UserId userId,
       required final String name,
       required final bool done,
       @DateTimeConverter() required final DateTime createdAt,
-      @DateTimeConverter() required final DateTime updatedAt}) = _$_SubTask;
+      @DateTimeConverter() required final DateTime updatedAt}) = _$SubTaskImpl;
   const _SubTask._() : super._();
 
-  factory _SubTask.fromJson(Map<String, dynamic> json) = _$_SubTask.fromJson;
+  factory _SubTask.fromJson(Map<String, dynamic> json) = _$SubTaskImpl.fromJson;
 
   @override
-  @SubTaskIdConverter()
   SubTaskId get id;
   @override
   @TaskIdConverter()
@@ -286,6 +284,6 @@ abstract class _SubTask extends SubTask {
   DateTime get updatedAt;
   @override
   @JsonKey(ignore: true)
-  _$$_SubTaskCopyWith<_$_SubTask> get copyWith =>
+  _$$SubTaskImplCopyWith<_$SubTaskImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

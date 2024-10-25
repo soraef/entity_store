@@ -11,7 +11,7 @@ abstract class EntityStoreDebugger {
     });
   }
 
-  void onEvent(PersistenceEvent<dynamic, Entity<dynamic>> event);
+  void onEvent(PersistenceEvent<Entity> event);
 }
 
 class EntityStorePrintDebugger extends EntityStoreDebugger {
@@ -22,7 +22,7 @@ class EntityStorePrintDebugger extends EntityStoreDebugger {
   });
 
   @override
-  void onEvent(PersistenceEvent<dynamic, Entity> event) {
+  void onEvent(PersistenceEvent<Entity> event) {
     if (event is GetEvent) {
       debugPrint(
         "[GetEvent:${event.entityType}] ${_entityString(

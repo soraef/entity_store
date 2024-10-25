@@ -1,16 +1,16 @@
 part of '../firestore_repository.dart';
 
-abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
+abstract class IFirestoreEntityNotifier<E extends Entity> {
   @protected
   Future<Result<E?, Exception>> protectedGetAndNotify(
     CollectionReference collection,
-    Id id, {
+    String id, {
     FetchPolicy fetchPolicy = FetchPolicy.persistent,
   });
   @protected
-  Future<Result<Id, Exception>> protectedDeleteAndNotify(
+  Future<Result<String, Exception>> protectedDeleteAndNotify(
     CollectionReference collection,
-    Id id,
+    String id,
   );
   @protected
   Future<Result<List<E>, Exception>> protectedListAndNotify(Query ref);
@@ -26,7 +26,7 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   @protected
   Future<Result<E?, Exception>> protectedCreateOrUpdateAndNotify(
     CollectionReference collection,
-    Id id,
+    String id,
     E? Function() creater,
     E? Function(E prev) updater, {
     FetchPolicy fetchPolicy = FetchPolicy.persistent,
@@ -38,7 +38,7 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   @protected
   Stream<Result<E?, Exception>> protectedObserveById(
     CollectionReference<Map<String, dynamic>> collectionRef,
-    Id id,
+    String id,
   );
 
   @protected
@@ -47,21 +47,21 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
   );
 }
 
-mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
-    on EntityChangeNotifier<Id, E> implements IFirestoreEntityNotifier<Id, E> {
+mixin FirestoreEntityNotifier<E extends Entity> on EntityChangeNotifier<E>
+    implements IFirestoreEntityNotifier<E> {
   Map<String, dynamic> toJson(E entity);
   E fromJson(Map<String, dynamic> json);
-  String idToString(Id id);
+  String idToString(String id);
 
   @override
   Future<Result<E?, Exception>> protectedGetAndNotify(
     CollectionReference collection,
-    Id id, {
+    String id, {
     FetchPolicy fetchPolicy = FetchPolicy.persistent,
   }) async {
     late DocumentSnapshot<dynamic> doc;
 
-    var entity = controller.getById<Id, E>(id);
+    var entity = controller.getById<E>(id);
 
     if (fetchPolicy == FetchPolicy.storeOnly) {
       return Result.ok(entity);
@@ -108,9 +108,9 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<Id, Exception>> protectedDeleteAndNotify(
+  Future<Result<String, Exception>> protectedDeleteAndNotify(
     CollectionReference collection,
-    Id id,
+    String id,
   ) async {
     try {
       await collection.doc(idToString(id)).delete();
@@ -190,7 +190,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> protectedCreateOrUpdateAndNotify(
     CollectionReference collection,
-    Id id,
+    String id,
     E? Function() creater,
     E? Function(E prev) updater, {
     FetchPolicy fetchPolicy = FetchPolicy.persistent,
@@ -224,7 +224,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
 
       if (fetchPolicy == FetchPolicy.storeOnly ||
           fetchPolicy == FetchPolicy.storeFirst) {
-        entity = controller.getById<Id, E>(id);
+        entity = controller.getById<E>(id);
       }
 
       if (fetchPolicy == FetchPolicy.persistent ||
@@ -274,7 +274,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
   @override
   Stream<Result<E?, Exception>> protectedObserveById(
     CollectionReference<Map<String, dynamic>> collectionRef,
-    Id id,
+    String id,
   ) {
     return collectionRef.doc(idToString(id)).snapshots().map((event) {
       if (event.exists) {

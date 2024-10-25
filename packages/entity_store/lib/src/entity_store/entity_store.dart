@@ -1,7 +1,7 @@
 part of '../entity_store.dart';
 
 class EntityStore extends Equatable {
-  final Map<Type, EntityMap<dynamic, dynamic>> _entityMaps;
+  final Map<Type, EntityMap<dynamic>> _entityMaps;
 
   const EntityStore._(this._entityMaps);
 
@@ -9,60 +9,60 @@ class EntityStore extends Equatable {
     return const EntityStore._({});
   }
 
-  EntityStore put<Id, E extends Entity<Id>>(E entity) {
+  EntityStore put<E extends Entity>(E entity) {
     return EntityStore._({
       ..._entityMaps,
-      E: _entityMaps[E]?.put(entity) ?? EntityMap<Id, E>.fromIterable([entity])
+      E: _entityMaps[E]?.put(entity) ?? EntityMap<E>.fromIterable([entity])
     });
   }
 
-  EntityStore putAll<Id, E extends Entity<Id>>(Iterable<E> entities) {
+  EntityStore putAll<E extends Entity>(Iterable<E> entities) {
     return EntityStore._({
       ..._entityMaps,
       E: _entityMaps[E]?.putAll(entities) ??
-          EntityMap<Id, E>.fromIterable(entities),
+          EntityMap<E>.fromIterable(entities),
     });
   }
 
-  EntityStore delete<Id, E extends Entity<Id>>(Id id) {
+  EntityStore delete<E extends Entity>(String id) {
     return EntityStore._({
       ..._entityMaps,
-      E: _entityMaps[E]?.removeById(id) ?? EntityMap<Id, E>.empty()
+      E: _entityMaps[E]?.removeById(id) ?? EntityMap<E>.empty()
     });
   }
 
-  E? get<Id, E extends Entity<Id>>(Id id) {
+  E? get<E extends Entity>(String id) {
     return _entityMaps[E]?.byId(id);
   }
 
-  EntityMap<Id, E> where<Id, E extends Entity<Id>>([
+  EntityMap<E> where<E extends Entity>([
     bool Function(E entity) test = testAlwaysTrue,
   ]) {
-    return (getEntityMap<Id, E>() ?? EntityMap<Id, E>.empty()).where(test);
+    return (getEntityMap<E>() ?? EntityMap<E>.empty()).where(test);
   }
 
   List<E> toList<E>() {
     return (_entityMaps[E]?.toList() ?? <E>[]) as List<E>;
   }
 
-  EntityEvent<Id, E> eventWhenPut<Id, E extends Entity<Id>>(E entity) {
-    return getEntityMap<Id, E>()?.eventWhenPut(entity) ??
-        EntityCreatedEvent<Id, E>(entity);
+  EntityEvent<E> eventWhenPut<E extends Entity>(E entity) {
+    return getEntityMap<E>()?.eventWhenPut(entity) ??
+        EntityCreatedEvent<E>(entity);
   }
 
-  List<EntityEvent<Id, E>> eventWhenPutAll<Id, E extends Entity<Id>>(
+  List<EntityEvent<E>> eventWhenPutAll<E extends Entity>(
     Iterable<E> entities,
   ) {
-    return getEntityMap<Id, E>()?.eventWhenPutAll(entities) ??
-        entities.map((e) => EntityCreatedEvent<Id, E>(e)).toList();
+    return getEntityMap<E>()?.eventWhenPutAll(entities) ??
+        entities.map((e) => EntityCreatedEvent<E>(e)).toList();
   }
 
-  EntityEvent? eventWhenDelete<Id, E extends Entity<Id>>(Id id) {
-    return getEntityMap<Id, E>()?.eventWhenRemove(id);
+  EntityEvent? eventWhenDelete<E extends Entity>(String id) {
+    return getEntityMap<E>()?.eventWhenRemove(id);
   }
 
-  EntityMap<Id, E>? getEntityMap<Id, E extends Entity<Id>>() {
-    return _entityMaps[E] as EntityMap<Id, E>?;
+  EntityMap<E>? getEntityMap<E extends Entity>() {
+    return _entityMaps[E] as EntityMap<E>?;
   }
 
   @override

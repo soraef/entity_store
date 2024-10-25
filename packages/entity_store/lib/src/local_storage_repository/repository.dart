@@ -1,16 +1,16 @@
 part of '../local_storage_repository.dart';
 
-abstract class LocalStorageRepository<Id, E extends Entity<Id>>
-    with EntityChangeNotifier<Id, E>
-    implements IRepository<Id, E> {
+abstract class LocalStorageRepository<E extends Entity>
+    with EntityChangeNotifier<E>
+    implements IRepository<E> {
   LocalStorageRepository(this.controller, this.localStorageHandler);
 
   @override
   final EntityStoreController controller;
   final ILocalStorageHandler localStorageHandler;
 
-  late final LocalStorageEntityHander<Id, E> localStorageEntityHander =
-      LocalStorageEntityHander<Id, E>(
+  late final LocalStorageEntityHander<E> localStorageEntityHander =
+      LocalStorageEntityHander<E>(
     localStorageHandler,
     toJson,
     fromJson,
@@ -18,7 +18,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
 
   @override
   Future<Result<E?, Exception>> upsert(
-    Id id, {
+    String id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
     UpsertOptions? options,
@@ -40,7 +40,8 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<Id, Exception>> delete(Id id, {DeleteOptions? options}) async {
+  Future<Result<String, Exception>> delete(String id,
+      {DeleteOptions? options}) async {
     final deleteResult = await localStorageEntityHander.delete(id);
 
     return deleteResult.map(
@@ -63,12 +64,12 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
 
   @override
   Future<Result<E?, Exception>> findById(
-    Id id, {
+    String id, {
     FindByIdOptions? options,
   }) async {
     options ??= const FindByIdOptions();
 
-    final storeEntity = controller.getById<Id, E>(id);
+    final storeEntity = controller.getById<E>(id);
     if (options.fetchPolicy == FetchPolicy.storeOnly) {
       return Result.ok(storeEntity);
     }
@@ -109,7 +110,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  IRepositoryQuery<Id, E> query() {
+  IRepositoryQuery<E> query() {
     return LocalStorageRepositoryQuery(this);
   }
 
@@ -129,7 +130,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Stream<Result<E?, Exception>> observeById(Id id,
+  Stream<Result<E?, Exception>> observeById(String id,
       {ObserveByIdOptions? options}) {
     throw UnimplementedError();
   }

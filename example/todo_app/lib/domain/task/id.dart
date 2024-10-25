@@ -2,9 +2,7 @@ import 'package:entity_store/entity_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-class TaskId extends Id {
-  const TaskId(String value) : super(value);
-
+extension type TaskId(String value) implements String {
   factory TaskId.create() {
     return TaskId(const Uuid().v4());
   }
