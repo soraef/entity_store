@@ -1,5 +1,7 @@
 part of '../repository_interface.dart';
 
+class TransactionOptions {}
+
 abstract class ITransaction<TTransactionContext extends ITransactionContext> {
   final EntityStoreController controller;
 
@@ -15,9 +17,10 @@ abstract class ITransaction<TTransactionContext extends ITransactionContext> {
   ///   userRepo.save(user, transaction: context);
   /// })
   Future<Result<T, Exception>> run<T>(
-    Future<T> Function(TTransactionContext context) fn,
-  ) async {
-    final result = await handleTransaction(fn);
+    Future<T> Function(TTransactionContext context) fn, {
+    TransactionOptions? options,
+  }) async {
+    final result = await handleTransaction(fn, options);
     if (result.isExcept) {
       throw result.except.toExcept();
     }
@@ -30,6 +33,7 @@ abstract class ITransaction<TTransactionContext extends ITransactionContext> {
 
   Future<Result<(T, TTransactionContext), Exception>> handleTransaction<T>(
     Future<T> Function(TTransactionContext context) fn,
+    TransactionOptions? options,
   );
 }
 

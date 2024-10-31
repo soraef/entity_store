@@ -74,3 +74,7 @@
 ## 5.0.0
 * FIX: upgrade entity_store 5.0.0
 * FEAT: Add observeAll and observeById options to repository interface
+
+## 6.0.0-dev.1
+
+* feat: Add database transaction handling to Repository

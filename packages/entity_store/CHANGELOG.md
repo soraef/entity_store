@@ -41,3 +41,7 @@
 * BREAKING CHANGE: IDeleteOptions changed to DeleteOptions
 * BREAKING CHANGE: ICreateOrUpdateOptions changed to UpsertOptions
 * FEAT: Add FetchPolicy
+
+## 6.0.0-dev.1
+
+* feat: Add database transaction handling to Repository
