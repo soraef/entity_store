@@ -1,36 +1,42 @@
 part of '../firestore_repository.dart';
 
-class FirestoreTransactionContext implements ITransactionContext {
+class FirestoreTransactionContext extends ITransactionContext {
   final Transaction value;
 
   FirestoreTransactionContext(this.value);
 
   @override
-  Future<void> commit() async {}
-
-  @override
-  Future<void> rollback() async {}
+  Future<void> rollback() {
+    throw UnimplementedError();
+  }
 }
 
-class FirestoreTransaction
-    implements ITransaction<FirestoreTransactionContext> {
+class FirestoreTransaction extends ITransaction<FirestoreTransactionContext> {
   final FirebaseFirestore instance;
-  final EntityStoreController controller;
 
   FirestoreTransaction({
+    required super.controller,
     required this.instance,
-    required this.controller,
   });
 
   @override
-  Future<T> run<T>(
+  Future<Result<(T, FirestoreTransactionContext), Exception>>
+      handleTransaction<T>(
     Future<T> Function(FirestoreTransactionContext context) fn,
   ) async {
-    return instance.runTransaction(
-      (transaction) async {
-        final context = FirestoreTransactionContext(transaction);
-        return fn(context);
-      },
-    );
+    try {
+      return await instance.runTransaction(
+        (transaction) async {
+          final context = FirestoreTransactionContext(transaction);
+          final result = await fn(context);
+          return (result, context).toOk();
+        },
+      );
+    } catch (e) {
+      if (e is Exception) {
+        return Result.except(e);
+      }
+      return Result.except(Exception(e));
+    }
   }
 }

@@ -239,6 +239,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
+    ITransactionContext? transaction,
   }) async {
     options = options ?? const FindAllOptions();
     final objects = _repository.controller
@@ -266,6 +267,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
+    ITransactionContext? transaction,
   }) async {
     options = options ?? const FindOneOptions();
     final objects = _repository.controller
@@ -299,7 +301,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     final result = await countQuery.get();
     final count = result.count;
     if (count == null) {
-      return Result.err(Exception("Count is null"));
+      return Result.except(Exception("Count is null"));
     }
     return Result.ok(count);
   }

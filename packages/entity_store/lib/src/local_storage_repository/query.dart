@@ -203,8 +203,8 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
 
     final result = await _repository.localStorageEntityHander.loadEntityList();
 
-    if (result.isErr) {
-      return Result.err(result.err);
+    if (result.isExcept) {
+      return Result.except(result.except);
     }
 
     var entities = result.ok.where((e) => test(_repository.toJson(e))).toList();

@@ -81,7 +81,20 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     DeleteOptions? options,
     ITransactionContext? transaction,
   }) async {
-    return protectedDeleteAndNotify(collectionRef, id);
+    if (transaction != null && transaction is! FirestoreTransactionContext) {
+      throw ArgumentError("transaction must be FirestoreTransactionContext");
+    }
+
+    FirestoreTransactionContext? firestoreTransaction;
+    if (transaction != null) {
+      firestoreTransaction = transaction as FirestoreTransactionContext;
+    }
+
+    return protectedDeleteAndNotify(
+      collectionRef,
+      id,
+      transaction: firestoreTransaction,
+    );
   }
 
   @override
@@ -125,8 +138,9 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       throw ArgumentError("transaction must be FirestoreTransactionContext");
     }
 
+    FirestoreTransactionContext? firestoreTransaction;
     if (transaction != null) {
-      (transaction as FirestoreTransactionContext).value.get();
+      firestoreTransaction = transaction as FirestoreTransactionContext;
     }
 
     options = options ?? const FindByIdOptions();
@@ -134,6 +148,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       collectionRef,
       id,
       fetchPolicy: options.fetchPolicy,
+      transaction: firestoreTransaction,
     );
   }
 
@@ -146,18 +161,30 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   Future<Result<E, Exception>> save(
     E entity, {
     SaveOptions? options,
+    ITransactionContext? transaction,
   }) {
+    if (transaction != null && transaction is! FirestoreTransactionContext) {
+      throw ArgumentError("transaction must be FirestoreTransactionContext");
+    }
+
+    FirestoreTransactionContext? firestoreTransaction;
+    if (transaction != null) {
+      firestoreTransaction = transaction as FirestoreTransactionContext;
+    }
+
     if (options is FirestoreSaveOptions) {
       return protectedSaveAndNotify(
         collectionRef,
         entity,
         merge: options.merge,
+        transaction: firestoreTransaction,
       );
     } else {
       return protectedSaveAndNotify(
         collectionRef,
         entity,
         merge: false,
+        transaction: firestoreTransaction,
       );
     }
   }

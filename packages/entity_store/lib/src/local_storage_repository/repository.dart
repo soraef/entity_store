@@ -25,8 +25,8 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }) async {
     final findResult = await findById(id,
         options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeOnly));
-    if (findResult.isErr) {
-      return Result.err(findResult.err);
+    if (findResult.isExcept) {
+      return Result.except(findResult.except);
     }
 
     final newEntity =
@@ -58,7 +58,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
         return Result.ok(id);
       },
       (err) {
-        return Result.err(err);
+        return Result.except(err);
       },
     );
   }
@@ -112,7 +112,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
         return Result.ok(entity);
       },
       (err) {
-        return Result.err(err);
+        return Result.except(err);
       },
     );
   }
@@ -161,7 +161,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
         return Result.ok(entity);
       },
       (err) {
-        return Result.err(err);
+        return Result.except(err);
       },
     );
   }

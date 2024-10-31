@@ -42,8 +42,8 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
   Future<Result<List<E>, Exception>> loadEntityList() async {
     final entityIndexResult =
         await localStorageHandler.load(_getEntityIndexKey());
-    if (entityIndexResult.isErr) {
-      return Result.err(entityIndexResult.err);
+    if (entityIndexResult.isExcept) {
+      return Result.except(entityIndexResult.except);
     }
 
     final entityIndexJsonString = entityIndexResult.ok;
@@ -95,7 +95,7 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
 
       return saveResult;
     } on Exception catch (e) {
-      return Result.err(e);
+      return Result.except(e);
     }
   }
 
@@ -116,7 +116,7 @@ class LocalStorageEntityHander<Id, E extends Entity<Id>> {
 
       return deleteResult;
     } on Exception catch (e) {
-      return Result.err(e);
+      return Result.except(e);
     }
   }
 

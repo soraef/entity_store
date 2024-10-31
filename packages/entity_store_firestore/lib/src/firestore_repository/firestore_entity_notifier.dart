@@ -6,12 +6,15 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
     CollectionReference collection,
     Id id, {
     FetchPolicy fetchPolicy = FetchPolicy.persistent,
+    FirestoreTransactionContext? transaction,
   });
+
   @protected
   Future<Result<Id, Exception>> protectedDeleteAndNotify(
     CollectionReference collection,
-    Id id,
-  );
+    Id id, {
+    FirestoreTransactionContext? transaction,
+  });
   @protected
   Future<Result<List<E>, Exception>> protectedListAndNotify(Query ref);
 
@@ -21,6 +24,7 @@ abstract class IFirestoreEntityNotifier<Id, E extends Entity<Id>> {
     E entity, {
     bool? merge,
     List<Object>? mergeFields,
+    FirestoreTransactionContext? transaction,
   });
 
   @protected
@@ -58,32 +62,40 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     CollectionReference collection,
     Id id, {
     FetchPolicy fetchPolicy = FetchPolicy.persistent,
+    FirestoreTransactionContext? transaction,
   }) async {
     late DocumentSnapshot<dynamic> doc;
 
     var entity = controller.getById<Id, E>(id);
 
-    if (fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.ok(entity);
-    }
-
-    if (fetchPolicy == FetchPolicy.storeFirst) {
-      if (entity != null) {
+    /// get using transaction
+    if (transaction != null) {
+      final ref = collection.doc(idToString(id));
+      doc = await transaction.value.get(ref);
+    } else {
+      /// get using no transaction
+      if (fetchPolicy == FetchPolicy.storeOnly) {
         return Result.ok(entity);
       }
-    }
 
-    try {
-      doc = await collection.doc(idToString(id)).get();
-    } on FirebaseException catch (e) {
-      return Result.err(
-        FirestoreRequestFailure(
-          entityType: E,
-          code: e.code,
-          message: e.message,
-          exception: e,
-        ),
-      );
+      if (fetchPolicy == FetchPolicy.storeFirst) {
+        if (entity != null) {
+          return Result.ok(entity);
+        }
+      }
+
+      try {
+        doc = await collection.doc(idToString(id)).get();
+      } on FirebaseException catch (e) {
+        return Result.except(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
     }
 
     if (doc.exists) {
@@ -92,7 +104,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
         notifyGetComplete(entity);
         return Result.ok(entity);
       } on Exception catch (e) {
-        return Result.err(
+        return Result.except(
           JsonConverterFailure(
             entityType: E,
             fetched: doc.data(),
@@ -110,21 +122,33 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
   @override
   Future<Result<Id, Exception>> protectedDeleteAndNotify(
     CollectionReference collection,
-    Id id,
-  ) async {
-    try {
-      await collection.doc(idToString(id)).delete();
-      notifyDeleteComplete(id);
+    Id id, {
+    FirestoreTransactionContext? transaction,
+  }) async {
+    if (transaction != null) {
+      final ref = collection.doc(idToString(id));
+      transaction.value.delete(ref);
+
+      // notify after commit
+      transaction.addOnCommitFunction(() {
+        notifyDeleteComplete(id);
+      });
       return Result.ok(id);
-    } on FirebaseException catch (e) {
-      return Result.err(
-        FirestoreRequestFailure(
-          entityType: E,
-          code: e.code,
-          message: e.message,
-          exception: e,
-        ),
-      );
+    } else {
+      try {
+        await collection.doc(idToString(id)).delete();
+        notifyDeleteComplete(id);
+        return Result.ok(id);
+      } on FirebaseException catch (e) {
+        return Result.except(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
     }
   }
 
@@ -134,7 +158,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     try {
       snapshot = await ref.get();
     } on FirebaseException catch (e) {
-      return Result.err(
+      return Result.except(
         FirestoreRequestFailure(
           entityType: E,
           code: e.code,
@@ -149,7 +173,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
       notifyListComplete(data);
       return Result.ok(data);
     } on Exception catch (e) {
-      return Result.err(
+      return Result.except(
         JsonConverterFailure(
           entityType: E,
           fetched: snapshot.docs.map((e) => e.data()).toList(),
@@ -165,25 +189,42 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     E entity, {
     bool? merge,
     List<Object>? mergeFields,
+    FirestoreTransactionContext? transaction,
   }) async {
-    try {
-      await collection.doc(idToString(entity.id)).set(
-            toJson(entity),
-            merge != null || mergeFields != null
-                ? SetOptions(merge: merge, mergeFields: mergeFields)
-                : null,
-          );
-      notifySaveComplete(entity);
-      return Result.ok(entity);
-    } on FirebaseException catch (e) {
-      return Result.err(
-        FirestoreRequestFailure(
-          entityType: E,
-          code: e.code,
-          message: e.message,
-          exception: e,
-        ),
+    if (transaction != null) {
+      final ref = collection.doc(idToString(entity.id));
+      transaction.value.set(
+        ref,
+        toJson(entity),
+        SetOptions(merge: merge, mergeFields: mergeFields),
       );
+
+      // notify after commit
+      transaction.addOnCommitFunction(() {
+        notifySaveComplete(entity);
+      });
+
+      return Result.ok(entity);
+    } else {
+      try {
+        await collection.doc(idToString(entity.id)).set(
+              toJson(entity),
+              merge != null || mergeFields != null
+                  ? SetOptions(merge: merge, mergeFields: mergeFields)
+                  : null,
+            );
+        notifySaveComplete(entity);
+        return Result.ok(entity);
+      } on FirebaseException catch (e) {
+        return Result.except(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
     }
   }
 
@@ -260,7 +301,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
 
       return Result.ok(entity);
     } on FirebaseException catch (e) {
-      return Result.err(
+      return Result.except(
         FirestoreRequestFailure(
           entityType: E,
           code: e.code,
@@ -283,7 +324,7 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
           notifyGetComplete(entity);
           return Result.ok(entity);
         } on Exception catch (e) {
-          return Result.err(
+          return Result.except(
             JsonConverterFailure(
               entityType: E,
               fetched: event.data(),
