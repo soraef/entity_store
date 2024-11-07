@@ -43,7 +43,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   Future<Result<Id, Exception>> delete(
     Id id, {
     DeleteOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) async {
     if (transaction != null) {
       throw UnimplementedError(
@@ -66,7 +66,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) {
     if (transaction != null) {
       throw UnimplementedError(
@@ -80,7 +80,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   Future<Result<E?, Exception>> findById(
     Id id, {
     FindByIdOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) async {
     if (transaction != null) {
       throw UnimplementedError(
@@ -120,7 +120,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) {
     if (transaction != null) {
       throw UnimplementedError(
@@ -132,7 +132,9 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<int, Exception>> count() {
+  Future<Result<int, Exception>> count({
+    CountOptions? options,
+  }) {
     return query().count();
   }
 
@@ -145,7 +147,7 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   Future<Result<E, Exception>> save(
     E entity, {
     SaveOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) async {
     if (transaction != null) {
       throw UnimplementedError(
@@ -167,8 +169,10 @@ abstract class LocalStorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Stream<Result<E?, Exception>> observeById(Id id,
-      {ObserveByIdOptions? options}) {
+  Stream<Result<E?, Exception>> observeById(
+    Id id, {
+    ObserveByIdOptions? options,
+  }) {
     throw UnimplementedError();
   }
 }

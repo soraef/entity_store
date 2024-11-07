@@ -13,7 +13,7 @@ final userRepo = Provider((ref) => UserRepository(
       ref.read(entityStoreController),
     ));
 
-class UserRepository extends RootCollectionRepository<UserId, User> {
+class UserRepository extends FirestoreRepository<UserId, User> {
   UserRepository(EntityStoreController controller)
       : super(
           controller: controller,

@@ -7,7 +7,7 @@ final class FirestoreTransactionOptions extends TransactionOptions {
   FirestoreTransactionOptions({this.timeout, this.maxAttempts});
 }
 
-class FirestoreTransactionContext extends ITransactionContext {
+class FirestoreTransactionContext extends TransactionContext {
   final Transaction value;
 
   FirestoreTransactionContext(this.value);
@@ -18,10 +18,11 @@ class FirestoreTransactionContext extends ITransactionContext {
   }
 }
 
-class FirestoreTransaction extends ITransaction<FirestoreTransactionContext> {
+class FirestoreTransactionRunner
+    extends TransactionRunner<FirestoreTransactionContext> {
   final FirebaseFirestore instance;
 
-  FirestoreTransaction({
+  FirestoreTransactionRunner({
     required super.controller,
     required this.instance,
   });

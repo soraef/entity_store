@@ -1,5 +1,6 @@
 .DS_Store
 example/listener_example/
+example/firestore_repository_for_test/
 
 # FVM Version Cache
 .fvm/

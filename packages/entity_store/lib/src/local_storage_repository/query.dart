@@ -174,7 +174,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) async {
     if (transaction != null) {
       throw UnimplementedError(
@@ -242,7 +242,7 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) async {
     if (transaction != null) {
       throw UnimplementedError(
@@ -258,7 +258,9 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<int, Exception>> count() async {
+  Future<Result<int, Exception>> count({
+    CountOptions? options,
+  }) async {
     return (await findAll()).mapOk((ok) => ok.length);
   }
 
@@ -266,7 +268,6 @@ class LocalStorageRepositoryQuery<Id, E extends Entity<Id>>
   Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
     ObserveAllOptions? options,
   }) {
-    // TODO: implement watchAll
     throw UnimplementedError();
   }
 }

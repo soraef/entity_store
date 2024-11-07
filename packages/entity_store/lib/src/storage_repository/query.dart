@@ -1,10 +1,9 @@
-// ignore_for_file: invalid_use_of_protected_member
+part of '../storage_repository.dart';
 
-part of '../firestore_repository.dart';
-
-class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
+class StorageRepositoryQuery<Id, E extends Entity<Id>>
     implements IRepositoryQuery<Id, E> {
-  final BaseFirestoreRepository<Id, E> _repository;
+  final StorageRepository<Id, E> _repository;
+
   @override
   final List<RepositoryFilter> filters;
   @override
@@ -19,7 +18,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   int? get getLimit => limitNum;
   Id? get getStartAfterId => startAfterId;
 
-  FirestoreRepositoryQuery._(
+  StorageRepositoryQuery._(
     this._repository,
     this.filters,
     this.sorts,
@@ -27,14 +26,14 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     this.startAfterId,
   );
 
-  const FirestoreRepositoryQuery(this._repository)
+  const StorageRepositoryQuery(this._repository)
       : filters = const [],
         sorts = const [],
         limitNum = null,
         startAfterId = null;
 
   @override
-  FirestoreRepositoryQuery<Id, E> where(
+  StorageRepositoryQuery<Id, E> where(
     Object field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -48,7 +47,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     List<Object?>? whereNotIn,
     bool? isNull,
   }) {
-    return FirestoreRepositoryQuery._(
+    return StorageRepositoryQuery._(
       _repository,
       [
         ...filters,
@@ -88,7 +87,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
             FilterOperator.isGreaterThanOrEqualTo,
             isGreaterThanOrEqualTo,
           ),
-        if (arrayContainsAny != null)
+        if (arrayContains != null)
           RepositoryFilter(
             field,
             FilterOperator.arrayContains,
@@ -126,33 +125,39 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> orderBy(
+  StorageRepositoryQuery<Id, E> orderBy(
     Object field, {
     bool descending = false,
   }) {
-    return FirestoreRepositoryQuery<Id, E>._(
+    return StorageRepositoryQuery._(
       _repository,
       filters,
-      [...sorts, RepositorySort(field, descending)],
+      [
+        ...sorts,
+        RepositorySort(
+          field,
+          descending,
+        ),
+      ],
       limitNum,
       startAfterId,
     );
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> limit(int num) {
-    return FirestoreRepositoryQuery<Id, E>._(
+  StorageRepositoryQuery<Id, E> limit(int count) {
+    return StorageRepositoryQuery._(
       _repository,
       filters,
       sorts,
-      num,
+      count,
       startAfterId,
     );
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> startAfter(Id id) {
-    return FirestoreRepositoryQuery<Id, E>._(
+  StorageRepositoryQuery<Id, E> startAfter(Id id) {
+    return StorageRepositoryQuery._(
       _repository,
       filters,
       sorts,
@@ -166,87 +171,35 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return filters.map((e) => e.test(object)).every((e) => e);
   }
 
-  Query _buildFilterQuery(Query query) {
-    for (final filter in getFilters) {
-      switch (filter.operator) {
-        case FilterOperator.isEqualTo:
-          query = query.where(filter.field, isEqualTo: filter.value);
-          break;
-        case FilterOperator.isNotEqualTo:
-          query = query.where(filter.field, isNotEqualTo: filter.value);
-          break;
-        case FilterOperator.isLessThan:
-          query = query.where(filter.field, isLessThan: filter.value);
-          break;
-        case FilterOperator.isLessThanOrEqualTo:
-          query = query.where(filter.field, isLessThanOrEqualTo: filter.value);
-          break;
-        case FilterOperator.isGreaterThan:
-          query = query.where(filter.field, isGreaterThan: filter.value);
-          break;
-        case FilterOperator.isGreaterThanOrEqualTo:
-          query =
-              query.where(filter.field, isGreaterThanOrEqualTo: filter.value);
-          break;
-        case FilterOperator.arrayContains:
-          query = query.where(filter.field, arrayContains: filter.value);
-          break;
-        case FilterOperator.arrayContainsAny:
-          query = query.where(filter.field, arrayContainsAny: filter.value);
-          break;
-        case FilterOperator.whereIn:
-          query = query.where(filter.field, whereIn: filter.value);
-          break;
-        case FilterOperator.whereNotIn:
-          query = query.where(filter.field, whereNotIn: filter.value);
-          break;
-        case FilterOperator.isNull:
-          query = query.where(filter.field, isNull: filter.value);
-          break;
-      }
-    }
-    return query;
-  }
-
-  Query _buildSortQuery(Query query) {
-    for (final sort in getSorts) {
-      query = query.orderBy(sort.field, descending: sort.descending);
-    }
-    return query;
-  }
-
-  Query _buildLimitQuery(Query query) {
-    final lim = getLimit;
-    if (lim != null) {
-      return query.limit(lim);
-    }
-    return query;
-  }
-
-  Future<Query> _build() async {
-    var ref = _buildFilterQuery(_repository.collectionRef);
-    ref = _buildSortQuery(ref);
-    ref = _buildLimitQuery(ref);
-
-    if (startAfterId != null) {
-      final doc = await _repository.getDocumentRef(startAfterId as Id).get();
-      ref = ref.startAfterDocument(doc);
-    }
-
-    return ref;
-  }
-
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   }) async {
+    if (transaction != null) {
+      throw UnimplementedError(
+        'Transaction is not supported in LocalStorageRepository',
+      );
+    }
+
+    final skipSyncCheck = switch (options) {
+      StorageFindAllOptions(skipSyncCheck: true) => true,
+      _ => false,
+    };
+
+    if (!skipSyncCheck) {
+      final syncResult = await _repository.syncRemoteDataIfUpdated();
+      if (syncResult.isExcept) {
+        return Result.except(syncResult.except);
+      }
+    }
+
     options = options ?? const FindAllOptions();
     final objects = _repository.controller
         .getAll<Id, E>()
         .map((e) => _repository.toJson(e))
         .toList();
-    final storeEntities = IRepositoryQuery.findEntities(objects, this)
+    var storeEntities = IRepositoryQuery.findEntities(objects, this)
         .map((e) => _repository.fromJson(e))
         .toList();
 
@@ -260,8 +213,43 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
       }
     }
 
-    final ref = await _build();
-    return _repository.protectedListAndNotify(ref);
+    final result = await _repository.dataSourceHandler.loadAll();
+
+    if (result.isExcept) {
+      return Result.except(result.except);
+    }
+
+    var entities =
+        result.ok!.where((e) => test(_repository.toJson(e))).toList();
+
+    final sorts = getSorts;
+    for (final sort in sorts.reversed) {
+      entities = entities.sorted(
+        (a, b) {
+          final fieldA = _repository.toJson(a)[sort.field] as Comparable;
+          final fieldB = _repository.toJson(b)[sort.field] as Comparable;
+          if (sort.descending) {
+            return fieldB.compareTo(fieldA);
+          } else {
+            return fieldA.compareTo(fieldB);
+          }
+        },
+      );
+    }
+
+    final startAfterId = getStartAfterId;
+    if (startAfterId != null) {
+      entities =
+          entities.skipWhile((e) => e.id != startAfterId).skip(1).toList();
+    }
+
+    final limit = getLimit;
+    if (limit != null) {
+      entities = entities.take(limit).toList();
+    }
+
+    _repository.notifyListComplete(entities);
+    return Result.ok(entities);
   }
 
   @override
@@ -269,48 +257,54 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
-    options = options ?? const FindOneOptions();
-    final objects = _repository.controller
-        .getAll<Id, E>()
-        .map((e) => _repository.toJson(e))
-        .toList();
-    final storeEntity = IRepositoryQuery.findEntities(objects, this)
-        .map((e) => _repository.fromJson(e))
-        .take(1)
-        .firstOrNull;
-
-    if (options.fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.ok(storeEntity);
+    if (transaction != null) {
+      throw UnimplementedError(
+        'Transaction is not supported in LocalStorageRepository',
+      );
     }
 
-    if (options.fetchPolicy == FetchPolicy.storeFirst) {
-      if (storeEntity != null) {
-        return Result.ok(storeEntity);
+    final skipSyncCheck = switch (options) {
+      StorageFindOneOptions(skipSyncCheck: true) => true,
+      _ => false,
+    };
+
+    if (!skipSyncCheck) {
+      final syncResult = await _repository.syncRemoteDataIfUpdated();
+      if (syncResult.isExcept) {
+        return Result.except(syncResult.except);
       }
     }
 
-    final ref = await _build();
-    return (await _repository.protectedListAndNotify(ref.limit(1)))
+    options ??= const FindOneOptions();
+
+    return (await findAll(
+            options: FindAllOptions(fetchPolicy: options.fetchPolicy)))
         .mapOk((ok) => ok.firstOrNull);
   }
 
   @override
-  Future<Result<int, Exception>> count() async {
-    final ref = await _build();
-    final countQuery = ref.count();
-    final result = await countQuery.get();
-    final count = result.count;
-    if (count == null) {
-      return Result.except(Exception("Count is null"));
+  Future<Result<int, Exception>> count({
+    CountOptions? options,
+  }) async {
+    final skipSyncCheck = switch (options) {
+      StorageCountOptions(skipSyncCheck: true) => true,
+      _ => false,
+    };
+
+    if (!skipSyncCheck) {
+      final syncResult = await _repository.syncRemoteDataIfUpdated();
+      if (syncResult.isExcept) {
+        return Result.except(syncResult.except);
+      }
     }
-    return Result.ok(count);
+
+    return (await findAll()).mapOk((ok) => ok.length);
   }
 
   @override
   Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
     ObserveAllOptions? options,
-  }) async* {
-    final ref = await _build();
-    yield* _repository.protectedObserveCollection(ref);
+  }) {
+    throw UnimplementedError();
   }
 }

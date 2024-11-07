@@ -82,19 +82,21 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
 
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   });
 
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   });
 
   Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
     ObserveAllOptions? options,
   });
 
-  Future<Result<int, Exception>> count();
+  Future<Result<int, Exception>> count({
+    CountOptions? options,
+  });
 
   List<RepositoryFilter> get filters;
   List<RepositorySort> get sorts;

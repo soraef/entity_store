@@ -68,6 +68,8 @@ class SaveOptions {}
 
 class DeleteOptions {}
 
+class CountOptions {}
+
 class ObserveAllOptions {}
 
 class ObserveByIdOptions {}

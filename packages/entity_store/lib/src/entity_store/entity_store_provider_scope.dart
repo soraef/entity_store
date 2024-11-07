@@ -6,10 +6,10 @@ class EntityStoreProviderScope extends StatelessWidget {
 
   // コンストラクタを通じてEntityStoreNotifierのインスタンスを受け取る
   const EntityStoreProviderScope({
-    Key? key,
+    super.key,
     required this.child,
     required this.entityStoreNotifier,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

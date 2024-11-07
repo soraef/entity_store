@@ -3,7 +3,7 @@ import 'package:entity_store_firestore/entity_store_firestore.dart';
 import 'weekly_activity.dart';
 
 class WeeklyActivityRepository
-    extends SubCollectionRepository<WeeklyActivityId, WeeklyActivity> {
+    extends FirestoreSubCollectionRepository<WeeklyActivityId, WeeklyActivity> {
   WeeklyActivityRepository({
     required super.controller,
     required super.parentRepository,

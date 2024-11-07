@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'entity.dart';
 
-class UserRepository extends RootCollectionRepository<UserId, User> {
+class UserRepository extends FirestoreRepository<UserId, User> {
   UserRepository(EntityStoreController controller)
       : super(
           controller: controller,

@@ -3,14 +3,14 @@ part of '../firestore_repository.dart';
 typedef CreateRepository<T, Id> = T Function(
     BaseFirestoreRepository parent, Id id);
 
-abstract class RootCollectionRepository<Id, E extends Entity<Id>>
-    extends FirestoreRepository<Id, E> {
+abstract class FirestoreRepository<Id, E extends Entity<Id>>
+    extends FirestoreRepositoryWithContainer<Id, E> {
   @override
   final EntityStoreController controller;
   final FirebaseFirestore instance;
   String get collectionId;
 
-  RootCollectionRepository({
+  FirestoreRepository({
     required this.controller,
     required this.instance,
   });
@@ -20,14 +20,14 @@ abstract class RootCollectionRepository<Id, E extends Entity<Id>>
       instance.collection(collectionId);
 }
 
-abstract class SubCollectionRepository<Id, E extends Entity<Id>>
-    extends FirestoreRepository<Id, E> implements SubCollection {
+abstract class FirestoreSubCollectionRepository<Id, E extends Entity<Id>>
+    extends FirestoreRepositoryWithContainer<Id, E> implements SubCollection {
   @override
   final EntityStoreController controller;
   final String parentDocumentId;
   final BaseFirestoreRepository parentRepository;
 
-  SubCollectionRepository({
+  FirestoreSubCollectionRepository({
     required this.controller,
     required this.parentRepository,
     required this.parentDocumentId,
@@ -44,7 +44,7 @@ abstract class SubCollectionRepository<Id, E extends Entity<Id>>
 
 abstract class SubCollection {}
 
-abstract class FirestoreRepository<Id, E extends Entity<Id>>
+abstract class FirestoreRepositoryWithContainer<Id, E extends Entity<Id>>
     extends BaseFirestoreRepository<Id, E>
     with EntityChangeNotifier<Id, E>, FirestoreEntityNotifier<Id, E>
     implements IRepository<Id, E> {
@@ -79,7 +79,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   Future<Result<Id, Exception>> delete(
     Id id, {
     DeleteOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) async {
     if (transaction != null && transaction is! FirestoreTransactionContext) {
       throw ArgumentError("transaction must be FirestoreTransactionContext");
@@ -100,7 +100,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<List<E>, Exception>> findAll({
     FindAllOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) {
     if (transaction != null) {
       throw UnimplementedError("findAll with transaction is not implemented");
@@ -113,7 +113,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   @override
   Future<Result<E?, Exception>> findOne({
     FindOneOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) {
     if (transaction != null) {
       throw UnimplementedError("findOne with transaction is not implemented");
@@ -132,7 +132,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   Future<Result<E?, Exception>> findById(
     Id id, {
     FindByIdOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) async {
     if (transaction != null && transaction is! FirestoreTransactionContext) {
       throw ArgumentError("transaction must be FirestoreTransactionContext");
@@ -161,7 +161,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   Future<Result<E, Exception>> save(
     E entity, {
     SaveOptions? options,
-    ITransactionContext? transaction,
+    TransactionContext? transaction,
   }) {
     if (transaction != null && transaction is! FirestoreTransactionContext) {
       throw ArgumentError("transaction must be FirestoreTransactionContext");

@@ -2,10 +2,11 @@ part of '../repository_interface.dart';
 
 class TransactionOptions {}
 
-abstract class ITransaction<TTransactionContext extends ITransactionContext> {
+abstract class TransactionRunner<
+    TTransactionContext extends TransactionContext> {
   final EntityStoreController controller;
 
-  ITransaction({
+  TransactionRunner({
     required this.controller,
   });
 
@@ -22,7 +23,7 @@ abstract class ITransaction<TTransactionContext extends ITransactionContext> {
   }) async {
     final result = await handleTransaction(fn, options);
     if (result.isExcept) {
-      throw result.except.toExcept();
+      return result.except.toExcept();
     }
 
     final context = result.ok.$2;
@@ -37,8 +38,8 @@ abstract class ITransaction<TTransactionContext extends ITransactionContext> {
   );
 }
 
-abstract class ITransactionContext {
-  ITransactionContext();
+abstract class TransactionContext {
+  TransactionContext();
 
   /// トランザクションが成功された場合に実行する関数のリスト
   final List<Function()> _onCommitFunctions = [];

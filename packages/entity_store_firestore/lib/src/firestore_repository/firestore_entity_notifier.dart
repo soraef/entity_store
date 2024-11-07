@@ -158,6 +158,13 @@ mixin FirestoreEntityNotifier<Id, E extends Entity<Id>>
     try {
       snapshot = await ref.get();
     } on FirebaseException catch (e) {
+      // failed-preconditionの場合
+      if (e.code == 'failed-precondition') {
+        if (e.message?.contains('The query requires an index') == true) {
+          // ignore: avoid_print
+          print(e.message);
+        }
+      }
       return Result.except(
         FirestoreRequestFailure(
           entityType: E,
