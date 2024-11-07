@@ -45,3 +45,10 @@
 ## 6.0.0-dev.1
 
 * feat: Add database transaction handling to Repository
+
+## 6.0.0-dev.2
+
+* feat: Add StorageRepository which is a repository that handles a generic storage as a data source.
+* feat: Add SyncStorageRepository which is a repository that handles a generic storage as a data source and synchronize with remote data source.
+* feat: Add CountOptions to count method
+* BREAKING CHANGE: LocalStorageRepository is deprecated. Use StorageRepository instead.

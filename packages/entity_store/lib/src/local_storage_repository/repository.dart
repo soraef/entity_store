@@ -1,5 +1,6 @@
 part of '../local_storage_repository.dart';
 
+@Deprecated("Use StorageRepository instead.")
 abstract class LocalStorageRepository<Id, E extends Entity<Id>>
     with EntityChangeNotifier<Id, E>
     implements IRepository<Id, E> {
