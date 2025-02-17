@@ -45,16 +45,16 @@ class FirestoreTransactionRunner
         (transaction) async {
           final context = FirestoreTransactionContext(transaction);
           final result = await fn(context);
-          return (result, context).toOk();
+          return (result, context).toSuccess();
         },
         timeout: firestoreOptions?.timeout ?? const Duration(seconds: 30),
         maxAttempts: firestoreOptions?.maxAttempts ?? 5,
       );
     } catch (e) {
       if (e is Exception) {
-        return Result.except(e);
+        return Result.failure(e);
       }
-      return Result.except(Exception(e));
+      return Result.failure(Exception(e));
     }
   }
 }

@@ -61,13 +61,13 @@ class TaskUsecase {
       id,
       creater: () => null,
       updater: (prev) => done ? prev.complete() : prev.uncomplete(),
-      options: FirestoreCreateOrUpdateOptions(
+      options: FirestoreUpsertOptions(
         useTransaction: false,
       ),
     );
 
-    if (result.isOk && result.ok != null) {
-      return Result.ok(result.ok!);
+    if (result.isSuccess && result.success != null) {
+      return Result.success(result.success!);
     }
 
     _activityRepository(userId!).upsert(
@@ -85,7 +85,7 @@ class TaskUsecase {
       },
     );
 
-    return Result.err(Exception("Task Not Found"));
+    return Result.failure(Exception("Task Not Found"));
   }
 
   Future<void> delete(Task task) async {
@@ -102,7 +102,7 @@ class TaskUsecase {
   }
 
   Future<void> loadUserAll() async {
-    final auth = (await authRepo.findById(AuthId("authId"))).ok;
+    final auth = (await authRepo.findById(AuthId("authId"))).success;
     assert(auth?.isLogin == true);
     await _taskRepo(userId!)
         .query()
@@ -154,14 +154,14 @@ class TaskUsecase {
       },
     );
 
-    if (result.isOk && result.ok != null) {
-      final sub = result.ok!.findSubTaskById(subTaskId);
+    if (result.isSuccess && result.success != null) {
+      final sub = result.success!.findSubTaskById(subTaskId);
       if (sub != null) {
-        return Result.ok(sub);
+        return Result.success(sub);
       }
     }
 
-    return Result.err(Exception("Task Not Found"));
+    return Result.failure(Exception("Task Not Found"));
   }
 
   Future<void> deleteSubTask(TaskId taskId, SubTask task) async {

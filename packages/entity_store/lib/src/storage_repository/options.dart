@@ -1,56 +1,99 @@
 part of '../storage_repository.dart';
 
-class StorageFindByIdOptions extends FindByIdOptions {
-  final bool skipSyncCheck;
-  const StorageFindByIdOptions({
-    super.fetchPolicy,
-    this.skipSyncCheck = false,
+class StorageFindByIdOptions
+    implements FindByIdOptions, FetchPolicyOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  StorageFindByIdOptions({
+    this.enableBefore = true,
+    this.fetchPolicy = FetchPolicy.persistent,
   });
 }
 
-class StorageFindOneOptions extends FindOneOptions {
-  final bool skipSyncCheck;
-  const StorageFindOneOptions({
-    super.fetchPolicy,
-    this.skipSyncCheck = false,
+class StorageFindOneOptions
+    implements FindOneOptions, FetchPolicyOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  StorageFindOneOptions({
+    this.enableBefore = true,
+    this.fetchPolicy = FetchPolicy.persistent,
   });
 }
 
-class StorageFindAllOptions extends FindAllOptions {
-  final bool skipSyncCheck;
-  const StorageFindAllOptions({
-    super.fetchPolicy,
-    this.skipSyncCheck = false,
+class StorageFindAllOptions
+    implements FindAllOptions, FetchPolicyOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  StorageFindAllOptions({
+    this.enableBefore = true,
+    this.fetchPolicy = FetchPolicy.persistent,
   });
 }
 
-class StorageUpsertOptions extends UpsertOptions {
-  final bool skipSyncCheck;
-  const StorageUpsertOptions({
-    super.fetchPolicy,
-    super.useTransaction,
-    this.skipSyncCheck = false,
+class StorageUpsertOptions
+    implements UpsertOptions, FetchPolicyOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  StorageUpsertOptions({
+    this.enableBefore = true,
+    this.fetchPolicy = FetchPolicy.persistent,
   });
 }
 
-class StorageSaveOptions extends SaveOptions {}
+class StorageSaveOptions
+    implements SaveOptions, BeforeCallbackOptions, LoadEntityCallbackOptions {
+  @override
+  bool enableBefore;
 
-class StorageDeleteOptions extends DeleteOptions {}
+  @override
+  bool enableLoadEntity;
 
-class StorageObserveAllOptions extends ObserveAllOptions {}
-
-class StorageObserveByIdOptions extends ObserveByIdOptions {}
-
-class StorageQueryUpsertOptions extends QueryUpsertOptions {
-  const StorageQueryUpsertOptions({
-    super.fetchPolicy,
-    super.useTransaction,
+  StorageSaveOptions({
+    this.enableBefore = true,
+    this.enableLoadEntity = true,
   });
 }
 
-class StorageCountOptions extends CountOptions {
-  final bool skipSyncCheck;
+class StorageDeleteOptions implements DeleteOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  StorageDeleteOptions({
+    this.enableBefore = true,
+  });
+}
+
+class StorageQueryUpsertOptions
+    implements QueryUpsertOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  StorageQueryUpsertOptions({
+    this.enableBefore = true,
+  });
+}
+
+class StorageCountOptions implements CountOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
   StorageCountOptions({
-    this.skipSyncCheck = false,
+    this.enableBefore = true,
   });
 }

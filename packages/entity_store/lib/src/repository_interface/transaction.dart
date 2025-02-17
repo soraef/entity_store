@@ -22,14 +22,14 @@ abstract class TransactionRunner<
     TransactionOptions? options,
   }) async {
     final result = await handleTransaction(fn, options);
-    if (result.isExcept) {
-      return result.except.toExcept();
+    if (result.isFailure) {
+      return result.failure.toFailure();
     }
 
-    final context = result.ok.$2;
+    final context = result.success.$2;
     context.complete();
 
-    return result.ok.$1.toOk();
+    return result.success.$1.toSuccess();
   }
 
   Future<Result<(T, TTransactionContext), Exception>> handleTransaction<T>(

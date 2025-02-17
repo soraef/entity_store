@@ -1,35 +1,7 @@
 import 'package:entity_store/entity_store.dart';
-import 'package:entity_store_firestore/src/firestore_repository.dart';
-import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'entity.dart';
-
-class UserRepository extends FirestoreRepository<UserId, User> {
-  UserRepository(EntityStoreController controller)
-      : super(
-          controller: controller,
-          instance: FakeFirebaseFirestore(),
-        );
-
-  @override
-  User fromJson(Map<String, dynamic> json) {
-    return userConverter.fromJson(json);
-  }
-
-  @override
-  Map<String, dynamic> toJson(User entity) {
-    return userConverter.toJson(entity);
-  }
-
-  @override
-  String get collectionId => 'users';
-
-  @override
-  String idToString(UserId id) {
-    return id.value;
-  }
-}
 
 void main() {
   late EntityStoreController controller;
@@ -49,9 +21,9 @@ void main() {
     await repo.save(users[0]);
     final userGet = await repo.findById(users[0].id);
 
-    expect(userGet.ok!.id, users[0].id);
+    expect(userGet.success!.id, users[0].id);
     expect(
-      controller.getById<UserId, User>(userGet.ok!.id)!.id,
+      controller.getById<UserId, User>(userGet.success!.id)!.id,
       users[0].id,
     );
 
@@ -59,39 +31,39 @@ void main() {
     controller.put(users[1]);
     final userGet2 = await repo.findById(
       users[1].id,
-      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
     );
-    expect(userGet2.ok!.id, users[1].id);
+    expect(userGet2.success!.id, users[1].id);
 
     final userGet3 = await repo.findById(
       users[2].id,
-      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
     );
-    expect(userGet3.ok, null);
+    expect(userGet3.success, null);
 
     /// FindByIdOptions.fetchPolicy = FetchPolicy.storeFirst
     final userGet4 = await repo.findById(
       users[1].id,
-      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
     );
-    expect(userGet4.ok!.id, users[1].id);
+    expect(userGet4.success!.id, users[1].id);
 
     await repo.save(users[2]);
     controller.delete<UserId, User>(users[2].id);
 
     final userGet5 = await repo.findById(
       users[2].id,
-      options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
     );
-    expect(userGet5.ok!.id, users[2].id);
+    expect(userGet5.success!.id, users[2].id);
   });
 
   test("delete", () async {
     await repo.save(users.first);
-    await repo.delete(users.first.id);
+    await repo.deleteById(users.first.id);
     final userGet = await repo.findById(users.first.id);
 
-    expect(userGet.ok, null);
+    expect(userGet.success, null);
     expect(controller.getById<UserId, User>(users.first.id), null);
   });
 
@@ -101,46 +73,51 @@ void main() {
     }
 
     final list = await repo.findAll();
-    expect(list.ok.length, users.length);
+    expect(list.success.length, users.length);
     expect(controller.where<UserId, User>().length, users.length);
 
     final list2 = await repo.query().limit(3).findAll();
-    expect(list2.ok.length, 3);
+    expect(list2.success.length, 3);
 
     final list3 = await repo.query().where('id', isEqualTo: '5').findAll();
-    expect(list3.ok.first.id.value, "5");
+    expect(list3.success.first.id.value, "5");
 
     /// FindAllOptions.fetchPolicy = FetchPolicy.storeOnly
     controller.delete<UserId, User>(users[0].id);
     final list4 = await repo.query().where('id', isEqualTo: '1').findAll(
-          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeOnly),
+          options:
+              EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.storeOnly),
         );
-    expect(list4.ok.length, 0);
+    expect(list4.success.length, 0);
 
-    /// FindAllOptions.fetchPolicy = FetchPolicy.storeFirst
+    /// EntityStoreFindAllOptions.fetchPolicy = FetchPolicy.storeFirst
     final list5 = await repo.query().where('id', isEqualTo: '1').findAll(
-          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+          options:
+              EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
         );
-    expect(list5.ok.length, 1);
+    expect(list5.success.length, 1);
 
     await repo.save(users[0]);
     controller.delete<UserId, User>(users[0].id);
     final list6 = await repo.query().where('id', isEqualTo: '1').findAll(
-          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+          options:
+              EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
         );
-    expect(list6.ok.length, 1);
+    expect(list6.success.length, 1);
 
     await repo.save(users[0]);
     controller.delete<UserId, User>(users[0].id);
     final list7 = await repo.query().where('age', isEqualTo: 1).findAll(
-          options: const FindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+          options:
+              EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
         );
-    expect(list7.ok.length, 2);
+    expect(list7.success.length, 2);
 
     final list8 = await repo.query().where('age', isEqualTo: 1).findAll(
-          options: const FindAllOptions(fetchPolicy: FetchPolicy.persistent),
+          options:
+              EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.persistent),
         );
-    expect(list8.ok.length, 3);
+    expect(list8.success.length, 3);
   });
 
   test("count", () async {
@@ -149,7 +126,7 @@ void main() {
     }
 
     final count = await repo.count();
-    expect(count.ok, users.length);
+    expect(count.success, users.length);
   });
 
   test('upsert', () async {
@@ -168,7 +145,7 @@ void main() {
     );
 
     final userGet = await repo.findById(user.id);
-    expect(userGet.ok!.name, "bbb");
+    expect(userGet.success!.name, "bbb");
 
     // created new user because user is not exists
     final user3 = User(id: UserId("11"), name: "aaa", age: 1);
@@ -179,6 +156,182 @@ void main() {
     );
 
     final userGet2 = await repo.findById(UserId("11"));
-    expect(userGet2.ok!.name, "aaa");
+    expect(userGet2.success!.name, "aaa");
+  });
+
+  test("FetchPolicy", () async {
+    final user = User(id: UserId("1"), name: "test", age: 20);
+
+    // まずデータを保存
+    await repo.save(user);
+
+    // Storeからデータを削除
+    controller.delete<UserId, User>(user.id);
+
+    // FetchPolicy.storeOnly - Storeにないので null が返される
+    final storeOnlyResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
+    );
+    expect(storeOnlyResult.success, null);
+
+    // FetchPolicy.storeFirst - Storeにないので永続化層から取得
+    final storeFirstResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstResult.success?.id, user.id);
+
+    // Storeにデータを追加
+    final updatedUser = User(id: UserId("1"), name: "updated", age: 30);
+    controller.put(updatedUser);
+
+    // FetchPolicy.storeFirst - Storeにあるのでそれを返す
+    final storeFirstWithCacheResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstWithCacheResult.success?.name, "updated");
+
+    // FetchPolicy.persistent - 永続化層から必ず取得
+    final persistentResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.persistent),
+    );
+    expect(persistentResult.success?.name, "test"); // 永続化層の元のデータ
+  });
+
+  test("FetchPolicy - findById", () async {
+    final user = User(id: UserId("1"), name: "test", age: 20);
+
+    // まずデータを保存
+    await repo.save(user);
+
+    // Storeからデータを削除
+    controller.delete<UserId, User>(user.id);
+
+    // FetchPolicy.storeOnly - Storeにないので null が返される
+    final storeOnlyResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeOnly),
+    );
+    expect(storeOnlyResult.success, null);
+
+    // FetchPolicy.storeFirst - Storeにないので永続化層から取得
+    final storeFirstResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstResult.success?.id, user.id);
+
+    // Storeにデータを追加
+    final updatedUser = User(id: UserId("1"), name: "updated", age: 30);
+    controller.put(updatedUser);
+
+    // FetchPolicy.storeFirst - Storeにあるのでそれを返す
+    final storeFirstWithCacheResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstWithCacheResult.success?.name, "updated");
+
+    // FetchPolicy.persistent - 永続化層から必ず取得
+    final persistentResult = await repo.findById(
+      user.id,
+      options: EntityStoreFindByIdOptions(fetchPolicy: FetchPolicy.persistent),
+    );
+    expect(persistentResult.success?.name, "test");
+  });
+
+  test("FetchPolicy - findAll", () async {
+    final users = [
+      User(id: UserId("1"), name: "test1", age: 20),
+      User(id: UserId("2"), name: "test2", age: 20),
+    ];
+
+    // まずデータを保存
+    for (final user in users) {
+      await repo.save(user);
+    }
+
+    // Storeからデータを削除
+    for (final user in users) {
+      controller.delete<UserId, User>(user.id);
+    }
+
+    // FetchPolicy.storeOnly - Storeにないので空のリストが返される
+    final storeOnlyResult = await repo.findAll(
+      options: EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.storeOnly),
+    );
+    expect(storeOnlyResult.success, isEmpty);
+
+    // FetchPolicy.storeFirst - Storeにないので永続化層から取得
+    final storeFirstResult = await repo.findAll(
+      options: EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstResult.success.length, 2);
+
+    // Storeにデータを追加（一部のデータを更新）
+    final updatedUser = User(id: UserId("1"), name: "updated", age: 30);
+    controller.put(updatedUser);
+
+    // FetchPolicy.storeFirst - Storeにあるものを返す
+    final storeFirstWithCacheResult = await repo.findAll(
+      options: EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstWithCacheResult.success.length, 2);
+    expect(storeFirstWithCacheResult.success.first.name, "updated");
+
+    // FetchPolicy.persistent - 永続化層から必ず取得
+    final persistentResult = await repo.findAll(
+      options: EntityStoreFindAllOptions(fetchPolicy: FetchPolicy.persistent),
+    );
+    expect(persistentResult.success.length, 2);
+    expect(persistentResult.success.first.name, "test1");
+  });
+
+  test("FetchPolicy - findOne", () async {
+    final users = [
+      User(id: UserId("1"), name: "test1", age: 20),
+      User(id: UserId("2"), name: "test2", age: 20),
+    ];
+
+    // まずデータを保存
+    for (final user in users) {
+      await repo.save(user);
+    }
+
+    // Storeからデータを削除
+    for (final user in users) {
+      controller.delete<UserId, User>(user.id);
+    }
+
+    // FetchPolicy.storeOnly - Storeにないのでnullが返される
+    final storeOnlyResult = await repo.findOne(
+      options: EntityStoreFindOneOptions(fetchPolicy: FetchPolicy.storeOnly),
+    );
+    expect(storeOnlyResult.success, null);
+
+    // FetchPolicy.storeFirst - Storeにないので永続化層から取得
+    final storeFirstResult = await repo.findOne(
+      options: EntityStoreFindOneOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstResult.success?.id, users.first.id);
+
+    // Storeにデータを追加（一部のデータを更新）
+    final updatedUser = User(id: UserId("1"), name: "updated", age: 30);
+    controller.put(updatedUser);
+
+    // FetchPolicy.storeFirst - Storeにあるものを返す
+    final storeFirstWithCacheResult = await repo.findOne(
+      options: EntityStoreFindOneOptions(fetchPolicy: FetchPolicy.storeFirst),
+    );
+    expect(storeFirstWithCacheResult.success?.name, "updated");
+
+    // FetchPolicy.persistent - 永続化層から必ず取得
+    final persistentResult = await repo.findOne(
+      options: EntityStoreFindOneOptions(fetchPolicy: FetchPolicy.persistent),
+    );
+    expect(persistentResult.success?.name, "test1");
   });
 }

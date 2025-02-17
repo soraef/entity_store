@@ -334,8 +334,8 @@ EntityStoreパッケージのリポジトリインターフェースを利用し
 ```dart
 // 使用例: IDによるTodoの検索
 var result = await todoRepository.findById(todoId);
-if (result.isOk) {
-  var todo = result.ok;
+if (result.isSuccess) {
+  var todo = result.success;
   // Todoの処理をここに記述
 }
 ```
@@ -349,8 +349,8 @@ if (result.isOk) {
 var result = await todoRepository.query()
   .where('isComplete', isEqualTo: false)
   .findAll();
-if (result.isOk) {
-  var todos = result.ok;
+if (result.isSuccess) {
+  var todos = result.success;
   // Todoリストの処理をここに記述
 }
 ```
@@ -364,8 +364,8 @@ if (result.isOk) {
 var result = await todoRepository.query()
   .where('isComplete', isEqualTo: false)
   .findOne();
-if (result.isOk) {
-  var todo = result.ok;
+if (result.isSuccess) {
+  var todo = result.success;
   // Todoの処理をここに記述
 }
 ```
@@ -379,8 +379,8 @@ if (result.isOk) {
 var result = await todoRepository.query()
   .where('isComplete', isEqualTo: false)
   .count();
-if (result.isOk) {
-  var activeCount = result.ok;
+if (result.isSuccess) {
+  var activeCount = result.success;
   // activeCountを使用した処理をここに記述
 }
 ```
@@ -393,7 +393,7 @@ if (result.isOk) {
 // 使用例: 新しいTodoを保存
 var newTodo = Todo.create(name: 'New Task');
 var result = await todoRepository.save(newTodo);
-if (result.isOk) {
+if (result.isSuccess) {
   // 保存処理の成功をここに記述
 }
 ```
@@ -405,7 +405,7 @@ if (result.isOk) {
 ```dart
 // 使用例: Todoを削除
 var result = await todoRepository.delete(todoId);
-if (result.isOk) {
+if (result.isSuccess) {
   // 削除処理の成功をここに記述
 }
 ```
@@ -421,7 +421,7 @@ var result = await todoRepository.upsert(
   creater: () => Todo.create(name: 'New Task'),
   updater: (existingTodo) => existingTodo.copyWith(isComplete: true),
 );
-if (result.isOk) {
+if (result.isSuccess) {
   // アップサート処理の成功をここに記述
 }
 ```

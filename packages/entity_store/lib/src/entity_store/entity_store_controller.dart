@@ -13,6 +13,10 @@ class EntityStoreController {
     _listenToEntityEvent();
   }
 
+  factory EntityStoreController.empty() {
+    return _EmptyEntityStoreController();
+  }
+
   void dispatch<Id, E extends Entity<Id>>(PersistenceEvent<Id, E> event) {
     event.apply(_entityStore);
     _controller.sink.add(event);
@@ -103,4 +107,16 @@ mixin EntityChangeNotifier<Id, E extends Entity<Id>> {
   void notifyDeleteComplete(Id id) {
     controller.dispatch(DeleteEvent<Id, E>.now(id));
   }
+}
+
+class _EmptyEntityStoreController extends EntityStoreController {
+  _EmptyEntityStoreController() : super(_EmptyEntityStoreNotifier());
+}
+
+class _EmptyEntityStoreNotifier with EntityStoreMixin {
+  @override
+  void update(Updater<EntityStore> updater) {}
+
+  @override
+  EntityStore get value => EntityStore.empty();
 }

@@ -24,7 +24,7 @@ class AuthUsecase {
   Future<void> login() async {
     const userId = UserId("user1");
     final user = await userRepo.findById(userId);
-    if (user.isOk && user.ok == null) {
+    if (user.isSuccess && user.success == null) {
       await userRepo.save(const User(id: userId));
     }
     await authRepo.save(Auth.login(const UserId("user1")));

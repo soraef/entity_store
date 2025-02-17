@@ -1,6 +1,6 @@
 name: entity_store_firestore
 description: firestore operations for entity_store package
-version: 6.0.0-dev.1
+version: 6.0.0-dev.8
 homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_firestore
 
 environment:
@@ -15,11 +15,11 @@ dependencies:
   equatable: ^2.0.3
   meta: ^1.8.0
   collection: ^1.16.0
-  type_result: ^2.0.0
+  type_result: ^3.0.0
 
-  entity_store: ^6.0.0-dev.1
-  # entity_store:
-  #   path: ../entity_store
+  # entity_store: ^6.0.0-dev.8
+  entity_store:
+    path: ../entity_store
 
 dev_dependencies:
   flutter_test:

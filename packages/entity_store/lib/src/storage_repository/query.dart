@@ -182,19 +182,18 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
       );
     }
 
-    final skipSyncCheck = switch (options) {
-      StorageFindAllOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+    final enableLoadEntity =
+        LoadEntityCallbackOptions.getEnableLoadEntity(options);
 
-    if (!skipSyncCheck) {
-      final syncResult = await _repository.syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
+    if (enableBefore) {
+      final beforeFindAllResult = await _repository.onBeforeFindAll(this);
+      if (beforeFindAllResult.isFailure) {
+        return Result.failure(beforeFindAllResult.failure);
       }
     }
 
-    options = options ?? const FindAllOptions();
     final objects = _repository.controller
         .getAll<Id, E>()
         .map((e) => _repository.toJson(e))
@@ -203,24 +202,24 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
         .map((e) => _repository.fromJson(e))
         .toList();
 
-    if (options.fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.ok(storeEntities);
+    if (fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.success(storeEntities);
     }
 
-    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+    if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntities.isNotEmpty) {
-        return Result.ok(storeEntities);
+        return Result.success(storeEntities);
       }
     }
 
     final result = await _repository.dataSourceHandler.loadAll();
 
-    if (result.isExcept) {
-      return Result.except(result.except);
+    if (result.isFailure) {
+      return Result.failure(result.failure);
     }
 
     var entities =
-        result.ok!.where((e) => test(_repository.toJson(e))).toList();
+        result.success.where((e) => test(_repository.toJson(e))).toList();
 
     final sorts = getSorts;
     for (final sort in sorts.reversed) {
@@ -248,8 +247,22 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
       entities = entities.take(limit).toList();
     }
 
+    if (enableLoadEntity) {
+      entities = (await Future.wait(
+        entities.map((e) async {
+          final loadEntityResult = await _repository.onLoadEntity(e);
+          if (loadEntityResult.isFailure) {
+            // log('Failed to load entity: ${loadEntityResult.failure}');
+          }
+          return loadEntityResult.successOrNull;
+        }),
+      ))
+          .whereType<E>()
+          .toList();
+    }
+
     _repository.notifyListComplete(entities);
-    return Result.ok(entities);
+    return Result.success(entities);
   }
 
   @override
@@ -263,42 +276,67 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
       );
     }
 
-    final skipSyncCheck = switch (options) {
-      StorageFindOneOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+    final enableLoadEntity =
+        LoadEntityCallbackOptions.getEnableLoadEntity(options);
 
-    if (!skipSyncCheck) {
-      final syncResult = await _repository.syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
+    if (enableBefore) {
+      final beforeFindOneResult = await _repository.onBeforeFindOne(this);
+      if (beforeFindOneResult.isFailure) {
+        return Result.failure(beforeFindOneResult.failure);
       }
     }
 
-    options ??= const FindOneOptions();
+    final allResult = await findAll(
+      options: StorageFindAllOptions(
+        fetchPolicy: fetchPolicy,
+        enableBefore: false,
+      ),
+    );
 
-    return (await findAll(
-            options: FindAllOptions(fetchPolicy: options.fetchPolicy)))
-        .mapOk((ok) => ok.firstOrNull);
+    if (allResult.isFailure) {
+      return Result.failure(allResult.failure);
+    }
+
+    var entity = allResult.success.firstOrNull;
+    if (enableLoadEntity && entity != null) {
+      final loadEntityResult = await _repository.onLoadEntity(entity);
+      if (loadEntityResult.isFailure) {
+        return Result.failure(loadEntityResult.failure);
+      }
+      entity = loadEntityResult.success;
+    }
+
+    return Result.success(entity);
   }
 
   @override
   Future<Result<int, Exception>> count({
     CountOptions? options,
   }) async {
-    final skipSyncCheck = switch (options) {
-      StorageCountOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
 
-    if (!skipSyncCheck) {
-      final syncResult = await _repository.syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
+    if (enableBefore) {
+      final beforeCountResult = await _repository.onBeforeCount();
+      if (beforeCountResult.isFailure) {
+        return Result.failure(beforeCountResult.failure);
       }
     }
 
-    return (await findAll()).mapOk((ok) => ok.length);
+    final allResult = await findAll(
+      options: StorageFindAllOptions(
+        fetchPolicy: fetchPolicy,
+        enableBefore: false,
+      ),
+    );
+
+    if (allResult.isFailure) {
+      return Result.failure(allResult.failure);
+    }
+
+    return Result.success(allResult.success.length);
   }
 
   @override

@@ -331,8 +331,8 @@ Get an entity with the specified ID.
 ```dart
 // Example: Finding a Todo by ID
 var result = await todoRepository.findById(todoId);
-if (result.isOk) {
-  var todo = result.ok;
+if (result.isSuccess) {
+  var todo = result.success;
   // Perform Todo-related operations here
 }
 ```
@@ -346,8 +346,8 @@ Retrieve all entities.
 var result = await todoRepository.query()
   .where('isComplete', isEqualTo: false)
   .findAll();
-if (result.isOk) {
-  var todos = result.ok;
+if (result.isSuccess) {
+  var todos = result.success;
   // Perform operations on the Todo list here
 }
 ```
@@ -361,8 +361,8 @@ Retrieve the first entity that matches the specified criteria.
 var result = await todoRepository.query()
   .where('isComplete', isEqualTo: false)
   .findOne();
-if (result.isOk) {
-  var todo = result.ok;
+if (result.isSuccess) {
+  var todo = result.success;
   // Perform Todo-related operations here
 }
 ```
@@ -376,8 +376,8 @@ Count the number of entities that match the specified criteria.
 var result = await todoRepository.query()
   .where('isComplete', isEqualTo: false)
   .count();
-if (result.isOk) {
-  var activeCount = result.ok;
+if (result.isSuccess) {
+  var activeCount = result.success;
   // Perform operations using activeCount here
 }
 ```
@@ -390,7 +390,7 @@ Save or update an entity.
 // Example: Save a new Todo
 var newTodo = Todo.create(name: 'New Task');
 var result = await todoRepository.save(newTodo);
-if (result.isOk) {
+if (result.isSuccess) {
   // Handle the success of the save operation here
 }
 ```
@@ -402,7 +402,7 @@ Delete an entity.
 ```dart
 // Example: Delete a Todo
 var result = await todoRepository.delete(todoId);
-if (result.isOk) {
+if (result.isSuccess) {
   // Handle the success of the delete operation here
 }
 ```
@@ -418,7 +418,7 @@ var result = await todoRepository.upsert(
   creater: () => Todo.create(name: 'New Task'),
   updater: (existingTodo) => existingTodo.copyWith(isComplete: true),
 );
-if (result.isOk) {
+if (result.isSuccess) {
   // Handle the success of the upsert operation here
 }
 ```

@@ -1,4 +1,6 @@
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store_firestore/entity_store_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:type_result/src/result.dart';
 
 class UserId extends Id {
@@ -61,51 +63,77 @@ final users = [
   User(id: UserId("10"), name: "aca", age: 4),
 ];
 
-class InMemoryLocalStorageHandler implements ILocalStorageHandler {
-  final Map<String, String> _map = {};
-
-  @override
-  Future<Result<void, Exception>> clear() {
-    _map.clear();
-    return Future.value(Result.ok(null));
-  }
-
-  @override
-  Future<Result<void, Exception>> delete(String key) {
-    _map.remove(key);
-    return Future.value(Result.ok(null));
-  }
-
-  @override
-  Future<Result<String?, Exception>> load(String key) {
-    return Future.value(Result.ok(_map[key]));
-  }
-
-  @override
-  Future<Result<void, Exception>> save(String key, String value) {
-    _map[key] = value;
-    return Future.value(Result.ok(null));
-  }
-}
-
-class UserRepo extends LocalStorageRepository<UserId, User> {
-  UserRepo(super.controller, super.localStorageHandler);
+class UserRepository extends FirestoreRepository<UserId, User> {
+  UserRepository(EntityStoreController controller)
+      : super(
+          controller: controller,
+          instance: FakeFirebaseFirestore(),
+        );
 
   @override
   User fromJson(Map<String, dynamic> json) {
-    return User(
-      id: UserId(json["id"]),
-      name: json["name"],
-      age: json["age"],
-    );
+    return userConverter.fromJson(json);
   }
 
   @override
   Map<String, dynamic> toJson(User entity) {
-    return {
-      "id": entity.id.value,
-      "name": entity.name,
-      "age": entity.age,
-    };
+    return userConverter.toJson(entity);
+  }
+
+  @override
+  String get collectionId => 'users';
+
+  @override
+  String idToString(UserId id) {
+    return id.value;
   }
 }
+
+// class InMemoryLocalStorageHandler implements ILocalStorageHandler {
+//   final Map<String, String> _map = {};
+
+//   @override
+//   Future<Result<void, Exception>> clear() {
+//     _map.clear();
+//     return Future.value(Result.success(null));
+//   }
+
+//   @override
+//   Future<Result<void, Exception>> delete(String key) {
+//     _map.remove(key);
+//     return Future.value(Result.success(null));
+//   }
+
+//   @override
+//   Future<Result<String?, Exception>> load(String key) {
+//     return Future.value(Result.success(_map[key]));
+//   }
+
+//   @override
+//   Future<Result<void, Exception>> save(String key, String value) {
+//     _map[key] = value;
+//     return Future.value(Result.success(null));
+//   }
+// }
+
+// class UserRepo extends LocalStorageRepository<UserId, User> {
+//   UserRepo(super.controller, super.localStorageHandler);
+
+//   @override
+//   User fromJson(Map<String, dynamic> json) {
+//     return User(
+//       id: UserId(json["id"]),
+//       name: json["name"],
+//       age: json["age"],
+//     );
+//   }
+
+//   @override
+//   Map<String, dynamic> toJson(User entity) {
+//     return {
+//       "id": entity.id.value,
+//       "name": entity.name,
+//       "age": entity.age,
+//     };
+//   }
+// }

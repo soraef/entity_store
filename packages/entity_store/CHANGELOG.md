@@ -44,11 +44,26 @@
 
 ## 6.0.0-dev.1
 
-* feat: Add database transaction handling to Repository
+* FEAT: Add database transaction handling to Repository
 
 ## 6.0.0-dev.2
 
-* feat: Add StorageRepository which is a repository that handles a generic storage as a data source.
-* feat: Add SyncStorageRepository which is a repository that handles a generic storage as a data source and synchronize with remote data source.
-* feat: Add CountOptions to count method
+* FEAT: Add StorageRepository which is a repository that handles a generic storage as a data source.
+* FEAT: Add SyncStorageRepository which is a repository that handles a generic storage as a data source and synchronize with remote data source.
+* FEAT: Add CountOptions to count method
 * BREAKING CHANGE: LocalStorageRepository is deprecated. Use StorageRepository instead.
+
+## 6.0.0-dev.3
+* FEAT: Add saveAll method to DataSourceHandler
+
+## 6.0.0-dev.4
+* FEAT: Add onUpdated callback method to SyncStorageRepository
+
+## 6.0.0-dev.5
+* BREAKING CHANGE: type_result version up
+
+## 6.0.0-dev.6
+* FEAT: Add EntityStoreController.empty()
+
+## 6.0.0-dev.7
+* FIX: Update entity_store_firestore

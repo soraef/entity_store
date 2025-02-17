@@ -3,6 +3,8 @@ name: entity_store
 packages:
   - packages/**
 
+sdkPath: .fvm/flutter_sdk
+
 scripts:
   analyze:
     name: analyze

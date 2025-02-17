@@ -8,5 +8,4 @@ import 'repository_interface.dart';
 
 part 'storage_repository/repository.dart';
 part 'storage_repository/query.dart';
-part 'storage_repository/sync_storage_repository.dart';
 part 'storage_repository/options.dart';

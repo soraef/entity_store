@@ -13,11 +13,11 @@ part of '../repository_interface.dart';
 /// ```dart
 /// IRepository<int, User> userRepository = UserRepository(entityStoreController);
 /// ```
-abstract class IRepository<Id, E extends Entity<Id>> {
-  final EntityStoreController controller;
+abstract interface class Repository<Id, E extends Entity<Id>> {
+  // final EntityStoreController controller;
 
-  /// Creates a new instance of the repository with the specified `controller`.
-  IRepository(this.controller);
+  // /// Creates a new instance of the repository with the specified `controller`.
+  // IRepository(this.controller);
 
   /// Finds an entity by its `id`.
   ///
@@ -71,8 +71,18 @@ abstract class IRepository<Id, E extends Entity<Id>> {
   ///
   /// Returns a `Result` object that contains the deleted entity's `id` or an exception if an error occurs.
   /// An optional `options` parameter can be provided to customize the delete behavior.
-  Future<Result<Id, Exception>> delete(
+  Future<Result<Id, Exception>> deleteById(
     Id id, {
+    DeleteOptions? options,
+    TransactionContext? transaction,
+  });
+
+  /// Deletes an entity.
+  ///
+  /// Returns a `Result` object that contains the deleted entity or an exception if an error occurs.
+  /// An optional `options` parameter can be provided to customize the delete behavior.
+  Future<Result<E, Exception>> delete(
+    E entity, {
     DeleteOptions? options,
     TransactionContext? transaction,
   });
@@ -95,7 +105,4 @@ abstract class IRepository<Id, E extends Entity<Id>> {
     Id id, {
     ObserveByIdOptions? options,
   });
-
-  Map<String, dynamic> toJson(E entity);
-  E fromJson(Map<String, dynamic> json);
 }

@@ -1,91 +1,153 @@
 part of '../repository_interface.dart';
 
-abstract class IGetOptions {
-  final bool useCache;
-  IGetOptions({
-    this.useCache = false,
-  });
-}
+abstract interface class FindByIdOptions {}
 
-abstract class ISaveOptions {}
+abstract interface class FindOneOptions {}
 
-abstract class IDeleteOptions {}
+abstract interface class FindAllOptions {}
 
-abstract class ICreateOrUpdateOptions {
-  final bool useTransaction;
-  final bool useCache;
-  ICreateOrUpdateOptions({
-    this.useTransaction = true,
-    this.useCache = false,
-  }) {
-    assert(!(useTransaction && useCache));
-  }
-}
+abstract interface class UpsertOptions {}
 
-enum FetchPolicy {
-  /// Fetch the data from the [EntityStore] first.
-  /// If the data is not found, fetch from the persisten.
-  storeFirst,
+abstract interface class SaveOptions {}
 
-  /// Fetch the data from the [EntityStore] only.
-  storeOnly,
+abstract interface class DeleteOptions {}
 
-  /// Fetch the data from the persistent.
-  persistent,
-}
+abstract interface class CountOptions {}
 
-class FindByIdOptions {
-  final FetchPolicy fetchPolicy;
-  const FindByIdOptions({
+abstract interface class ObserveAllOptions {}
+
+abstract interface class ObserveByIdOptions {}
+
+abstract interface class QueryUpsertOptions {}
+
+class EntityStoreFindByIdOptions
+    implements
+        FindByIdOptions,
+        FetchPolicyOptions,
+        BeforeCallbackOptions,
+        LoadEntityCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  @override
+  bool enableLoadEntity;
+
+  EntityStoreFindByIdOptions({
+    this.enableBefore = true,
     this.fetchPolicy = FetchPolicy.persistent,
+    this.enableLoadEntity = true,
   });
 }
 
-class FindOneOptions {
-  final FetchPolicy fetchPolicy;
-  const FindOneOptions({
+class EntityStoreFindOneOptions
+    implements
+        FindOneOptions,
+        FetchPolicyOptions,
+        BeforeCallbackOptions,
+        LoadEntityCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  @override
+  bool enableLoadEntity;
+
+  EntityStoreFindOneOptions({
+    this.enableBefore = true,
     this.fetchPolicy = FetchPolicy.persistent,
+    this.enableLoadEntity = true,
   });
 }
 
-class FindAllOptions {
-  final FetchPolicy fetchPolicy;
-  const FindAllOptions({
+class EntityStoreFindAllOptions
+    implements
+        FindAllOptions,
+        FetchPolicyOptions,
+        BeforeCallbackOptions,
+        LoadEntityCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  @override
+  bool enableLoadEntity;
+
+  EntityStoreFindAllOptions({
+    this.enableBefore = true,
     this.fetchPolicy = FetchPolicy.persistent,
+    this.enableLoadEntity = true,
   });
 }
 
-class UpsertOptions {
-  final FetchPolicy fetchPolicy;
-  final bool useTransaction;
-  const UpsertOptions({
+class EntityStoreUpsertOptions
+    implements
+        UpsertOptions,
+        FetchPolicyOptions,
+        BeforeCallbackOptions,
+        LoadEntityCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  FetchPolicy fetchPolicy;
+
+  @override
+  bool enableLoadEntity;
+
+  EntityStoreUpsertOptions({
+    this.enableBefore = true,
     this.fetchPolicy = FetchPolicy.persistent,
-    this.useTransaction = true,
+    this.enableLoadEntity = true,
   });
 }
 
-class SaveOptions {}
+class EntityStoreSaveOptions implements SaveOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
 
-class DeleteOptions {}
-
-class CountOptions {}
-
-class ObserveAllOptions {}
-
-class ObserveByIdOptions {}
-
-class QueryUpsertOptions {
-  final FetchPolicy fetchPolicy;
-  final bool useTransaction;
-  const QueryUpsertOptions({
-    this.fetchPolicy = FetchPolicy.persistent,
-    this.useTransaction = true,
+  EntityStoreSaveOptions({
+    this.enableBefore = true,
   });
+}
 
-  UpsertOptions toUpsertOptions() {
-    return UpsertOptions(
-      fetchPolicy: fetchPolicy,
-      useTransaction: useTransaction,
-    );
-  }
+class EntityStoreDeleteOptions implements DeleteOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  EntityStoreDeleteOptions({
+    this.enableBefore = true,
+  });
+}
+
+class EntityStoreQueryUpsertOptions
+    implements
+        QueryUpsertOptions,
+        BeforeCallbackOptions,
+        LoadEntityCallbackOptions {
+  @override
+  bool enableBefore;
+
+  @override
+  bool enableLoadEntity;
+
+  EntityStoreQueryUpsertOptions({
+    this.enableBefore = true,
+    this.enableLoadEntity = true,
+  });
+}
+
+class EntityStoreCountOptions implements CountOptions, BeforeCallbackOptions {
+  @override
+  bool enableBefore;
+
+  EntityStoreCountOptions({
+    this.enableBefore = true,
+  });
 }

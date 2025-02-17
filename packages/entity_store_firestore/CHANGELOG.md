@@ -78,3 +78,24 @@
 ## 6.0.0-dev.1
 
 * feat: Add database transaction handling to Repository
+
+## 6.0.0-dev.2
+
+* feat: Add CountOptions to count method
+
+## 6.0.0-dev.3
+
+* feat: Add saveAll method to DataSourceHandler
+
+## 6.0.0-dev.4
+
+* feat: Add onUpdated callback method to SyncStorageRepository
+
+## 6.0.0-dev.5
+
+* BREAKING CHANGE: type_result version up
+
+## 6.0.0-dev.7
+
+* FIX: Change Fetch Policy
+

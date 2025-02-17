@@ -241,7 +241,8 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     FindAllOptions? options,
     TransactionContext? transaction,
   }) async {
-    options = options ?? const FindAllOptions();
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+
     final objects = _repository.controller
         .getAll<Id, E>()
         .map((e) => _repository.toJson(e))
@@ -250,18 +251,18 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
         .map((e) => _repository.fromJson(e))
         .toList();
 
-    if (options.fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.ok(storeEntities);
+    if (fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.success(storeEntities);
     }
 
-    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+    if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntities.isNotEmpty) {
-        return Result.ok(storeEntities);
+        return Result.success(storeEntities);
       }
     }
 
     final ref = await _build();
-    return _repository.protectedListAndNotify(ref);
+    return _repository._protectedListAndNotify(ref, options);
   }
 
   @override
@@ -269,7 +270,8 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
-    options = options ?? const FindOneOptions();
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+
     final objects = _repository.controller
         .getAll<Id, E>()
         .map((e) => _repository.toJson(e))
@@ -279,31 +281,33 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
         .take(1)
         .firstOrNull;
 
-    if (options.fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.ok(storeEntity);
+    if (fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.success(storeEntity);
     }
 
-    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+    if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntity != null) {
-        return Result.ok(storeEntity);
+        return Result.success(storeEntity);
       }
     }
 
     final ref = await _build();
-    return (await _repository.protectedListAndNotify(ref.limit(1)))
-        .mapOk((ok) => ok.firstOrNull);
+    return (await _repository._protectedListAndNotify(ref.limit(1), options))
+        .mapSuccess((success) => success.firstOrNull);
   }
 
   @override
-  Future<Result<int, Exception>> count() async {
+  Future<Result<int, Exception>> count({
+    CountOptions? options,
+  }) async {
     final ref = await _build();
     final countQuery = ref.count();
     final result = await countQuery.get();
     final count = result.count;
     if (count == null) {
-      return Result.except(Exception("Count is null"));
+      return Result.failure(Exception("Count is null"));
     }
-    return Result.ok(count);
+    return Result.success(count);
   }
 
   @override
@@ -311,6 +315,6 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     ObserveAllOptions? options,
   }) async* {
     final ref = await _build();
-    yield* _repository.protectedObserveCollection(ref);
+    yield* _repository._protectedObserveCollection(ref);
   }
 }

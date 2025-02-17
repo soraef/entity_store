@@ -9,7 +9,10 @@ part of '../storage_repository.dart';
 /// This repository can also read data from an external data source and cache it.
 abstract class StorageRepository<Id, E extends Entity<Id>>
     with EntityChangeNotifier<Id, E>
-    implements IRepository<Id, E> {
+    implements
+        Repository<Id, E>,
+        EntityStoreRepository<Id, E>,
+        CallbackRepository<Id, E> {
   StorageRepository({
     required this.dataSourceHandler,
     required this.controller,
@@ -23,11 +26,6 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
   @override
   final EntityStoreController controller;
 
-  /// Synchronizes data with a remote data source if there are updates.
-  Future<Result<void, Exception>> syncRemoteDataIfUpdated() async {
-    return Result.ok(null);
-  }
-
   @override
   Future<Result<E?, Exception>> upsert(
     Id id, {
@@ -35,36 +33,59 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
     required E? Function(E prev) updater,
     UpsertOptions? options,
   }) async {
-    final skipSyncCheck = switch (options) {
-      StorageUpsertOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    final enableLoadEntity =
+        LoadEntityCallbackOptions.getEnableLoadEntity(options);
 
-    if (!skipSyncCheck) {
-      final syncResult = await syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
+    if (enableBefore) {
+      final beforeUpsertResult = await onBeforeUpsert(id);
+      if (beforeUpsertResult.isFailure) {
+        return Result.failure(beforeUpsertResult.failure);
       }
     }
 
-    final findResult = await findById(id,
-        options: const FindByIdOptions(fetchPolicy: FetchPolicy.storeOnly));
-    if (findResult.isExcept) {
-      return Result.except(findResult.except);
+    final findResult = await findById(
+      id,
+      options: StorageFindByIdOptions(
+        enableBefore: false,
+      ),
+    );
+    if (findResult.isFailure) {
+      return Result.failure(findResult.failure);
     }
 
-    final newEntity =
-        findResult.okOrNull == null ? creater() : updater(findResult.ok!);
+    var entity = findResult.success;
+
+    if (enableLoadEntity) {
+      final loadEntityResult = await onLoadEntity(entity!);
+      if (loadEntityResult.isFailure) {
+        return Result.failure(loadEntityResult.failure);
+      }
+      entity = loadEntityResult.success;
+    }
+
+    final newEntity = entity == null ? creater() : updater(entity);
 
     if (newEntity != null) {
-      return save(newEntity);
+      final saveResult = await save(
+        newEntity,
+        options: StorageSaveOptions(
+          enableBefore: false,
+          enableLoadEntity: enableLoadEntity,
+        ),
+      );
+      if (saveResult.isFailure) {
+        return Result.failure(saveResult.failure);
+      }
+
+      return Result.success(newEntity);
     } else {
-      return Result.ok(null);
+      return Result.success(null);
     }
   }
 
   @override
-  Future<Result<Id, Exception>> delete(
+  Future<Result<Id, Exception>> deleteById(
     Id id, {
     DeleteOptions? options,
     TransactionContext? transaction,
@@ -75,17 +96,52 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       );
     }
 
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeDeleteByIdResult = await onBeforeDeleteById(id);
+      if (beforeDeleteByIdResult.isFailure) {
+        return Result.failure(beforeDeleteByIdResult.failure);
+      }
+    }
+
     final deleteResult = await dataSourceHandler.delete(id);
 
     return deleteResult.map(
-      (ok) {
+      (success) {
         notifyDeleteComplete(id);
-        return Result.ok(id);
+        return Result.success(id);
       },
       (err) {
-        return Result.except(err);
+        return Result.failure(err);
       },
     );
+  }
+
+  @override
+  Future<Result<E, Exception>> delete(
+    E entity, {
+    DeleteOptions? options,
+    TransactionContext? transaction,
+  }) async {
+    if (transaction != null) {
+      throw UnimplementedError(
+        'Transaction is not supported in StorageRepository',
+      );
+    }
+
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeDeleteResult = await onBeforeDelete(entity);
+      if (beforeDeleteResult.isFailure) {
+        return Result.failure(beforeDeleteResult.failure);
+      }
+    }
+
+    final deleteByIdResult = await deleteById(entity.id);
+    if (deleteByIdResult.isFailure) {
+      return Result.failure(deleteByIdResult.failure);
+    }
+    return Result.success(entity);
   }
 
   @override
@@ -99,19 +155,12 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       );
     }
 
-    final skipSyncCheck = switch (options) {
-      StorageFindAllOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
+    final result = await query().findAll(
+      options: options,
+      transaction: transaction,
+    );
 
-    if (!skipSyncCheck) {
-      final syncResult = await syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
-      }
-    }
-
-    return query().findAll();
+    return result;
   }
 
   @override
@@ -126,46 +175,50 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       );
     }
 
-    final skipSyncCheck = switch (options) {
-      StorageFindByIdOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    final enableLoadEntity =
+        LoadEntityCallbackOptions.getEnableLoadEntity(options);
 
-    if (!skipSyncCheck) {
-      final syncResult = await syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
+    if (enableBefore) {
+      final beforeFindByIdResult = await onBeforeFindById(id);
+      if (beforeFindByIdResult.isFailure) {
+        return Result.failure(beforeFindByIdResult.failure);
       }
     }
 
-    options ??= const FindByIdOptions();
-
     final storeEntity = controller.getById<Id, E>(id);
-    if (options.fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.ok(storeEntity);
+    if (fetchPolicy == FetchPolicy.storeOnly) {
+      return Result.success(storeEntity);
     }
 
-    if (options.fetchPolicy == FetchPolicy.storeFirst) {
+    if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntity != null) {
-        return Result.ok(storeEntity);
+        return Result.success(storeEntity);
       }
     }
 
     final loadResult = await dataSourceHandler.loadAll();
-    return loadResult.map(
-      (ok) {
-        final entity = ok.firstWhereOrNull((e) => e.id == id);
-        if (entity != null) {
-          notifyGetComplete(entity);
-        } else {
-          notifyEntityNotFound(id);
-        }
-        return Result.ok(entity);
-      },
-      (err) {
-        return Result.except(err);
-      },
-    );
+    if (loadResult.isFailure) {
+      return Result.failure(loadResult.failure);
+    }
+
+    var entity = loadResult.success.firstWhereOrNull((e) => e.id == id);
+    if (entity == null) {
+      notifyEntityNotFound(id);
+      return Result.success(null);
+    }
+
+    if (enableLoadEntity) {
+      final loadEntityResult = await onLoadEntity(entity);
+      if (loadEntityResult.isFailure) {
+        return Result.failure(loadEntityResult.failure);
+      }
+      entity = loadEntityResult.success;
+    }
+
+    notifyGetComplete(entity);
+    return Result.success(entity);
   }
 
   @override
@@ -179,38 +232,16 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       );
     }
 
-    final skipSyncCheck = switch (options) {
-      StorageFindOneOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
-
-    if (!skipSyncCheck) {
-      final syncResult = await syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
-      }
-    }
-
-    return query().findOne();
+    final result = await query().findOne();
+    return result;
   }
 
   @override
   Future<Result<int, Exception>> count({
     CountOptions? options,
   }) async {
-    final skipSyncCheck = switch (options) {
-      StorageCountOptions(skipSyncCheck: true) => true,
-      _ => false,
-    };
-
-    if (!skipSyncCheck) {
-      final syncResult = await syncRemoteDataIfUpdated();
-      if (syncResult.isExcept) {
-        return Result.except(syncResult.except);
-      }
-    }
-
-    return query().count();
+    final result = await query().count();
+    return result;
   }
 
   @override
@@ -230,14 +261,23 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       );
     }
 
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeSaveResult = await onBeforeSave(entity);
+      if (beforeSaveResult.isFailure) {
+        return Result.failure(beforeSaveResult.failure);
+      }
+    }
+
     final saveResult = await dataSourceHandler.save(entity);
+
     return saveResult.map(
-      (ok) {
+      (success) async {
         notifySaveComplete(entity);
-        return Result.ok(entity);
+        return Result.success(entity);
       },
       (err) {
-        return Result.except(err);
+        return Result.failure(err);
       },
     );
   }
@@ -249,6 +289,55 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
   }) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<Result<void, Exception>> onBeforeSave(E entity) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeDeleteById(Id id) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeDelete(E entity) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeFindById(Id id) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeFindAll(
+    IRepositoryQuery<Id, E> query,
+  ) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeCount() async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeFindOne(
+    IRepositoryQuery<Id, E> query,
+  ) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeUpsert(Id id) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<E, Exception>> onLoadEntity(E entity) async {
+    return Result.success(entity);
+  }
 }
 
 /// A handler for a data source.
@@ -257,6 +346,7 @@ abstract class IDataSourceHandler<Id, E extends Entity<Id>> {
   late final E Function(Map<String, dynamic> json) fromJson;
 
   Future<Result<void, Exception>> save(E entity);
+  Future<Result<void, Exception>> saveAll(Iterable<E> entities);
   Future<Result<List<E>, Exception>> loadAll();
   Future<Result<void, Exception>> delete(Id id);
   Future<Result<void, Exception>> clear();
@@ -269,23 +359,31 @@ class InMemoryDataSourceHandler<Id, E extends Entity<Id>>
   @override
   Future<Result<void, Exception>> delete(Id id) async {
     _data[E]!.remove(id);
-    return Result.ok(null);
+    return Result.success(null);
   }
 
   @override
   Future<Result<List<E>, Exception>> loadAll() async {
-    return Result.ok(_data[E]!.values.toList());
+    return Result.success(_data[E]!.values.toList());
   }
 
   @override
   Future<Result<void, Exception>> save(E entity) async {
     _data[E]![entity.id] = entity;
-    return Result.ok(null);
+    return Result.success(null);
   }
 
   @override
   Future<Result<void, Exception>> clear() async {
     _data[E]!.clear();
-    return Result.ok(null);
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> saveAll(Iterable<E> entities) async {
+    for (var entity in entities) {
+      await save(entity);
+    }
+    return Result.success(null);
   }
 }

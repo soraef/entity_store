@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 part of '../firestore_repository.dart';
 
 typedef CreateRepository<T, Id> = T Function(
@@ -46,8 +48,8 @@ abstract class SubCollection {}
 
 abstract class FirestoreRepositoryWithContainer<Id, E extends Entity<Id>>
     extends BaseFirestoreRepository<Id, E>
-    with EntityChangeNotifier<Id, E>, FirestoreEntityNotifier<Id, E>
-    implements IRepository<Id, E> {
+    with EntityChangeNotifier<Id, E>
+    implements Repository<Id, E>, EntityStoreRepository<Id, E> {
   final Map<Type, CreateRepository<Object?, Id>> _container = {};
 
   TRepo getRepository<TRepo extends SubCollection>(
@@ -72,11 +74,15 @@ abstract class FirestoreRepositoryWithContainer<Id, E extends Entity<Id>>
 }
 
 abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
-    implements IFirestoreEntityNotifier<Id, E>, IRepository<Id, E> {
+    with EntityChangeNotifier<Id, E>
+    implements
+        Repository<Id, E>,
+        EntityStoreRepository<Id, E>,
+        CallbackRepository<Id, E> {
   CollectionReference<Map<String, dynamic>> get collectionRef;
 
   @override
-  Future<Result<Id, Exception>> delete(
+  Future<Result<Id, Exception>> deleteById(
     Id id, {
     DeleteOptions? options,
     TransactionContext? transaction,
@@ -90,11 +96,44 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       firestoreTransaction = transaction as FirestoreTransactionContext;
     }
 
-    return protectedDeleteAndNotify(
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeDeleteByIdResult = await onBeforeDeleteById(id);
+      if (beforeDeleteByIdResult.isFailure) {
+        return Result.failure(beforeDeleteByIdResult.failure);
+      }
+    }
+
+    return _protectedDeleteAndNotify(
       collectionRef,
       id,
       transaction: firestoreTransaction,
     );
+  }
+
+  @override
+  Future<Result<E, Exception>> delete(
+    E entity, {
+    DeleteOptions? options,
+    TransactionContext? transaction,
+  }) async {
+    if (transaction != null) {
+      throw UnimplementedError("delete with transaction is not implemented");
+    }
+
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeDeleteResult = await onBeforeDelete(entity);
+      if (beforeDeleteResult.isFailure) {
+        return Result.failure(beforeDeleteResult.failure);
+      }
+    }
+
+    final deleteByIdResult = await deleteById(entity.id);
+    if (deleteByIdResult.isFailure) {
+      return Result.failure(deleteByIdResult.failure);
+    }
+    return Result.success(entity);
   }
 
   @override
@@ -105,6 +144,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     if (transaction != null) {
       throw UnimplementedError("findAll with transaction is not implemented");
     }
+
     return query().findAll(
       options: options,
     );
@@ -124,8 +164,12 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<int, Exception>> count() {
-    return query().count();
+  Future<Result<int, Exception>> count({
+    CountOptions? options,
+  }) {
+    return query().count(
+      options: options,
+    );
   }
 
   @override
@@ -143,12 +187,19 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       firestoreTransaction = transaction as FirestoreTransactionContext;
     }
 
-    options = options ?? const FindByIdOptions();
-    return protectedGetAndNotify(
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeFindByIdResult = await onBeforeFindById(id);
+      if (beforeFindByIdResult.isFailure) {
+        return Result.failure(beforeFindByIdResult.failure);
+      }
+    }
+
+    return _protectedGetAndNotify(
       collectionRef,
       id,
-      fetchPolicy: options.fetchPolicy,
       transaction: firestoreTransaction,
+      options: options,
     );
   }
 
@@ -162,7 +213,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     E entity, {
     SaveOptions? options,
     TransactionContext? transaction,
-  }) {
+  }) async {
     if (transaction != null && transaction is! FirestoreTransactionContext) {
       throw ArgumentError("transaction must be FirestoreTransactionContext");
     }
@@ -172,21 +223,19 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       firestoreTransaction = transaction as FirestoreTransactionContext;
     }
 
-    if (options is FirestoreSaveOptions) {
-      return protectedSaveAndNotify(
-        collectionRef,
-        entity,
-        merge: options.merge,
-        transaction: firestoreTransaction,
-      );
-    } else {
-      return protectedSaveAndNotify(
-        collectionRef,
-        entity,
-        merge: false,
-        transaction: firestoreTransaction,
-      );
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeSaveResult = await onBeforeSave(entity);
+      if (beforeSaveResult.isFailure) {
+        return Result.failure(beforeSaveResult.failure);
+      }
     }
+
+    return _protectedSaveAndNotify(
+      collectionRef,
+      entity,
+      transaction: firestoreTransaction,
+    );
   }
 
   @override
@@ -195,24 +244,21 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     required E? Function() creater,
     required E? Function(E prev) updater,
     UpsertOptions? options,
-  }) {
-    if (options is FirestoreCreateOrUpdateOptions) {
-      return protectedCreateOrUpdateAndNotify(
-        collectionRef,
-        id,
-        creater,
-        updater,
-        merge: options.merge,
-      );
-    } else {
-      return protectedCreateOrUpdateAndNotify(
-        collectionRef,
-        id,
-        creater,
-        updater,
-        merge: false,
-      );
+  }) async {
+    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
+    if (enableBefore) {
+      final beforeUpsertResult = await onBeforeUpsert(id);
+      if (beforeUpsertResult.isFailure) {
+        return Result.failure(beforeUpsertResult.failure);
+      }
     }
+
+    return _protectedCreateOrUpdateAndNotify(
+      collectionRef,
+      id,
+      creater,
+      updater,
+    );
   }
 
   @override
@@ -220,8 +266,458 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     Id id, {
     ObserveByIdOptions? options,
   }) {
-    return protectedObserveById(collectionRef, id);
+    return _protectedObserveById(collectionRef, id);
   }
 
   DocumentReference getDocumentRef(Id id);
+
+  @override
+  Future<Result<void, Exception>> onBeforeSave(E entity) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeDeleteById(Id id) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeDelete(E entity) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeFindById(Id id) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeFindAll(
+    IRepositoryQuery<Id, E> query,
+  ) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeCount() async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeFindOne(
+    IRepositoryQuery<Id, E> query,
+  ) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> onBeforeUpsert(Id id) async {
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<E, Exception>> onLoadEntity(E entity) async {
+    return Result.success(entity);
+  }
+
+  String idToString(Id id);
+
+  Future<Result<E?, Exception>> _protectedGetAndNotify(
+    CollectionReference collection,
+    Id id, {
+    FindByIdOptions? options,
+    // FetchPolicy fetchPolicy = FetchPolicy.persistent,
+    FirestoreTransactionContext? transaction,
+  }) async {
+    late DocumentSnapshot<dynamic> doc;
+
+    var entity = controller.getById<Id, E>(id);
+
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+    final loadEntity = LoadEntityCallbackOptions.getEnableLoadEntity(options);
+
+    /// get using transaction
+    if (transaction != null) {
+      final ref = collection.doc(idToString(id));
+      doc = await transaction.value.get(ref);
+    } else {
+      /// get using no transaction
+      if (fetchPolicy == FetchPolicy.storeOnly) {
+        return Result.success(entity);
+      }
+
+      if (fetchPolicy == FetchPolicy.storeFirst) {
+        if (entity != null) {
+          return Result.success(entity);
+        }
+      }
+
+      try {
+        doc = await collection.doc(idToString(id)).get();
+      } on FirebaseException catch (e) {
+        return Result.failure(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
+    }
+
+    if (doc.exists) {
+      try {
+        var entity = fromJson(doc.data());
+        if (loadEntity) {
+          final loadEntityResult = await onLoadEntity(entity);
+          if (loadEntityResult.isFailure) {
+            return Result.failure(loadEntityResult.failure);
+          }
+          entity = loadEntityResult.success;
+        }
+        notifyGetComplete(entity);
+        return Result.success(entity);
+      } on Exception catch (e) {
+        return Result.failure(
+          JsonConverterFailure(
+            entityType: E,
+            fetched: doc.data(),
+            exception: e,
+          ),
+        );
+      }
+    } else {
+      notifyEntityNotFound(id);
+    }
+
+    return Result.success(null);
+  }
+
+  Future<Result<Id, Exception>> _protectedDeleteAndNotify(
+    CollectionReference collection,
+    Id id, {
+    DeleteOptions? options,
+    FirestoreTransactionContext? transaction,
+  }) async {
+    if (transaction != null) {
+      final ref = collection.doc(idToString(id));
+      transaction.value.delete(ref);
+
+      // notify after commit
+      transaction.addOnCommitFunction(() {
+        notifyDeleteComplete(id);
+      });
+      return Result.success(id);
+    } else {
+      try {
+        await collection.doc(idToString(id)).delete();
+        notifyDeleteComplete(id);
+        return Result.success(id);
+      } on FirebaseException catch (e) {
+        return Result.failure(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<Result<List<E>, Exception>> _protectedListAndNotify(
+    Query ref,
+    Object? options,
+  ) async {
+    final loadEntity = LoadEntityCallbackOptions.getEnableLoadEntity(options);
+
+    late QuerySnapshot<dynamic> snapshot;
+    try {
+      snapshot = await ref.get();
+    } on FirebaseException catch (e) {
+      // failed-preconditionの場合
+      if (e.code == 'failed-precondition') {
+        if (e.message?.contains('The query requires an index') == true) {
+          // ignore: avoid_print
+          print(e.message);
+        }
+      }
+      return Result.failure(
+        FirestoreRequestFailure(
+          entityType: E,
+          code: e.code,
+          message: e.message,
+          exception: e,
+        ),
+      );
+    }
+
+    try {
+      var data = _convert(snapshot.docs).toList();
+      if (loadEntity) {
+        final loadEntityResult = await _convertWithLoad(data);
+        if (loadEntityResult.isFailure) {
+          return Result.failure(loadEntityResult.failure);
+        }
+        data = loadEntityResult.success;
+      }
+      notifyListComplete(data);
+      return Result.success(data);
+    } on Exception catch (e) {
+      return Result.failure(
+        JsonConverterFailure(
+          entityType: E,
+          fetched: snapshot.docs.map((e) => e.data()).toList(),
+          exception: e,
+        ),
+      );
+    }
+  }
+
+  Future<Result<E, Exception>> _protectedSaveAndNotify(
+    CollectionReference collection,
+    E entity, {
+    SaveOptions? options,
+    FirestoreTransactionContext? transaction,
+  }) async {
+    final merge = MergeOptions.getMerge(options);
+    final mergeFields = MergeOptions.getMergeFields(options);
+
+    if (transaction != null) {
+      final ref = collection.doc(idToString(entity.id));
+      transaction.value.set(
+        ref,
+        toJson(entity),
+        SetOptions(merge: merge, mergeFields: mergeFields),
+      );
+
+      // notify after commit
+      transaction.addOnCommitFunction(() {
+        notifySaveComplete(entity);
+      });
+
+      return Result.success(entity);
+    } else {
+      try {
+        await collection.doc(idToString(entity.id)).set(
+              toJson(entity),
+              merge != null || mergeFields != null
+                  ? SetOptions(merge: merge, mergeFields: mergeFields)
+                  : null,
+            );
+        notifySaveComplete(entity);
+        return Result.success(entity);
+      } on FirebaseException catch (e) {
+        return Result.failure(
+          FirestoreRequestFailure(
+            entityType: E,
+            code: e.code,
+            message: e.message,
+            exception: e,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<Result<E?, Exception>> _protectedCreateOrUpdateAndNotify(
+    CollectionReference collection,
+    Id id,
+    E? Function() creater,
+    E? Function(E prev) updater, {
+    UpsertOptions? options,
+    // FetchPolicy fetchPolicy = FetchPolicy.persistent,
+    // bool? merge,
+    // bool? useTransaction,
+    // List<Object>? mergeFields,
+  }) async {
+    final merge = MergeOptions.getMerge(options);
+    final mergeFields = MergeOptions.getMergeFields(options);
+    final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+    final useTransaction = UseTransactionOptions.getUseTransaction(options);
+    final loadEntity = LoadEntityCallbackOptions.getEnableLoadEntity(options);
+
+    /// get and set using transaction
+    Future<E?> getAndSetTransaction() async {
+      return await collection.firestore.runTransaction((transaction) async {
+        final doc = await transaction.get(collection.doc(idToString(id)));
+        final entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
+        final newEntity = entity == null ? creater() : updater(entity);
+        if (newEntity != null) {
+          transaction.set(
+            collection.doc(idToString(id)),
+            toJson(newEntity),
+            merge != null || mergeFields != null
+                ? SetOptions(merge: merge, mergeFields: mergeFields)
+                : null,
+          );
+        }
+
+        return newEntity;
+      });
+    }
+
+    /// get and set using no transaction
+    Future<E?> getAndSetNoTransaction() async {
+      E? entity;
+
+      if (fetchPolicy == FetchPolicy.storeOnly ||
+          fetchPolicy == FetchPolicy.storeFirst) {
+        entity = controller.getById<Id, E>(id);
+      }
+
+      if (fetchPolicy == FetchPolicy.persistent ||
+          (entity == null && fetchPolicy == FetchPolicy.storeFirst)) {
+        final doc = await collection.doc(idToString(id)).get();
+        entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
+        if (loadEntity && entity != null) {
+          final loadEntityResult = await onLoadEntity(entity);
+          if (loadEntityResult.isFailure) {
+            return null;
+          }
+          entity = loadEntityResult.success;
+        }
+      }
+
+      final newEntity = entity == null ? creater() : updater(entity);
+      if (newEntity != null) {
+        await collection.doc(idToString(id)).set(
+              toJson(newEntity),
+              merge != null || mergeFields != null
+                  ? SetOptions(merge: merge, mergeFields: mergeFields)
+                  : null,
+            );
+      }
+
+      return newEntity;
+    }
+
+    try {
+      final entity = await useTransaction.orTrue.ifMap(
+        ifTrue: getAndSetTransaction,
+        ifFalse: getAndSetNoTransaction,
+      );
+
+      if (entity == null) {
+        notifyEntityNotFound(id);
+      } else {
+        notifySaveComplete(entity);
+      }
+
+      return Result.success(entity);
+    } on FirebaseException catch (e) {
+      return Result.failure(
+        FirestoreRequestFailure(
+          entityType: E,
+          code: e.code,
+          message: e.message,
+          exception: e,
+        ),
+      );
+    }
+  }
+
+  Stream<Result<E?, Exception>> _protectedObserveById(
+    CollectionReference<Map<String, dynamic>> collectionRef,
+    Id id, {
+    ObserveByIdOptions? options,
+  }) {
+    return collectionRef.doc(idToString(id)).snapshots().map((event) {
+      if (event.exists) {
+        try {
+          final entity = fromJson(event.data() as dynamic);
+          notifyGetComplete(entity);
+          return Result.success(entity);
+        } on Exception catch (e) {
+          return Result.failure(
+            JsonConverterFailure(
+              entityType: E,
+              fetched: event.data(),
+              exception: e,
+            ),
+          );
+        }
+      } else {
+        notifyEntityNotFound(id);
+        return Result.success(null);
+      }
+    });
+  }
+
+  Stream<Result<List<EntityChange<E>>, Exception>> _protectedObserveCollection(
+    Query collection,
+  ) {
+    return collection.snapshots().map((event) {
+      final changes = event.docChanges.map((e) {
+        final entity = fromJson(e.doc.data() as dynamic);
+        if (e.type == DocumentChangeType.added) {
+          return EntityChange<E>(
+            entity: entity,
+            changeType: ChangeType.created,
+          );
+        } else if (e.type == DocumentChangeType.modified) {
+          return EntityChange<E>(
+            entity: entity,
+            changeType: ChangeType.updated,
+          );
+        } else if (e.type == DocumentChangeType.removed) {
+          return EntityChange<E>(
+            entity: entity,
+            changeType: ChangeType.deleted,
+          );
+        } else {
+          throw UnimplementedError();
+        }
+      }).toList();
+
+      for (final change in changes) {
+        if (change.changeType == ChangeType.created) {
+          notifyGetComplete(change.entity);
+        } else if (change.changeType == ChangeType.updated) {
+          notifyGetComplete(change.entity);
+        } else if (change.changeType == ChangeType.deleted) {
+          notifyDeleteComplete(change.entity.id);
+        }
+      }
+      return Result.success(changes);
+    });
+  }
+
+  List<E> _convert(List<QueryDocumentSnapshot<dynamic>> docs) {
+    return docs
+        .map((e) => e.data())
+        .map((data) {
+          if (data == null) return null;
+          return fromJson(data);
+        })
+        .whereType<E>()
+        .toList();
+  }
+
+  Future<Result<List<E>, Exception>> _convertWithLoad(List<E> entities) async {
+    final results = await Future.wait(entities.map(onLoadEntity));
+    if (results.any((e) => e.isFailure)) {
+      return Result.failure(Exception("failed to load entity"));
+    }
+    return Result.success(results.map((e) => e.success).toList());
+  }
+}
+
+extension _BoolX on bool {
+  T ifMap<T>({
+    required T Function() ifTrue,
+    required T Function() ifFalse,
+  }) {
+    if (this) {
+      return ifTrue();
+    } else {
+      return ifFalse();
+    }
+  }
+}
+
+extension _BoolOrNullX on bool? {
+  bool get orTrue => this ?? true;
 }

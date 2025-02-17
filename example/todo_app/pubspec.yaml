@@ -28,7 +28,7 @@ dependencies:
   adaptive_dialog: ^2.1.0
 
   uuid: ^4.4.0
-  type_result: ^1.0.2
+  type_result: ^3.0.0
 
   collection: ^1.16.0
 
