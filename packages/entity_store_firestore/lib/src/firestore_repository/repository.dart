@@ -228,6 +228,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
 
   DocumentReference getDocumentRef(Id id);
 
+  @override
   String idToString(Id id);
 
   Future<Result<E?, Exception>> _protectedGetAndNotify(
@@ -297,7 +298,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   Future<Result<Id, Exception>> _protectedDeleteAndNotify(
     CollectionReference collection,
     Id id, {
-    DeleteOptions? options,
     FirestoreTransactionContext? transaction,
   }) async {
     if (transaction != null) {
@@ -504,9 +504,7 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
 
   Stream<Result<E?, Exception>> _protectedObserveById(
     CollectionReference<Map<String, dynamic>> collectionRef,
-    Id id, {
-    ObserveByIdOptions? options,
-  }) {
+    Id id) {
     return collectionRef.doc(idToString(id)).snapshots().map((event) {
       if (event.exists) {
         try {

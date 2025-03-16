@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:entity_store/entity_store.dart';
 
-import 'package:meta/meta.dart';
 import 'package:type_result/type_result.dart';
 
 import 'exception.dart';
