@@ -9,7 +9,6 @@ class FirestoreSaveOptions extends EntityStoreSaveOptions
   final List<String> mergeFields;
 
   FirestoreSaveOptions({
-    super.enableBefore = true,
     this.merge = true,
     this.mergeFields = const [],
   });
@@ -24,7 +23,6 @@ class FirestoreUpsertOptions extends EntityStoreUpsertOptions
   final List<String> mergeFields;
 
   FirestoreUpsertOptions({
-    super.enableBefore = true,
     super.fetchPolicy = FetchPolicy.persistent,
     this.merge = true,
     this.mergeFields = const [],

@@ -71,6 +71,12 @@ class TestRepository extends SembastRepository<String, TestUser> {
       'age': entity.age,
     };
   }
+  
+  @override
+  String idToString(String id) {
+    // TODO: implement idToString
+    throw UnimplementedError();
+  }
 }
 
 void main() {

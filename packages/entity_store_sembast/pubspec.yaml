@@ -1,7 +1,7 @@
 name: entity_store_sembast
-description: "A new Flutter package project."
-version: 0.0.1
-homepage: https://github.com/soraef/entity_store
+description: sembast operations for entity_store package
+version: 6.0.0-dev.10
+homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_sembast
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -14,7 +14,7 @@ dependencies:
   sembast: ^3.5.0+1
   path_provider: ^2.1.5
   
-  # entity_store: ^6.0.0-dev.8
+  # entity_store: ^6.0.0-dev.10
   entity_store:
     path: ../entity_store
   type_result: ^3.0.0

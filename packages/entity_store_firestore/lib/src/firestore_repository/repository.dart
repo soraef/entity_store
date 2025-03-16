@@ -75,10 +75,7 @@ abstract class FirestoreRepositoryWithContainer<Id, E extends Entity<Id>>
 
 abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     with EntityChangeNotifier<Id, E>
-    implements
-        Repository<Id, E>,
-        EntityStoreRepository<Id, E>,
-        CallbackRepository<Id, E> {
+    implements Repository<Id, E>, EntityStoreRepository<Id, E> {
   CollectionReference<Map<String, dynamic>> get collectionRef;
 
   @override
@@ -96,14 +93,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       firestoreTransaction = transaction as FirestoreTransactionContext;
     }
 
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeDeleteByIdResult = await onBeforeDeleteById(id);
-      if (beforeDeleteByIdResult.isFailure) {
-        return Result.failure(beforeDeleteByIdResult.failure);
-      }
-    }
-
     return _protectedDeleteAndNotify(
       collectionRef,
       id,
@@ -119,14 +108,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
   }) async {
     if (transaction != null) {
       throw UnimplementedError("delete with transaction is not implemented");
-    }
-
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeDeleteResult = await onBeforeDelete(entity);
-      if (beforeDeleteResult.isFailure) {
-        return Result.failure(beforeDeleteResult.failure);
-      }
     }
 
     final deleteByIdResult = await deleteById(entity.id);
@@ -187,14 +168,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       firestoreTransaction = transaction as FirestoreTransactionContext;
     }
 
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeFindByIdResult = await onBeforeFindById(id);
-      if (beforeFindByIdResult.isFailure) {
-        return Result.failure(beforeFindByIdResult.failure);
-      }
-    }
-
     return _protectedGetAndNotify(
       collectionRef,
       id,
@@ -223,14 +196,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
       firestoreTransaction = transaction as FirestoreTransactionContext;
     }
 
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeSaveResult = await onBeforeSave(entity);
-      if (beforeSaveResult.isFailure) {
-        return Result.failure(beforeSaveResult.failure);
-      }
-    }
-
     return _protectedSaveAndNotify(
       collectionRef,
       entity,
@@ -245,14 +210,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     required E? Function(E prev) updater,
     UpsertOptions? options,
   }) async {
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeUpsertResult = await onBeforeUpsert(id);
-      if (beforeUpsertResult.isFailure) {
-        return Result.failure(beforeUpsertResult.failure);
-      }
-    }
-
     return _protectedCreateOrUpdateAndNotify(
       collectionRef,
       id,
@@ -271,55 +228,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
 
   DocumentReference getDocumentRef(Id id);
 
-  @override
-  Future<Result<void, Exception>> onBeforeSave(E entity) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeDeleteById(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeDelete(E entity) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindById(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindAll(
-    IRepositoryQuery<Id, E> query,
-  ) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeCount() async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindOne(
-    IRepositoryQuery<Id, E> query,
-  ) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeUpsert(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<E, Exception>> onLoadEntity(E entity) async {
-    return Result.success(entity);
-  }
-
   String idToString(Id id);
 
   Future<Result<E?, Exception>> _protectedGetAndNotify(
@@ -334,7 +242,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     var entity = controller.getById<Id, E>(id);
 
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
-    final loadEntity = LoadEntityCallbackOptions.getEnableLoadEntity(options);
 
     /// get using transaction
     if (transaction != null) {
@@ -369,13 +276,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     if (doc.exists) {
       try {
         var entity = fromJson(doc.data());
-        if (loadEntity) {
-          final loadEntityResult = await onLoadEntity(entity);
-          if (loadEntityResult.isFailure) {
-            return Result.failure(loadEntityResult.failure);
-          }
-          entity = loadEntityResult.success;
-        }
         notifyGetComplete(entity);
         return Result.success(entity);
       } on Exception catch (e) {
@@ -431,8 +331,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     Query ref,
     Object? options,
   ) async {
-    final loadEntity = LoadEntityCallbackOptions.getEnableLoadEntity(options);
-
     late QuerySnapshot<dynamic> snapshot;
     try {
       snapshot = await ref.get();
@@ -456,13 +354,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
 
     try {
       var data = _convert(snapshot.docs).toList();
-      if (loadEntity) {
-        final loadEntityResult = await _convertWithLoad(data);
-        if (loadEntityResult.isFailure) {
-          return Result.failure(loadEntityResult.failure);
-        }
-        data = loadEntityResult.success;
-      }
       notifyListComplete(data);
       return Result.success(data);
     } on Exception catch (e) {
@@ -537,7 +428,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
     final mergeFields = MergeOptions.getMergeFields(options);
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
     final useTransaction = UseTransactionOptions.getUseTransaction(options);
-    final loadEntity = LoadEntityCallbackOptions.getEnableLoadEntity(options);
 
     /// get and set using transaction
     Future<E?> getAndSetTransaction() async {
@@ -572,13 +462,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
           (entity == null && fetchPolicy == FetchPolicy.storeFirst)) {
         final doc = await collection.doc(idToString(id)).get();
         entity = doc.exists ? fromJson(doc.data() as dynamic) : null;
-        if (loadEntity && entity != null) {
-          final loadEntityResult = await onLoadEntity(entity);
-          if (loadEntityResult.isFailure) {
-            return null;
-          }
-          entity = loadEntityResult.success;
-        }
       }
 
       final newEntity = entity == null ? creater() : updater(entity);
@@ -694,14 +577,6 @@ abstract class BaseFirestoreRepository<Id, E extends Entity<Id>>
         })
         .whereType<E>()
         .toList();
-  }
-
-  Future<Result<List<E>, Exception>> _convertWithLoad(List<E> entities) async {
-    final results = await Future.wait(entities.map(onLoadEntity));
-    if (results.any((e) => e.isFailure)) {
-      return Result.failure(Exception("failed to load entity"));
-    }
-    return Result.success(results.map((e) => e.success).toList());
   }
 }
 

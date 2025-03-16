@@ -67,3 +67,8 @@
 
 ## 6.0.0-dev.7
 * FIX: Update entity_store_firestore
+
+## 6.0.0-dev.10
+* BREAKING CHANGE: before callback options is removed.
+* BREAKING CHANGE: load entity options is removed.
+

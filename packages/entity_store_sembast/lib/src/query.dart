@@ -114,16 +114,6 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
   }) async {
     try {
       final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
-      final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-      final enableLoadEntity =
-          LoadEntityCallbackOptions.getEnableLoadEntity(options);
-
-      if (enableBefore) {
-        final beforeFindAllResult = await repository.onBeforeFindAll(this);
-        if (beforeFindAllResult.isFailure) {
-          return Result.failure(beforeFindAllResult.failure);
-        }
-      }
 
       final objects = repository.controller
           .getAll<Id, E>()
@@ -146,20 +136,6 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
       var entities = records
           .map((r) => fromJson(Map<String, dynamic>.from(r.value)))
           .toList();
-
-      if (enableLoadEntity) {
-        entities = (await Future.wait(
-          entities.map((e) async {
-            final loadEntityResult = await repository.onLoadEntity(e);
-            if (loadEntityResult.isFailure) {
-              return null;
-            }
-            return loadEntityResult.success;
-          }),
-        ))
-            .whereType<E>()
-            .toList();
-      }
 
       repository.notifyListComplete(entities);
       return Result.success(entities);
@@ -221,7 +197,6 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
 
   @override
   IRepositoryQuery<Id, E> startAfter(Id id) {
-    // startAfterは実装しない
     return this;
   }
 

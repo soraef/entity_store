@@ -9,16 +9,14 @@ part of '../storage_repository.dart';
 /// This repository can also read data from an external data source and cache it.
 abstract class StorageRepository<Id, E extends Entity<Id>>
     with EntityChangeNotifier<Id, E>
-    implements
-        Repository<Id, E>,
-        EntityStoreRepository<Id, E>,
-        CallbackRepository<Id, E> {
+    implements Repository<Id, E>, EntityStoreRepository<Id, E> {
   StorageRepository({
     required this.dataSourceHandler,
     required this.controller,
   }) {
     dataSourceHandler.toJson = toJson;
     dataSourceHandler.fromJson = fromJson;
+    dataSourceHandler.idToString = idToString;
   }
 
   final IDataSourceHandler<Id, E> dataSourceHandler;
@@ -33,22 +31,9 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
     required E? Function(E prev) updater,
     UpsertOptions? options,
   }) async {
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    final enableLoadEntity =
-        LoadEntityCallbackOptions.getEnableLoadEntity(options);
-
-    if (enableBefore) {
-      final beforeUpsertResult = await onBeforeUpsert(id);
-      if (beforeUpsertResult.isFailure) {
-        return Result.failure(beforeUpsertResult.failure);
-      }
-    }
-
     final findResult = await findById(
       id,
-      options: StorageFindByIdOptions(
-        enableBefore: false,
-      ),
+      options: StorageFindByIdOptions(),
     );
     if (findResult.isFailure) {
       return Result.failure(findResult.failure);
@@ -56,23 +41,12 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
 
     var entity = findResult.success;
 
-    if (enableLoadEntity) {
-      final loadEntityResult = await onLoadEntity(entity!);
-      if (loadEntityResult.isFailure) {
-        return Result.failure(loadEntityResult.failure);
-      }
-      entity = loadEntityResult.success;
-    }
-
     final newEntity = entity == null ? creater() : updater(entity);
 
     if (newEntity != null) {
       final saveResult = await save(
         newEntity,
-        options: StorageSaveOptions(
-          enableBefore: false,
-          enableLoadEntity: enableLoadEntity,
-        ),
+        options: StorageSaveOptions(),
       );
       if (saveResult.isFailure) {
         return Result.failure(saveResult.failure);
@@ -96,16 +70,7 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       );
     }
 
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeDeleteByIdResult = await onBeforeDeleteById(id);
-      if (beforeDeleteByIdResult.isFailure) {
-        return Result.failure(beforeDeleteByIdResult.failure);
-      }
-    }
-
     final deleteResult = await dataSourceHandler.delete(id);
-
     return deleteResult.map(
       (success) {
         notifyDeleteComplete(id);
@@ -127,14 +92,6 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       throw UnimplementedError(
         'Transaction is not supported in StorageRepository',
       );
-    }
-
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeDeleteResult = await onBeforeDelete(entity);
-      if (beforeDeleteResult.isFailure) {
-        return Result.failure(beforeDeleteResult.failure);
-      }
     }
 
     final deleteByIdResult = await deleteById(entity.id);
@@ -176,16 +133,6 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
     }
 
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    final enableLoadEntity =
-        LoadEntityCallbackOptions.getEnableLoadEntity(options);
-
-    if (enableBefore) {
-      final beforeFindByIdResult = await onBeforeFindById(id);
-      if (beforeFindByIdResult.isFailure) {
-        return Result.failure(beforeFindByIdResult.failure);
-      }
-    }
 
     final storeEntity = controller.getById<Id, E>(id);
     if (fetchPolicy == FetchPolicy.storeOnly) {
@@ -207,14 +154,6 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
     if (entity == null) {
       notifyEntityNotFound(id);
       return Result.success(null);
-    }
-
-    if (enableLoadEntity) {
-      final loadEntityResult = await onLoadEntity(entity);
-      if (loadEntityResult.isFailure) {
-        return Result.failure(loadEntityResult.failure);
-      }
-      entity = loadEntityResult.success;
     }
 
     notifyGetComplete(entity);
@@ -261,14 +200,6 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
       );
     }
 
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-    if (enableBefore) {
-      final beforeSaveResult = await onBeforeSave(entity);
-      if (beforeSaveResult.isFailure) {
-        return Result.failure(beforeSaveResult.failure);
-      }
-    }
-
     final saveResult = await dataSourceHandler.save(entity);
 
     return saveResult.map(
@@ -289,61 +220,13 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
   }) {
     throw UnimplementedError();
   }
-
-  @override
-  Future<Result<void, Exception>> onBeforeSave(E entity) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeDeleteById(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeDelete(E entity) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindById(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindAll(
-    IRepositoryQuery<Id, E> query,
-  ) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeCount() async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindOne(
-    IRepositoryQuery<Id, E> query,
-  ) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeUpsert(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<E, Exception>> onLoadEntity(E entity) async {
-    return Result.success(entity);
-  }
 }
 
 /// A handler for a data source.
 abstract class IDataSourceHandler<Id, E extends Entity<Id>> {
   late final Map<String, dynamic> Function(E entity) toJson;
   late final E Function(Map<String, dynamic> json) fromJson;
+  late final String Function(Id id) idToString;
 
   Future<Result<void, Exception>> save(E entity);
   Future<Result<void, Exception>> saveAll(Iterable<E> entities);

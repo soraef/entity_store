@@ -34,16 +34,6 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
   }) async {
     try {
       final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
-      final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
-      final enableLoadEntity =
-          LoadEntityCallbackOptions.getEnableLoadEntity(options);
-
-      if (enableBefore) {
-        final beforeFindByIdResult = await onBeforeFindById(id);
-        if (beforeFindByIdResult.isFailure) {
-          return Result.failure(beforeFindByIdResult.failure);
-        }
-      }
 
       final storeEntity = controller.getById<Id, E>(id);
       if (fetchPolicy == FetchPolicy.storeOnly) {
@@ -54,20 +44,13 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
         return Result.success(storeEntity);
       }
 
-      final record = await store.record(id.toString()).get(db);
+      final record = await store.record(idToString(id)).get(db);
       if (record == null) {
         notifyEntityNotFound(id);
         return Result.success(null);
       }
 
       var entity = fromJson(Map<String, dynamic>.from(record));
-      if (enableLoadEntity) {
-        final loadEntityResult = await onLoadEntity(entity);
-        if (loadEntityResult.isFailure) {
-          return Result.failure(loadEntityResult.failure);
-        }
-        entity = loadEntityResult.success;
-      }
 
       notifyGetComplete(entity);
       return Result.success(entity);
@@ -100,7 +83,7 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
   }) async {
     try {
       final json = toJson(entity);
-      await store.record(entity.id.toString()).put(db, json);
+      await store.record(idToString(entity.id)).put(db, json);
       notifySaveComplete(entity);
       return Result.success(entity);
     } catch (e) {
@@ -115,7 +98,7 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
     TransactionContext? transaction,
   }) async {
     try {
-      await store.record(id.toString()).delete(db);
+      await store.record(idToString(id)).delete(db);
       notifyDeleteComplete(id);
       return Result.success(id);
     } catch (e) {
@@ -181,7 +164,7 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
     Id id, {
     ObserveByIdOptions? options,
   }) {
-    final record = store.record(id.toString());
+    final record = store.record(idToString(id));
     return record.onSnapshot(db).map((snapshot) {
       if (snapshot == null) {
         notifyEntityNotFound(id);
@@ -223,54 +206,5 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
       (success) => Result.success(newEntity),
       (failure) => Result.failure(failure),
     );
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeSave(E entity) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeDeleteById(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeDelete(E entity) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindById(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindAll(
-    IRepositoryQuery<Id, E> query,
-  ) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeCount() async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeFindOne(
-    IRepositoryQuery<Id, E> query,
-  ) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> onBeforeUpsert(Id id) async {
-    return Result.success(null);
-  }
-
-  @override
-  Future<Result<E, Exception>> onLoadEntity(E entity) async {
-    return Result.success(entity);
   }
 }

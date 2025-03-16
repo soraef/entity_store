@@ -182,17 +182,7 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
       );
     }
 
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
-    final enableLoadEntity =
-        LoadEntityCallbackOptions.getEnableLoadEntity(options);
-
-    if (enableBefore) {
-      final beforeFindAllResult = await _repository.onBeforeFindAll(this);
-      if (beforeFindAllResult.isFailure) {
-        return Result.failure(beforeFindAllResult.failure);
-      }
-    }
 
     final objects = _repository.controller
         .getAll<Id, E>()
@@ -247,20 +237,6 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
       entities = entities.take(limit).toList();
     }
 
-    if (enableLoadEntity) {
-      entities = (await Future.wait(
-        entities.map((e) async {
-          final loadEntityResult = await _repository.onLoadEntity(e);
-          if (loadEntityResult.isFailure) {
-            // log('Failed to load entity: ${loadEntityResult.failure}');
-          }
-          return loadEntityResult.successOrNull;
-        }),
-      ))
-          .whereType<E>()
-          .toList();
-    }
-
     _repository.notifyListComplete(entities);
     return Result.success(entities);
   }
@@ -276,22 +252,11 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
       );
     }
 
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
-    final enableLoadEntity =
-        LoadEntityCallbackOptions.getEnableLoadEntity(options);
-
-    if (enableBefore) {
-      final beforeFindOneResult = await _repository.onBeforeFindOne(this);
-      if (beforeFindOneResult.isFailure) {
-        return Result.failure(beforeFindOneResult.failure);
-      }
-    }
 
     final allResult = await findAll(
       options: StorageFindAllOptions(
         fetchPolicy: fetchPolicy,
-        enableBefore: false,
       ),
     );
 
@@ -300,13 +265,6 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
     }
 
     var entity = allResult.success.firstOrNull;
-    if (enableLoadEntity && entity != null) {
-      final loadEntityResult = await _repository.onLoadEntity(entity);
-      if (loadEntityResult.isFailure) {
-        return Result.failure(loadEntityResult.failure);
-      }
-      entity = loadEntityResult.success;
-    }
 
     return Result.success(entity);
   }
@@ -315,21 +273,10 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
   Future<Result<int, Exception>> count({
     CountOptions? options,
   }) async {
-    final enableBefore = BeforeCallbackOptions.getEnableBefore(options);
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
 
-    if (enableBefore) {
-      final beforeCountResult = await _repository.onBeforeCount();
-      if (beforeCountResult.isFailure) {
-        return Result.failure(beforeCountResult.failure);
-      }
-    }
-
     final allResult = await findAll(
-      options: StorageFindAllOptions(
-        fetchPolicy: fetchPolicy,
-        enableBefore: false,
-      ),
+      options: StorageFindAllOptions(fetchPolicy: fetchPolicy),
     );
 
     if (allResult.isFailure) {

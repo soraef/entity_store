@@ -6,6 +6,7 @@ abstract interface class EntityStoreRepository<Id, E extends Entity<Id>> {
 
   Map<String, dynamic> toJson(E entity);
   E fromJson(Map<String, dynamic> json);
+  String idToString(Id id);
 }
 
 enum FetchPolicy {
