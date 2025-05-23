@@ -21,9 +21,10 @@ abstract interface class Repository<Id, E extends Entity<Id>> {
 
   /// Finds an entity by its `id`.
   ///
-  /// Returns a `Result` object that contains the found entity or an exception if an error occurs.
+  /// Returns the found entity or null if not found.
+  /// Throws a [RepositoryException] if an error occurs.
   /// An optional `options` parameter can be provided to customize the query behavior.
-  Future<Result<E?, Exception>> findById(
+  Future<E?> findById(
     Id id, {
     FindByIdOptions? options,
     TransactionContext? transaction,
@@ -31,24 +32,27 @@ abstract interface class Repository<Id, E extends Entity<Id>> {
 
   /// Finds all entities of type `E`.
   ///
-  /// Returns a `Result` object that contains a list of entities or an exception if an error occurs.
-  Future<Result<List<E>, Exception>> findAll({
+  /// Returns a list of entities.
+  /// Throws a [RepositoryException] if an error occurs.
+  Future<List<E>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   });
 
   /// Finds a single entity of type `E`.
   ///
-  /// Returns a `Result` object that contains the found entity or an exception if an error occurs.
-  Future<Result<E?, Exception>> findOne({
+  /// Returns the found entity or null if not found.
+  /// Throws a [RepositoryException] if an error occurs.
+  Future<E?> findOne({
     FindOneOptions? options,
     TransactionContext? transaction,
   });
 
   /// Counts the number of entities of type `E`.
   ///
-  /// Returns a `Result` object that contains the count or an exception if an error occurs.
-  Future<Result<int, Exception>> count({
+  /// Returns the count.
+  /// Throws a [RepositoryException] if an error occurs.
+  Future<int> count({
     CountOptions? options,
   });
 
@@ -59,9 +63,10 @@ abstract interface class Repository<Id, E extends Entity<Id>> {
 
   /// Saves an entity of type `E`.
   ///
-  /// Returns a `Result` object that contains the saved entity or an exception if an error occurs.
+  /// Returns the saved entity.
+  /// Throws a [RepositoryException] if an error occurs.
   /// An optional `options` parameter can be provided to customize the save behavior.
-  Future<Result<E, Exception>> save(
+  Future<E> save(
     E entity, {
     SaveOptions? options,
     TransactionContext? transaction,
@@ -69,9 +74,10 @@ abstract interface class Repository<Id, E extends Entity<Id>> {
 
   /// Deletes an entity by its `id`.
   ///
-  /// Returns a `Result` object that contains the deleted entity's `id` or an exception if an error occurs.
+  /// Returns the deleted entity's `id`.
+  /// Throws a [RepositoryException] if an error occurs.
   /// An optional `options` parameter can be provided to customize the delete behavior.
-  Future<Result<Id, Exception>> deleteById(
+  Future<Id> deleteById(
     Id id, {
     DeleteOptions? options,
     TransactionContext? transaction,
@@ -79,9 +85,10 @@ abstract interface class Repository<Id, E extends Entity<Id>> {
 
   /// Deletes an entity.
   ///
-  /// Returns a `Result` object that contains the deleted entity or an exception if an error occurs.
+  /// Returns the deleted entity.
+  /// Throws a [RepositoryException] if an error occurs.
   /// An optional `options` parameter can be provided to customize the delete behavior.
-  Future<Result<E, Exception>> delete(
+  Future<E> delete(
     E entity, {
     DeleteOptions? options,
     TransactionContext? transaction,
@@ -92,16 +99,21 @@ abstract interface class Repository<Id, E extends Entity<Id>> {
   /// If an entity with the specified `id` exists, it will be updated using the `updater` function.
   /// If no entity with the specified `id` exists, a new entity will be created using the `creater` function.
   ///
-  /// Returns a `Result` object that contains the upserted entity or an exception if an error occurs.
+  /// Returns the upserted entity or null if both create and update returned null.
+  /// Throws a [RepositoryException] if an error occurs.
   /// An optional `options` parameter can be provided to customize the upsert behavior.
-  Future<Result<E?, Exception>> upsert(
+  Future<E?> upsert(
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
     UpsertOptions? options,
   });
 
-  Stream<Result<E?, Exception>> observeById(
+  /// Observes an entity by its `id`.
+  ///
+  /// Returns a stream of the entity. The stream will emit whenever the entity changes.
+  /// Throws a [RepositoryException] if an error occurs.
+  Stream<E?> observeById(
     Id id, {
     ObserveByIdOptions? options,
   });

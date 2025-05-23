@@ -1,6 +1,5 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:sembast/sembast.dart';
-import 'package:type_result/type_result.dart';
 
 import 'repository.dart';
 
@@ -108,7 +107,7 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll({
+  Future<List<E>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   }) async {
@@ -124,11 +123,11 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
           .toList();
 
       if (fetchPolicy == FetchPolicy.storeOnly) {
-        return Result.success(storeEntities);
+        return storeEntities;
       }
 
       if (fetchPolicy == FetchPolicy.storeFirst && storeEntities.isNotEmpty) {
-        return Result.success(storeEntities);
+        return storeEntities;
       }
 
       final finder = _createFinder();
@@ -138,14 +137,14 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
           .toList();
 
       repository.notifyListComplete(entities);
-      return Result.success(entities);
+      return entities;
     } catch (e) {
-      return Result.failure(Exception('Failed to find all entities: $e'));
+      throw QueryException('Failed to find all entities: $e');
     }
   }
 
   @override
-  Future<Result<E?, Exception>> findOne({
+  Future<E?> findOne({
     FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
@@ -153,33 +152,33 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
       final finder = _createFinder();
       final record = await store.findFirst(db, finder: finder);
       if (record == null) {
-        return Result.success(null);
+        return null;
       }
 
       final entity = fromJson(Map<String, dynamic>.from(record.value));
-      return Result.success(entity);
+      return entity;
     } catch (e) {
-      return Result.failure(Exception('Failed to find one entity: $e'));
+      throw QueryException('Failed to find one entity: $e');
     }
   }
 
   @override
-  Future<Result<int, Exception>> count({CountOptions? options}) async {
+  Future<int> count({CountOptions? options}) async {
     try {
       final count = await store.count(db, filter: _createFilter());
-      return Result.success(count);
+      return count;
     } catch (e) {
-      return Result.failure(Exception('Failed to count entities: $e'));
+      throw QueryException('Failed to count entities: $e');
     }
   }
 
   @override
-  Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
+  Stream<List<EntityChange<E>>> observeAll({
     ObserveAllOptions? options,
   }) {
-    final finder = _createFinder();
-    return store.query(finder: finder).onSnapshots(db).map((snapshots) {
-      try {
+    try {
+      final finder = _createFinder();
+      return store.query(finder: finder).onSnapshots(db).map((snapshots) {
         final entities = snapshots
             .map(
               (s) => EntityChange(
@@ -188,15 +187,16 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
               ),
             )
             .toList();
-        return Result.success(entities);
-      } catch (e) {
-        return Result.failure(Exception('Failed to observe all entities: $e'));
-      }
-    });
+        return entities;
+      });
+    } catch (e) {
+      throw RepositoryException('Failed to observe all entities: $e');
+    }
   }
 
   @override
   IRepositoryQuery<Id, E> startAfter(Id id) {
+    _startAfterId = id;
     return this;
   }
 

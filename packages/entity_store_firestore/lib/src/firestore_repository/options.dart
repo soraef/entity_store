@@ -15,23 +15,27 @@ class FirestoreSaveOptions extends EntityStoreSaveOptions
 }
 
 class FirestoreUpsertOptions extends EntityStoreUpsertOptions
-    implements MergeOptions {
+    implements MergeOptions, UseTransactionOptions {
   @override
-  final bool merge;
+  final bool? merge;
 
   @override
-  final List<String> mergeFields;
+  final List<String>? mergeFields;
+
+  @override
+  final bool useTransaction;
 
   FirestoreUpsertOptions({
     super.fetchPolicy = FetchPolicy.persistent,
-    this.merge = true,
-    this.mergeFields = const [],
+    this.merge,
+    this.mergeFields,
+    this.useTransaction = false,
   });
 }
 
 abstract interface class MergeOptions {
-  bool get merge;
-  List<String> get mergeFields;
+  bool? get merge;
+  List<String>? get mergeFields;
 
   static bool? getMerge(Object? options) {
     return switch (options) { MergeOptions(:final merge) => merge, _ => null };

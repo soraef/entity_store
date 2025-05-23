@@ -172,12 +172,12 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll({
+  Future<List<E>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in LocalStorageRepository',
       );
     }
@@ -193,103 +193,91 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
         .toList();
 
     if (fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.success(storeEntities);
+      return storeEntities;
     }
 
     if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntities.isNotEmpty) {
-        return Result.success(storeEntities);
+        return storeEntities;
       }
     }
 
-    final result = await _repository.dataSourceHandler.loadAll();
+    try {
+      final result = await _repository.dataSourceHandler.loadAll();
+      var entities = result.where((e) => test(_repository.toJson(e))).toList();
 
-    if (result.isFailure) {
-      return Result.failure(result.failure);
+      final sorts = getSorts;
+      for (final sort in sorts.reversed) {
+        entities = entities.sorted(
+          (a, b) {
+            final fieldA = _repository.toJson(a)[sort.field] as Comparable;
+            final fieldB = _repository.toJson(b)[sort.field] as Comparable;
+            if (sort.descending) {
+              return fieldB.compareTo(fieldA);
+            } else {
+              return fieldA.compareTo(fieldB);
+            }
+          },
+        );
+      }
+
+      final startAfterId = getStartAfterId;
+      if (startAfterId != null) {
+        entities =
+            entities.skipWhile((e) => e.id != startAfterId).skip(1).toList();
+      }
+
+      final limit = getLimit;
+      if (limit != null) {
+        entities = entities.take(limit).toList();
+      }
+
+      _repository.notifyListComplete(entities);
+      return entities;
+    } catch (e) {
+      throw QueryException('Failed to execute query: ${e.toString()}');
     }
-
-    var entities =
-        result.success.where((e) => test(_repository.toJson(e))).toList();
-
-    final sorts = getSorts;
-    for (final sort in sorts.reversed) {
-      entities = entities.sorted(
-        (a, b) {
-          final fieldA = _repository.toJson(a)[sort.field] as Comparable;
-          final fieldB = _repository.toJson(b)[sort.field] as Comparable;
-          if (sort.descending) {
-            return fieldB.compareTo(fieldA);
-          } else {
-            return fieldA.compareTo(fieldB);
-          }
-        },
-      );
-    }
-
-    final startAfterId = getStartAfterId;
-    if (startAfterId != null) {
-      entities =
-          entities.skipWhile((e) => e.id != startAfterId).skip(1).toList();
-    }
-
-    final limit = getLimit;
-    if (limit != null) {
-      entities = entities.take(limit).toList();
-    }
-
-    _repository.notifyListComplete(entities);
-    return Result.success(entities);
   }
 
   @override
-  Future<Result<E?, Exception>> findOne({
+  Future<E?> findOne({
     FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in LocalStorageRepository',
       );
     }
 
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
 
-    final allResult = await findAll(
+    final entities = await findAll(
       options: StorageFindAllOptions(
         fetchPolicy: fetchPolicy,
       ),
     );
 
-    if (allResult.isFailure) {
-      return Result.failure(allResult.failure);
-    }
-
-    var entity = allResult.success.firstOrNull;
-
-    return Result.success(entity);
+    return entities.firstOrNull;
   }
 
   @override
-  Future<Result<int, Exception>> count({
+  Future<int> count({
     CountOptions? options,
   }) async {
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
 
-    final allResult = await findAll(
+    final entities = await findAll(
       options: StorageFindAllOptions(fetchPolicy: fetchPolicy),
     );
 
-    if (allResult.isFailure) {
-      return Result.failure(allResult.failure);
-    }
-
-    return Result.success(allResult.success.length);
+    return entities.length;
   }
 
   @override
-  Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
+  Stream<List<EntityChange<E>>> observeAll({
     ObserveAllOptions? options,
   }) {
-    throw UnimplementedError();
+    throw UnimplementedError('observeAll is not implemented');
   }
 }

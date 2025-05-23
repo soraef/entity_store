@@ -80,21 +80,37 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
 
   bool test(Map<String, dynamic> object);
 
-  Future<Result<List<E>, Exception>> findAll({
+  /// Finds all entities matching the query.
+  ///
+  /// Returns a list of entities.
+  /// Throws a [RepositoryException] if an error occurs.
+  Future<List<E>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   });
 
-  Future<Result<E?, Exception>> findOne({
+  /// Finds one entity matching the query.
+  ///
+  /// Returns the found entity or null if not found.
+  /// Throws a [RepositoryException] if an error occurs.
+  Future<E?> findOne({
     FindOneOptions? options,
     TransactionContext? transaction,
   });
 
-  Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
+  /// Observes all entities matching the query.
+  ///
+  /// Returns a stream of entity changes. The stream will emit whenever any matching entity changes.
+  /// Throws a [RepositoryException] if an error occurs.
+  Stream<List<EntityChange<E>>> observeAll({
     ObserveAllOptions? options,
   });
 
-  Future<Result<int, Exception>> count({
+  /// Counts the number of entities matching the query.
+  ///
+  /// Returns the count.
+  /// Throws a [RepositoryException] if an error occurs.
+  Future<int> count({
     CountOptions? options,
   });
 

@@ -1,8 +1,7 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_sembast/src/query.dart';
 import 'package:sembast/sembast.dart';
-import 'package:type_result/type_result.dart';
-import 'storage_repository.dart'; // Entity, Result, RepositoryFilter, RepositorySort などの定義済みとする
+import 'storage_repository.dart'; // Entity, RepositoryFilter, RepositorySort などの定義済みとする
 
 /// Sembast 用に直接 Sembast の API を利用する Repository 実装
 abstract class SembastRepository<Id, E extends Entity<Id>>
@@ -27,7 +26,7 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
   E fromJson(Map<String, dynamic> json);
 
   @override
-  Future<Result<E?, Exception>> findById(
+  Future<E?> findById(
     Id id, {
     FindByIdOptions? options,
     TransactionContext? transaction,
@@ -37,30 +36,30 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
 
       final storeEntity = controller.getById<Id, E>(id);
       if (fetchPolicy == FetchPolicy.storeOnly) {
-        return Result.success(storeEntity);
+        return storeEntity;
       }
 
       if (fetchPolicy == FetchPolicy.storeFirst && storeEntity != null) {
-        return Result.success(storeEntity);
+        return storeEntity;
       }
 
       final record = await store.record(idToString(id)).get(db);
       if (record == null) {
         notifyEntityNotFound(id);
-        return Result.success(null);
+        return null;
       }
 
       var entity = fromJson(Map<String, dynamic>.from(record));
 
       notifyGetComplete(entity);
-      return Result.success(entity);
+      return entity;
     } catch (e) {
-      return Result.failure(Exception('Failed to find entity: $e'));
+      throw RepositoryException('Failed to find entity: $e');
     }
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll({
+  Future<List<E>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   }) async {
@@ -69,14 +68,14 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
       final entities = records
           .map((r) => fromJson(Map<String, dynamic>.from(r.value)))
           .toList();
-      return Result.success(entities);
+      return entities;
     } catch (e) {
-      return Result.failure(Exception('Failed to find all entities: $e'));
+      throw RepositoryException('Failed to find all entities: $e');
     }
   }
 
   @override
-  Future<Result<E, Exception>> save(
+  Future<E> save(
     E entity, {
     SaveOptions? options,
     TransactionContext? transaction,
@@ -85,14 +84,14 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
       final json = toJson(entity);
       await store.record(idToString(entity.id)).put(db, json);
       notifySaveComplete(entity);
-      return Result.success(entity);
+      return entity;
     } catch (e) {
-      return Result.failure(Exception('Failed to save entity: $e'));
+      throw EntitySaveException(entity, reason: e.toString());
     }
   }
 
   @override
-  Future<Result<Id, Exception>> deleteById(
+  Future<Id> deleteById(
     Id id, {
     DeleteOptions? options,
     TransactionContext? transaction,
@@ -100,32 +99,29 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
     try {
       await store.record(idToString(id)).delete(db);
       notifyDeleteComplete(id);
-      return Result.success(id);
+      return id;
     } catch (e) {
-      return Result.failure(Exception('Failed to delete entity: $e'));
+      throw EntityDeleteException(id, reason: e.toString());
     }
   }
 
   @override
-  Future<Result<E, Exception>> delete(
+  Future<E> delete(
     E entity, {
     DeleteOptions? options,
     TransactionContext? transaction,
   }) async {
-    final result = await deleteById(entity.id, options: options);
-    return result.map(
-      (success) => Result.success(entity),
-      (failure) => Result.failure(failure),
-    );
+    await deleteById(entity.id, options: options);
+    return entity;
   }
 
   @override
-  Future<Result<int, Exception>> count({CountOptions? options}) async {
+  Future<int> count({CountOptions? options}) async {
     try {
       final count = await store.count(db);
-      return Result.success(count);
+      return count;
     } catch (e) {
-      return Result.failure(Exception('Failed to count entities: $e'));
+      throw RepositoryException('Failed to count entities: $e');
     }
   }
 
@@ -142,69 +138,65 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E?, Exception>> findOne({
+  Future<E?> findOne({
     FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
     try {
       final record = await store.findFirst(db);
       if (record == null) {
-        return Result.success(null);
+        return null;
       }
 
       final entity = fromJson(Map<String, dynamic>.from(record.value));
-      return Result.success(entity);
+      return entity;
     } catch (e) {
-      return Result.failure(Exception('Failed to find one entity: $e'));
+      throw RepositoryException('Failed to find one entity: $e');
     }
   }
 
   @override
-  Stream<Result<E?, Exception>> observeById(
+  Stream<E?> observeById(
     Id id, {
     ObserveByIdOptions? options,
   }) {
-    final record = store.record(idToString(id));
-    return record.onSnapshot(db).map((snapshot) {
-      if (snapshot == null) {
-        notifyEntityNotFound(id);
-        return Result.success(null);
-      }
+    try {
+      final record = store.record(idToString(id));
+      return record.onSnapshot(db).map((snapshot) {
+        if (snapshot == null) {
+          notifyEntityNotFound(id);
+          return null;
+        }
 
-      try {
         final entity = fromJson(Map<String, dynamic>.from(snapshot.value));
         notifyGetComplete(entity);
-        return Result.success(entity);
-      } catch (e) {
-        return Result.failure(Exception('Failed to observe entity: $e'));
-      }
-    });
+        return entity;
+      });
+    } catch (e) {
+      throw RepositoryException('Failed to observe entity: $e');
+    }
   }
 
   @override
-  Future<Result<E?, Exception>> upsert(
+  Future<E?> upsert(
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
     UpsertOptions? options,
   }) async {
-    final findResult = await findById(id);
-    if (findResult.isFailure) {
-      return Result.failure(findResult.failure);
+    try {
+      final existingEntity = await findById(id);
+      final newEntity =
+          existingEntity == null ? creater() : updater(existingEntity);
+
+      if (newEntity == null) {
+        return null;
+      }
+
+      await save(newEntity);
+      return newEntity;
+    } catch (e) {
+      throw RepositoryException('Failed to upsert entity: $e');
     }
-
-    final existingEntity = findResult.success;
-    final newEntity =
-        existingEntity == null ? creater() : updater(existingEntity);
-
-    if (newEntity == null) {
-      return Result.success(null);
-    }
-
-    final saveResult = await save(newEntity);
-    return saveResult.map(
-      (success) => Result.success(newEntity),
-      (failure) => Result.failure(failure),
-    );
   }
 }

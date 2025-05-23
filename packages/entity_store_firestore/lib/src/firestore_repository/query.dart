@@ -88,7 +88,7 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
             FilterOperator.isGreaterThanOrEqualTo,
             isGreaterThanOrEqualTo,
           ),
-        if (arrayContainsAny != null)
+        if (arrayContains != null)
           RepositoryFilter(
             field,
             FilterOperator.arrayContains,
@@ -133,19 +133,25 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return FirestoreRepositoryQuery<Id, E>._(
       _repository,
       filters,
-      [...sorts, RepositorySort(field, descending)],
+      [
+        ...sorts,
+        RepositorySort(
+          field,
+          descending,
+        ),
+      ],
       limitNum,
       startAfterId,
     );
   }
 
   @override
-  FirestoreRepositoryQuery<Id, E> limit(int num) {
+  FirestoreRepositoryQuery<Id, E> limit(int count) {
     return FirestoreRepositoryQuery<Id, E>._(
       _repository,
       filters,
       sorts,
-      num,
+      count,
       startAfterId,
     );
   }
@@ -166,83 +172,20 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
     return filters.map((e) => e.test(object)).every((e) => e);
   }
 
-  Query _buildFilterQuery(Query query) {
-    for (final filter in getFilters) {
-      switch (filter.operator) {
-        case FilterOperator.isEqualTo:
-          query = query.where(filter.field, isEqualTo: filter.value);
-          break;
-        case FilterOperator.isNotEqualTo:
-          query = query.where(filter.field, isNotEqualTo: filter.value);
-          break;
-        case FilterOperator.isLessThan:
-          query = query.where(filter.field, isLessThan: filter.value);
-          break;
-        case FilterOperator.isLessThanOrEqualTo:
-          query = query.where(filter.field, isLessThanOrEqualTo: filter.value);
-          break;
-        case FilterOperator.isGreaterThan:
-          query = query.where(filter.field, isGreaterThan: filter.value);
-          break;
-        case FilterOperator.isGreaterThanOrEqualTo:
-          query =
-              query.where(filter.field, isGreaterThanOrEqualTo: filter.value);
-          break;
-        case FilterOperator.arrayContains:
-          query = query.where(filter.field, arrayContains: filter.value);
-          break;
-        case FilterOperator.arrayContainsAny:
-          query = query.where(filter.field, arrayContainsAny: filter.value);
-          break;
-        case FilterOperator.whereIn:
-          query = query.where(filter.field, whereIn: filter.value);
-          break;
-        case FilterOperator.whereNotIn:
-          query = query.where(filter.field, whereNotIn: filter.value);
-          break;
-        case FilterOperator.isNull:
-          query = query.where(filter.field, isNull: filter.value);
-          break;
-      }
-    }
-    return query;
-  }
-
-  Query _buildSortQuery(Query query) {
-    for (final sort in getSorts) {
-      query = query.orderBy(sort.field, descending: sort.descending);
-    }
-    return query;
-  }
-
-  Query _buildLimitQuery(Query query) {
-    final lim = getLimit;
-    if (lim != null) {
-      return query.limit(lim);
-    }
-    return query;
-  }
-
-  Future<Query> _build() async {
-    var ref = _buildFilterQuery(_repository.collectionRef);
-    ref = _buildSortQuery(ref);
-    ref = _buildLimitQuery(ref);
-
-    if (startAfterId != null) {
-      final doc = await _repository.getDocumentRef(startAfterId as Id).get();
-      ref = ref.startAfterDocument(doc);
-    }
-
-    return ref;
-  }
-
   @override
-  Future<Result<List<E>, Exception>> findAll({
+  Future<List<E>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   }) async {
+    if (transaction != null) {
+      throw TransactionException(
+        'Transaction is not supported in FirestoreRepositoryQuery',
+      );
+    }
+
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
 
+    // ストアからデータを取得
     final objects = _repository.controller
         .getAll<Id, E>()
         .map((e) => _repository.toJson(e))
@@ -251,27 +194,37 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
         .map((e) => _repository.fromJson(e))
         .toList();
 
+    // ストアのみの場合
     if (fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.success(storeEntities);
+      return storeEntities;
     }
 
+    // ストア優先の場合、ストアにデータがあればそれを返す
     if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntities.isNotEmpty) {
-        return Result.success(storeEntities);
+        return storeEntities;
       }
     }
 
-    final ref = await _build();
-    return _repository._protectedListAndNotify(ref, options);
+    // Firestoreからデータを取得
+    final query = await _buildQueryWithCursor(_repository.collectionRef);
+    return await _repository._protectedListAndNotify(query, options);
   }
 
   @override
-  Future<Result<E?, Exception>> findOne({
+  Future<E?> findOne({
     FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
+    if (transaction != null) {
+      throw TransactionException(
+        'Transaction is not supported in FirestoreRepositoryQuery',
+      );
+    }
+
     final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
 
+    // ストアからデータを取得
     final objects = _repository.controller
         .getAll<Id, E>()
         .map((e) => _repository.toJson(e))
@@ -281,40 +234,155 @@ class FirestoreRepositoryQuery<Id, E extends Entity<Id>>
         .take(1)
         .firstOrNull;
 
+    // ストアのみの場合
     if (fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.success(storeEntity);
+      return storeEntity;
     }
 
+    // ストア優先の場合、ストアにデータがあればそれを返す
     if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntity != null) {
-        return Result.success(storeEntity);
+        return storeEntity;
       }
     }
 
-    final ref = await _build();
-    return (await _repository._protectedListAndNotify(ref.limit(1), options))
-        .mapSuccess((success) => success.firstOrNull);
+    // Firestoreからデータを取得
+    final query = await _buildQueryWithCursor(_repository.collectionRef);
+    final limitedQuery = query.limit(1);
+
+    final entities =
+        await _repository._protectedListAndNotify(limitedQuery, options);
+    return entities.isEmpty ? null : entities.first;
   }
 
   @override
-  Future<Result<int, Exception>> count({
+  Future<int> count({
     CountOptions? options,
   }) async {
-    final ref = await _build();
-    final countQuery = ref.count();
-    final result = await countQuery.get();
-    final count = result.count;
-    if (count == null) {
-      return Result.failure(Exception("Count is null"));
+    try {
+      final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+
+      // ストアのみの場合はストアのデータ数を返す
+      if (fetchPolicy == FetchPolicy.storeOnly) {
+        final objects = _repository.controller
+            .getAll<Id, E>()
+            .map((e) => _repository.toJson(e))
+            .toList();
+        return IRepositoryQuery.findEntities(objects, this).length;
+      }
+
+      final query = await _buildQueryWithCursor(_repository.collectionRef);
+      final countQuery = query.count();
+      final result = await countQuery.get();
+
+      if (result.count == null) {
+        throw QueryException('カウント結果が取得できませんでした');
+      }
+
+      return result.count!;
+    } catch (e) {
+      if (e is FirebaseException) {
+        throw QueryException('Firestoreカウントに失敗: ${e.code} - ${e.message}');
+      }
+      throw QueryException('ドキュメント数の取得に失敗: ${e.toString()}');
     }
-    return Result.success(count);
   }
 
   @override
-  Stream<Result<List<EntityChange<E>>, Exception>> observeAll({
+  Stream<List<EntityChange<E>>> observeAll({
     ObserveAllOptions? options,
-  }) async* {
-    final ref = await _build();
-    yield* _repository._protectedObserveCollection(ref);
+  }) {
+    try {
+      Query query = _buildQuery(_repository.collectionRef);
+      return _repository._protectedObserveCollection(query);
+    } catch (e) {
+      throw QueryException('Failed to observe collection: ${e.toString()}');
+    }
+  }
+
+  Future<Query> _buildQueryWithCursor(CollectionReference collectionRef) async {
+    Query query = _buildQuery(collectionRef);
+
+    if (startAfterId != null) {
+      try {
+        // ドキュメントスナップショットを取得してカーソル位置として使用
+        final docRef = _repository.getDocumentRef(startAfterId!);
+        final docSnapshot = await docRef.get();
+
+        if (docSnapshot.exists) {
+          query = query.startAfterDocument(docSnapshot);
+        } else {
+          throw QueryException('カーソルに指定されたドキュメント(ID: $startAfterId)が存在しません');
+        }
+      } catch (e) {
+        if (e is QueryException) rethrow;
+        throw QueryException('カーソルの設定に失敗しました: ${e.toString()}');
+      }
+    }
+
+    return query;
+  }
+
+  Query _buildQuery(CollectionReference collectionRef) {
+    Query query = collectionRef;
+
+    for (final filter in filters) {
+      final fieldPath = filter.field;
+      switch (filter.operator) {
+        case FilterOperator.isEqualTo:
+          query = query.where(fieldPath, isEqualTo: filter.value);
+          break;
+        case FilterOperator.isNotEqualTo:
+          query = query.where(fieldPath, isNotEqualTo: filter.value);
+          break;
+        case FilterOperator.isLessThan:
+          query = query.where(fieldPath, isLessThan: filter.value);
+          break;
+        case FilterOperator.isLessThanOrEqualTo:
+          query = query.where(fieldPath, isLessThanOrEqualTo: filter.value);
+          break;
+        case FilterOperator.isGreaterThan:
+          query = query.where(fieldPath, isGreaterThan: filter.value);
+          break;
+        case FilterOperator.isGreaterThanOrEqualTo:
+          query = query.where(fieldPath, isGreaterThanOrEqualTo: filter.value);
+          break;
+        case FilterOperator.arrayContains:
+          query = query.where(fieldPath, arrayContains: filter.value);
+          break;
+        case FilterOperator.arrayContainsAny:
+          query = query.where(fieldPath, arrayContainsAny: filter.value);
+          break;
+        case FilterOperator.whereIn:
+          query = query.where(fieldPath, whereIn: filter.value);
+          break;
+        case FilterOperator.whereNotIn:
+          query = query.where(fieldPath, whereNotIn: filter.value);
+          break;
+        case FilterOperator.isNull:
+          if (filter.value as bool) {
+            query = query.where(fieldPath, isNull: true);
+          } else {
+            query = query.where(fieldPath, isNull: false);
+          }
+          break;
+      }
+    }
+
+    for (final sort in sorts) {
+      query = query.orderBy(
+        sort.field,
+        descending: sort.descending,
+      );
+    }
+
+    if (limitNum != null) {
+      query = query.limit(limitNum!);
+    }
+
+    // 注意: startAfterの処理は_buildQueryWithCursorメソッドに移動しました
+    // ここではcursorを設定しない基本的なクエリを返します
+
+    return query;
   }
 }

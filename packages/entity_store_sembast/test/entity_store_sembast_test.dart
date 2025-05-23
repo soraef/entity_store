@@ -4,7 +4,6 @@ import 'package:entity_store_sembast/src/repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sembast/sembast_memory.dart';
 
-
 class Store with EntityStoreMixin {
   EntityStore state = EntityStore.empty();
 
@@ -68,11 +67,10 @@ class TestRepository extends SembastRepository<String, TestUser> {
       'age': entity.age,
     };
   }
-  
+
   @override
   String idToString(String id) {
-    // TODO: implement idToString
-    throw UnimplementedError();
+    return id;
   }
 }
 
@@ -105,22 +103,19 @@ void main() {
       );
 
       // 保存
-      final saveResult = await repository.save(user);
-      expect(saveResult.isSuccess, true);
-      expect(saveResult.success, user);
+      final savedUser = await repository.save(user);
+      expect(savedUser, user);
 
       // 取得
-      final findResult = await repository.findById(user.id);
-      expect(findResult.isSuccess, true);
-      expect(findResult.success?.id, user.id);
-      expect(findResult.success?.name, user.name);
-      expect(findResult.success?.age, user.age);
+      final foundUser = await repository.findById(user.id);
+      expect(foundUser?.id, user.id);
+      expect(foundUser?.name, user.name);
+      expect(foundUser?.age, user.age);
     });
 
     test('findById with non-existent ID', () async {
-      final findResult = await repository.findById('non_existent');
-      expect(findResult.isSuccess, true);
-      expect(findResult.success, null);
+      final foundUser = await repository.findById('non_existent');
+      expect(foundUser, null);
     });
 
     test('findAll', () async {
@@ -135,9 +130,8 @@ void main() {
       }
 
       // 全件取得
-      final findResult = await repository.findAll();
-      expect(findResult.isSuccess, true);
-      expect(findResult.success.length, 2);
+      final foundUsers = await repository.findAll();
+      expect(foundUsers.length, 2);
     });
 
     test('query with filter', () async {
@@ -155,8 +149,7 @@ void main() {
       // age=20でフィルタリング
       final queryResult =
           await repository.query().where('age', isEqualTo: 20).findAll();
-      expect(queryResult.isSuccess, true);
-      expect(queryResult.success.length, 2);
+      expect(queryResult.length, 2);
     });
 
     test('query with sort', () async {
@@ -173,11 +166,10 @@ void main() {
 
       // age でソート（昇順）
       final queryResult = await repository.query().orderBy('age').findAll();
-      expect(queryResult.isSuccess, true);
-      expect(queryResult.success.length, 3);
-      expect(queryResult.success[0].age, 20);
-      expect(queryResult.success[1].age, 25);
-      expect(queryResult.success[2].age, 30);
+      expect(queryResult.length, 3);
+      expect(queryResult[0].age, 20);
+      expect(queryResult[1].age, 25);
+      expect(queryResult[2].age, 30);
     });
 
     test('query with limit', () async {
@@ -195,10 +187,9 @@ void main() {
       // limit を使用
       final queryResult =
           await repository.query().orderBy('id').limit(2).findAll();
-      expect(queryResult.isSuccess, true);
-      expect(queryResult.success.length, 2);
-      expect(queryResult.success[0].id, 'user1');
-      expect(queryResult.success[1].id, 'user2');
+      expect(queryResult.length, 2);
+      expect(queryResult[0].id, 'user1');
+      expect(queryResult[1].id, 'user2');
     });
 
     test('delete', () async {
@@ -212,13 +203,12 @@ void main() {
       await repository.save(user);
 
       // 削除
-      final deleteResult = await repository.delete(user);
-      expect(deleteResult.isSuccess, true);
+      final deletedUser = await repository.delete(user);
+      expect(deletedUser, user);
 
       // 取得して確認
-      final findResult = await repository.findById(user.id);
-      expect(findResult.isSuccess, true);
-      expect(findResult.success, null);
+      final foundUser = await repository.findById(user.id);
+      expect(foundUser, null);
     });
 
     test('count', () async {
@@ -234,15 +224,13 @@ void main() {
       }
 
       // 全件数を取得
-      final countResult = await repository.count();
-      expect(countResult.isSuccess, true);
-      expect(countResult.success, 3);
+      final count = await repository.count();
+      expect(count, 3);
 
       // フィルタ付きの件数を取得
-      final filteredCountResult =
+      final filteredCount =
           await repository.query().where('age', isEqualTo: 20).count();
-      expect(filteredCountResult.isSuccess, true);
-      expect(filteredCountResult.success, 2);
+      expect(filteredCount, 2);
     });
 
     // test('observeById', () async {
@@ -254,18 +242,16 @@ void main() {
 
     //   // 監視を開始
     //   final subscription = repository.observeById(user.id).listen(
-    //         expectAsync1((result) {
-    //           expect(result!.isSuccess, true);
-    //           if (result.success != null) {
-    //             expect(result.success?.id, user.id);
-    //             expect(result.success?.name, user.name);
-    //             expect(result.success?.age, user.age);
+    //         expectAsync1((foundUser) {
+    //           if (foundUser != null) {
+    //             expect(foundUser.id, user.id);
+    //             expect(foundUser.name, user.name);
+    //             expect(foundUser.age, user.age);
     //           }
     //         }, count: 2), // 初期値nullと保存後の値
     //       );
 
     //   // 少し待ってから保存
-
     //   await repository.save(user);
 
     //   // クリーンアップ
@@ -292,8 +278,7 @@ void main() {
           fetchPolicy: FetchPolicy.storeOnly,
         ),
       );
-      expect(storeOnlyResult.isSuccess, true);
-      expect(storeOnlyResult.success, null);
+      expect(storeOnlyResult, null);
 
       // storeFirst: ストアを優先して取得
       final storeFirstResult = await repository.findById(
@@ -302,8 +287,7 @@ void main() {
           fetchPolicy: FetchPolicy.storeFirst,
         ),
       );
-      expect(storeFirstResult.isSuccess, true);
-      expect(storeFirstResult.success, null);
+      expect(storeFirstResult, null);
 
       // ストアにエンティティを追加
       controller.put(user);
@@ -315,8 +299,7 @@ void main() {
           fetchPolicy: FetchPolicy.storeFirst,
         ),
       );
-      expect(storeFirstWithCacheResult.isSuccess, true);
-      expect(storeFirstWithCacheResult.success, user);
+      expect(storeFirstWithCacheResult, user);
 
       // persistent: 永続化層から取得
       final persistentResult = await repository.findById(
@@ -325,8 +308,7 @@ void main() {
           fetchPolicy: FetchPolicy.persistent,
         ),
       );
-      expect(persistentResult.isSuccess, true);
-      expect(persistentResult.success, null);
+      expect(persistentResult, null);
     });
   });
 }

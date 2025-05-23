@@ -25,109 +25,92 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
   final EntityStoreController controller;
 
   @override
-  Future<Result<E?, Exception>> upsert(
+  Future<E?> upsert(
     Id id, {
     required E? Function() creater,
     required E? Function(E prev) updater,
     UpsertOptions? options,
   }) async {
-    final findResult = await findById(
+    final entity = await findById(
       id,
       options: StorageFindByIdOptions(),
     );
-    if (findResult.isFailure) {
-      return Result.failure(findResult.failure);
-    }
-
-    var entity = findResult.success;
 
     final newEntity = entity == null ? creater() : updater(entity);
 
     if (newEntity != null) {
-      final saveResult = await save(
+      await save(
         newEntity,
         options: StorageSaveOptions(),
       );
-      if (saveResult.isFailure) {
-        return Result.failure(saveResult.failure);
-      }
-
-      return Result.success(newEntity);
+      return newEntity;
     } else {
-      return Result.success(null);
+      return null;
     }
   }
 
   @override
-  Future<Result<Id, Exception>> deleteById(
+  Future<Id> deleteById(
     Id id, {
     DeleteOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in StorageRepository',
       );
     }
 
-    final deleteResult = await dataSourceHandler.delete(id);
-    return deleteResult.map(
-      (success) {
-        notifyDeleteComplete(id);
-        return Result.success(id);
-      },
-      (err) {
-        return Result.failure(err);
-      },
-    );
+    try {
+      await dataSourceHandler.delete(id);
+      notifyDeleteComplete(id);
+      return id;
+    } catch (e) {
+      throw EntityDeleteException(id, reason: e.toString());
+    }
   }
 
   @override
-  Future<Result<E, Exception>> delete(
+  Future<E> delete(
     E entity, {
     DeleteOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in StorageRepository',
       );
     }
 
-    final deleteByIdResult = await deleteById(entity.id);
-    if (deleteByIdResult.isFailure) {
-      return Result.failure(deleteByIdResult.failure);
-    }
-    return Result.success(entity);
+    await deleteById(entity.id);
+    return entity;
   }
 
   @override
-  Future<Result<List<E>, Exception>> findAll({
+  Future<List<E>> findAll({
     FindAllOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in StorageRepository',
       );
     }
 
-    final result = await query().findAll(
+    return await query().findAll(
       options: options,
       transaction: transaction,
     );
-
-    return result;
   }
 
   @override
-  Future<Result<E?, Exception>> findById(
+  Future<E?> findById(
     Id id, {
     FindByIdOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in StorageRepository',
       );
     }
@@ -136,51 +119,53 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
 
     final storeEntity = controller.getById<Id, E>(id);
     if (fetchPolicy == FetchPolicy.storeOnly) {
-      return Result.success(storeEntity);
+      return storeEntity;
     }
 
     if (fetchPolicy == FetchPolicy.storeFirst) {
       if (storeEntity != null) {
-        return Result.success(storeEntity);
+        return storeEntity;
       }
     }
 
-    final loadResult = await dataSourceHandler.loadAll();
-    if (loadResult.isFailure) {
-      return Result.failure(loadResult.failure);
-    }
+    try {
+      final entities = await dataSourceHandler.loadAll();
+      var entity = entities.firstWhereOrNull((e) => e.id == id);
+      if (entity == null) {
+        notifyEntityNotFound(id);
+        return null;
+      }
 
-    var entity = loadResult.success.firstWhereOrNull((e) => e.id == id);
-    if (entity == null) {
-      notifyEntityNotFound(id);
-      return Result.success(null);
+      notifyGetComplete(entity);
+      return entity;
+    } catch (e) {
+      throw DataSourceException(
+          'Failed to load entity with id $id: ${e.toString()}');
     }
-
-    notifyGetComplete(entity);
-    return Result.success(entity);
   }
 
   @override
-  Future<Result<E?, Exception>> findOne({
+  Future<E?> findOne({
     FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in StorageRepository',
       );
     }
 
-    final result = await query().findOne();
-    return result;
+    return await query().findOne(
+      options: options,
+      transaction: transaction,
+    );
   }
 
   @override
-  Future<Result<int, Exception>> count({
+  Future<int> count({
     CountOptions? options,
   }) async {
-    final result = await query().count();
-    return result;
+    return await query().count(options: options);
   }
 
   @override
@@ -189,36 +174,32 @@ abstract class StorageRepository<Id, E extends Entity<Id>>
   }
 
   @override
-  Future<Result<E, Exception>> save(
+  Future<E> save(
     E entity, {
     SaveOptions? options,
     TransactionContext? transaction,
   }) async {
     if (transaction != null) {
-      throw UnimplementedError(
+      throw TransactionException(
         'Transaction is not supported in StorageRepository',
       );
     }
 
-    final saveResult = await dataSourceHandler.save(entity);
-
-    return saveResult.map(
-      (success) async {
-        notifySaveComplete(entity);
-        return Result.success(entity);
-      },
-      (err) {
-        return Result.failure(err);
-      },
-    );
+    try {
+      await dataSourceHandler.save(entity);
+      notifySaveComplete(entity);
+      return entity;
+    } catch (e) {
+      throw EntitySaveException(entity, reason: e.toString());
+    }
   }
 
   @override
-  Stream<Result<E?, Exception>> observeById(
+  Stream<E?> observeById(
     Id id, {
     ObserveByIdOptions? options,
   }) {
-    throw UnimplementedError();
+    throw UnimplementedError('observeById is not implemented');
   }
 }
 
@@ -228,11 +209,11 @@ abstract class IDataSourceHandler<Id, E extends Entity<Id>> {
   late final E Function(Map<String, dynamic> json) fromJson;
   late final String Function(Id id) idToString;
 
-  Future<Result<void, Exception>> save(E entity);
-  Future<Result<void, Exception>> saveAll(Iterable<E> entities);
-  Future<Result<List<E>, Exception>> loadAll();
-  Future<Result<void, Exception>> delete(Id id);
-  Future<Result<void, Exception>> clear();
+  Future<void> save(E entity);
+  Future<void> saveAll(Iterable<E> entities);
+  Future<List<E>> loadAll();
+  Future<void> delete(Id id);
+  Future<void> clear();
 }
 
 class InMemoryDataSourceHandler<Id, E extends Entity<Id>>
@@ -240,33 +221,29 @@ class InMemoryDataSourceHandler<Id, E extends Entity<Id>>
   final Map<Type, Map<Id, E>> _data = {};
 
   @override
-  Future<Result<void, Exception>> delete(Id id) async {
+  Future<void> delete(Id id) async {
     _data[E]!.remove(id);
-    return Result.success(null);
   }
 
   @override
-  Future<Result<List<E>, Exception>> loadAll() async {
-    return Result.success(_data[E]!.values.toList());
+  Future<List<E>> loadAll() async {
+    return _data[E]!.values.toList();
   }
 
   @override
-  Future<Result<void, Exception>> save(E entity) async {
+  Future<void> save(E entity) async {
     _data[E]![entity.id] = entity;
-    return Result.success(null);
   }
 
   @override
-  Future<Result<void, Exception>> clear() async {
+  Future<void> clear() async {
     _data[E]!.clear();
-    return Result.success(null);
   }
 
   @override
-  Future<Result<void, Exception>> saveAll(Iterable<E> entities) async {
+  Future<void> saveAll(Iterable<E> entities) async {
     for (var entity in entities) {
       await save(entity);
     }
-    return Result.success(null);
   }
 }

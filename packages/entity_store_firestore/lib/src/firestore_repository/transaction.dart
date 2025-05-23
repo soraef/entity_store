@@ -28,8 +28,7 @@ class FirestoreTransactionRunner
   });
 
   @override
-  Future<Result<(T, FirestoreTransactionContext), Exception>>
-      handleTransaction<T>(
+  Future<(T, FirestoreTransactionContext)> handleTransaction<T>(
     Future<T> Function(FirestoreTransactionContext context) fn,
     TransactionOptions? options,
   ) async {
@@ -45,16 +44,16 @@ class FirestoreTransactionRunner
         (transaction) async {
           final context = FirestoreTransactionContext(transaction);
           final result = await fn(context);
-          return (result, context).toSuccess();
+          return (result, context);
         },
         timeout: firestoreOptions?.timeout ?? const Duration(seconds: 30),
         maxAttempts: firestoreOptions?.maxAttempts ?? 5,
       );
     } catch (e) {
       if (e is Exception) {
-        return Result.failure(e);
+        throw e;
       }
-      return Result.failure(Exception(e));
+      throw TransactionException(e.toString());
     }
   }
 }

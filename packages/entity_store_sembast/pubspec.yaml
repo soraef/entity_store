@@ -1,6 +1,6 @@
 name: entity_store_sembast
 description: sembast operations for entity_store package
-version: 6.0.0-dev.10
+version: 6.0.0-dev.13
 homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_sembast
 
 environment:
@@ -14,10 +14,10 @@ dependencies:
   sembast: ^3.5.0+1
   path_provider: ^2.1.5
   
-  # entity_store: ^6.0.0-dev.10
-  entity_store:
-    path: ../entity_store
-  type_result: ^3.0.0
+  entity_store: ^6.0.0-dev.13
+  # entity_store:
+  #   path: ../entity_store
+  # type_result: ^3.0.0
 
 dev_dependencies:
   flutter_test:

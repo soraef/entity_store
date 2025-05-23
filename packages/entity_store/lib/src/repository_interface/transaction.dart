@@ -17,22 +17,19 @@ abstract class TransactionRunner<
   ///   user.name = 'new name';
   ///   userRepo.save(user, transaction: context);
   /// })
-  Future<Result<T, Exception>> run<T>(
+  Future<T> run<T>(
     Future<T> Function(TTransactionContext context) fn, {
     TransactionOptions? options,
   }) async {
-    final result = await handleTransaction(fn, options);
-    if (result.isFailure) {
-      return result.failure.toFailure();
-    }
-
-    final context = result.success.$2;
+    final (result, context) = await handleTransaction(fn, options);
     context.complete();
-
-    return result.success.$1.toSuccess();
+    return result;
   }
 
-  Future<Result<(T, TTransactionContext), Exception>> handleTransaction<T>(
+  /// ハンドルトランザクション
+  ///
+  /// トランザクションを処理し、結果とトランザクションコンテキストを返す
+  Future<(T, TTransactionContext)> handleTransaction<T>(
     Future<T> Function(TTransactionContext context) fn,
     TransactionOptions? options,
   );
