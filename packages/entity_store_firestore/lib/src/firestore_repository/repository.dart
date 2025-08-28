@@ -9,20 +9,37 @@ abstract class FirestoreRepository<Id, E extends Entity<Id>>
     extends FirestoreRepositoryWithContainer<Id, E> {
   @override
   final EntityStoreController controller;
-  FirebaseFirestore instance;
+
+  FirebaseFirestore get instance => _multiInstance[_currentInstanceId]!;
+
   String get collectionId;
+
+  Map<String, FirebaseFirestore> _multiInstance = {};
+  late String _currentInstanceId;
 
   FirestoreRepository({
     required this.controller,
-    required this.instance,
-  });
+    required FirebaseFirestore instance,
+  }) {
+    _currentInstanceId = 'default';
+    _multiInstance[_currentInstanceId] = instance;
+  }
+
+  FirestoreRepository.multiInstance({
+    required this.controller,
+    required String instanceId,
+    required Map<String, FirebaseFirestore> instances,
+  }) {
+    _multiInstance = instances;
+    _currentInstanceId = instanceId;
+  }
 
   @override
   CollectionReference<Map<String, dynamic>> get collectionRef =>
       instance.collection(collectionId);
 
-  void setInstance(FirebaseFirestore instance) {
-    this.instance = instance;
+  void setInstance(String instanceId) {
+    _currentInstanceId = instanceId;
   }
 }
 

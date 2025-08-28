@@ -105,3 +105,15 @@
 * BREAKING CHANGE: Result type is removed.
 * BREAKING CHANGE: before callback options is removed.
 * BREAKING CHANGE: load entity options is removed.
+
+## 6.0.0-dev.15
+* Update entity_store version
+
+## 6.0.0
+* BREAKING CHANGE: Updated to entity_store 6.0.0 with all breaking changes
+* FEAT: Full Firestore transaction support with TransactionContext
+* FEAT: Improved query builder with type-safe filters and sorting
+* FEAT: Better offline support and conflict resolution
+* FEAT: Enhanced FetchPolicy implementation for cache control
+* REFACTOR: Cleaner repository implementation aligned with entity_store interface
+* FIX: Improved error handling for network and permission issues

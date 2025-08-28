@@ -1,35 +1,32 @@
-name: entity_store_sembast
-description: sembast operations for entity_store package
+name: entity_store_isar
+description: "Isar database integration for EntityStore state management ecosystem"
 version: 6.0.0
-homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_sembast
+homepage: https://github.com/soraef/entity_store
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.3.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-
-  sembast: ^3.5.0+1
-  path_provider: ^2.1.5
-  
   entity_store: ^6.0.0
-  # entity_store:
-  #   path: ../entity_store
-  # type_result: ^3.0.0
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
-  test: ^1.24.0
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.0
+  isar_generator: ^3.1.0+1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-# flutter:
+flutter:
 
   # To add assets to your package, add an assets section, like this:
   # assets:

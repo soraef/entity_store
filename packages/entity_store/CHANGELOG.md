@@ -74,3 +74,15 @@
 
 ## 6.0.0-dev.11
 * BREAKING CHANGE: Result type is removed.
+
+## 6.0.0
+* BREAKING CHANGE: Result type removed - simplifies error handling
+* BREAKING CHANGE: before callback options removed - cleaner API design
+* BREAKING CHANGE: load entity options removed - simplified data fetching
+* FEAT: Full transaction support across all repository implementations
+* FEAT: Improved query API with better type safety and flexibility
+* FEAT: Enhanced error handling with RepositoryException
+* FEAT: StorageRepository and SyncStorageRepository for flexible data sources
+* FEAT: Count method support across all repositories
+* REFACTOR: Cleaner repository interface with consistent method signatures
+* REFACTOR: Improved documentation and type definitions

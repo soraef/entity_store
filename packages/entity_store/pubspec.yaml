@@ -1,6 +1,6 @@
 name: entity_store
 description: Entity State Management Package
-version: 6.0.0-dev.13
+version: 6.0.0
 homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store
 
 environment:
