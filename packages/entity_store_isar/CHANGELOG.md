@@ -1,3 +1,17 @@
+## 6.0.1
+
+### Updated Dependencies
+* **FEAT**: Migrated from official `isar` packages to community-maintained `isar_community` packages
+* **UPDATED**: Now uses `isar_community: ^3.2.0-dev.2` for continued support and development
+* **UPDATED**: Now uses `isar_community_flutter_libs: ^3.2.0-dev.2` for Flutter integration
+* **REMOVED**: Test files and example files to reduce package size
+* **DOCS**: Updated README with isar_community usage instructions
+
+### Dependencies
+- entity_store: ^6.0.0
+- isar_community: ^3.2.0-dev.2
+- isar_community_flutter_libs: ^3.2.0-dev.2
+
 ## 6.0.0-dev.1
 
 ### Initial Release
