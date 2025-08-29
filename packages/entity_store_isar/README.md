@@ -20,15 +20,17 @@ Isar database integration for the EntityStore state management ecosystem.
 Add `entity_store_isar` to your `pubspec.yaml`:
 
 ```yaml
+isar_version: &isar_version 3.2.0-dev.2
+
 dependencies:
-  entity_store_isar: ^6.0.0-dev.1
-  entity_store: ^6.0.0-dev.13
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
+  entity_store_isar: ^6.0.0
+  entity_store: ^6.0.0
+  isar_community: *isar_version
+  isar_community_flutter_libs: *isar_version
 
 dev_dependencies:
-  build_runner: ^2.4.0
-  isar_generator: ^3.1.0+1
+  build_runner: any
+  isar_community_generator: *isar_version
 ```
 
 ## Usage
@@ -57,7 +59,7 @@ class TodoEntity extends Entity<String> {
 ### 2. Create Isar Model
 
 ```dart
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar_community.dart';
 
 @collection
 class TodoModel {

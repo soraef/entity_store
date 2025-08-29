@@ -1,6 +1,6 @@
 import 'package:entity_store/entity_store.dart' as e;
 import 'package:entity_store/entity_store.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 import 'isar_repository_query.dart';
 
@@ -8,7 +8,7 @@ abstract class IsarRepository<Id, E extends e.Entity<Id>, IsarModel>
     with e.EntityChangeNotifier<Id, E>
     implements e.Repository<Id, E> {
   final Isar isar;
-  
+
   @override
   final e.EntityStoreController controller;
 
@@ -19,7 +19,8 @@ abstract class IsarRepository<Id, E extends e.Entity<Id>, IsarModel>
     Id id, {
     e.ObserveByIdOptions? options,
   }) {
-    throw UnimplementedError('observeById is not yet implemented for IsarRepository');
+    throw UnimplementedError(
+        'observeById is not yet implemented for IsarRepository');
   }
 
   @override
@@ -176,11 +177,11 @@ abstract class IsarRepository<Id, E extends e.Entity<Id>, IsarModel>
     await isar.writeTxn(() async {
       await getCollection().putAll(models);
     });
-    
+
     for (var entity in entities) {
       notifySaveComplete(entity);
     }
-    
+
     return entities;
   }
 
@@ -190,15 +191,15 @@ abstract class IsarRepository<Id, E extends e.Entity<Id>, IsarModel>
   }) async {
     final entities = await findAll();
     final ids = entities.map((e) => e.id).toList();
-    
+
     await isar.writeTxn(() async {
       await getCollection().clear();
     });
-    
+
     for (var id in ids) {
       notifyDeleteComplete(id);
     }
-    
+
     return ids;
   }
 

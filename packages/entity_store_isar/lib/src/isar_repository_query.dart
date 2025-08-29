@@ -1,6 +1,6 @@
 import 'package:entity_store/entity_store.dart' as e;
 import 'package:entity_store/entity_store.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 import 'isar_repository.dart';
 
@@ -165,15 +165,16 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
     return _filters.map((e) => e.test(object)).every((e) => e);
   }
 
-  Future<QueryBuilder<IsarModel, IsarModel, QQueryOperations>> _buildQuery() async {
+  Future<QueryBuilder<IsarModel, IsarModel, QQueryOperations>>
+      _buildQuery() async {
     var query = _repository.getCollection().where();
-    
+
     // Note: In Isar 3.x, filters must be applied using filter() method
     // after where() clause. The where() clause is for index-based filtering only.
     // For now, we'll return the basic query and filters will be applied in memory
     // This is a simplified implementation - a production version would need
     // proper index-based filtering
-    
+
     return query;
   }
 
@@ -183,7 +184,7 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
   }) async {
     final query = await _buildQuery();
     final allItems = await query.findAll();
-    
+
     // Apply filters in memory (simplified implementation)
     final filteredItems = _applyFiltersInMemory(allItems);
     return filteredItems.length;
@@ -196,21 +197,22 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
   }) async {
     final query = await _buildQuery();
     final allModels = await query.findAll();
-    
+
     // Apply filters in memory (simplified implementation)
     var filteredModels = _applyFiltersInMemory(allModels);
-    
+
     // Apply sorting
     if (_sorts.isNotEmpty) {
       filteredModels = _applySorting(filteredModels);
     }
-    
+
     // Apply limit
     if (_limitNum != null && filteredModels.length > _limitNum) {
       filteredModels = filteredModels.take(_limitNum).toList();
     }
-    
-    final entities = filteredModels.map((model) => _repository.toEntity(model)).toList();
+
+    final entities =
+        filteredModels.map((model) => _repository.toEntity(model)).toList();
     _repository.notifyListComplete(entities);
     return entities;
   }
@@ -227,17 +229,17 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
   // Helper method to apply filters in memory
   List<IsarModel> _applyFiltersInMemory(List<IsarModel> models) {
     if (_filters.isEmpty) return models;
-    
+
     // This is a simplified implementation
     // In production, you would need to properly convert IsarModel to Map
     // and apply filters based on the actual model structure
     return models;
   }
-  
+
   // Helper method to apply sorting in memory
   List<IsarModel> _applySorting(List<IsarModel> models) {
     if (_sorts.isEmpty) return models;
-    
+
     // This is a simplified implementation
     // In production, you would need to properly sort based on model properties
     return models;
@@ -253,7 +255,8 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
   Stream<List<e.EntityChange<E>>> observeAll({
     e.ObserveAllOptions? options,
   }) {
-    throw UnimplementedError('observeAll is not yet implemented for IsarRepositoryQuery');
+    throw UnimplementedError(
+        'observeAll is not yet implemented for IsarRepositoryQuery');
   }
 
   @override
