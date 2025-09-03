@@ -165,15 +165,195 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
     return _filters.map((e) => e.test(object)).every((e) => e);
   }
 
-  Future<QueryBuilder<IsarModel, IsarModel, QQueryOperations>>
-      _buildQuery() async {
+  Future<QueryBuilder<IsarModel, IsarModel, dynamic>> _buildQuery() async {
     var query = _repository.getCollection().where();
+    for (var filter in _filters) {
+      if (filter.operator == e.FilterOperator.isEqualTo) {
+        query = QueryBuilder.apply(
+          query,
+          (query) => query.addFilterCondition(
+            FilterCondition.equalTo(
+              property: filter.field as String,
+              value: filter.value,
+            ),
+          ),
+        );
+      } else if (filter.operator == e.FilterOperator.isNotEqualTo) {
+        query = QueryBuilder.apply(
+          query,
+          (query) => query.addFilterCondition(
+            FilterGroup.not(
+              FilterCondition.equalTo(
+                property: filter.field as String,
+                value: filter.value,
+              ),
+            ),
+          ),
+        );
+      } else if (filter.operator == e.FilterOperator.isLessThan) {
+        query = QueryBuilder.apply(
+          query,
+          (query) => query.addFilterCondition(
+            FilterCondition.lessThan(
+              property: filter.field as String,
+              value: filter.value,
+            ),
+          ),
+        );
+      } else if (filter.operator == e.FilterOperator.isLessThanOrEqualTo) {
+        query = QueryBuilder.apply(
+          query,
+          (query) => query.addFilterCondition(
+            FilterGroup.or([
+              FilterCondition.lessThan(
+                property: filter.field as String,
+                value: filter.value,
+              ),
+              FilterCondition.equalTo(
+                property: filter.field as String,
+                value: filter.value,
+              ),
+            ]),
+          ),
+        );
+      } else if (filter.operator == e.FilterOperator.isGreaterThan) {
+        query = QueryBuilder.apply(
+          query,
+          (query) => query.addFilterCondition(
+            FilterCondition.greaterThan(
+              property: filter.field as String,
+              value: filter.value,
+            ),
+          ),
+        );
+      } else if (filter.operator == e.FilterOperator.isGreaterThanOrEqualTo) {
+        query = QueryBuilder.apply(
+          query,
+          (query) => query.addFilterCondition(
+            FilterGroup.or([
+              FilterCondition.greaterThan(
+                property: filter.field as String,
+                value: filter.value,
+              ),
+              FilterCondition.equalTo(
+                property: filter.field as String,
+                value: filter.value,
+              ),
+            ]),
+          ),
+        );
+      } else if (filter.operator == e.FilterOperator.arrayContains) {
+        query = QueryBuilder.apply(
+          query,
+          (query) => query.addFilterCondition(
+            FilterCondition.equalTo(
+              property: filter.field as String,
+              value: filter.value,
+            ),
+          ),
+        );
+      } else if (filter.operator == e.FilterOperator.arrayContainsAny) {
+        final values = filter.value as List<Object?>;
+        if (values.isEmpty) {
+          // Empty list should match nothing
+          throw UnimplementedError(
+              'arrayContainsAny with empty list not supported');
+        } else {
+          var conditions = <FilterOperation>[];
+          for (var value in values) {
+            conditions.add(FilterCondition.equalTo(
+              property: filter.field as String,
+              value: value,
+            ));
+          }
+          query = QueryBuilder.apply(
+            query,
+            (query) => query.addFilterCondition(
+              FilterGroup.or(conditions),
+            ),
+          );
+        }
+      } else if (filter.operator == e.FilterOperator.whereIn) {
+        final values = filter.value as List<Object?>;
+        if (values.isEmpty) {
+          // Empty list should match nothing
+          throw UnimplementedError('whereIn with empty list not supported');
+        } else {
+          var conditions = <FilterOperation>[];
+          for (var value in values) {
+            conditions.add(FilterCondition.equalTo(
+              property: filter.field as String,
+              value: value,
+            ));
+          }
+          query = QueryBuilder.apply(
+            query,
+            (query) => query.addFilterCondition(
+              FilterGroup.or(conditions),
+            ),
+          );
+        }
+      } else if (filter.operator == e.FilterOperator.whereNotIn) {
+        final values = filter.value as List<Object?>;
+        if (values.isEmpty) {
+          // No restriction when list is empty - all items match
+        } else {
+          var conditions = <FilterOperation>[];
+          for (var value in values) {
+            conditions.add(FilterCondition.equalTo(
+              property: filter.field as String,
+              value: value,
+            ));
+          }
+          query = QueryBuilder.apply(
+            query,
+            (query) => query.addFilterCondition(
+              FilterGroup.not(
+                FilterGroup.or(conditions),
+              ),
+            ),
+          );
+        }
+      } else if (filter.operator == e.FilterOperator.isNull) {
+        if (filter.value == true) {
+          query = QueryBuilder.apply(
+            query,
+            (query) => query.addFilterCondition(
+              FilterCondition.isNull(
+                property: filter.field as String,
+              ),
+            ),
+          );
+        } else {
+          query = QueryBuilder.apply(
+            query,
+            (query) => query.addFilterCondition(
+              FilterCondition.isNotNull(
+                property: filter.field as String,
+              ),
+            ),
+          );
+        }
+      }
+    }
 
-    // Note: In Isar 3.x, filters must be applied using filter() method
-    // after where() clause. The where() clause is for index-based filtering only.
-    // For now, we'll return the basic query and filters will be applied in memory
-    // This is a simplified implementation - a production version would need
-    // proper index-based filtering
+    for (var sort in _sorts) {
+      query = QueryBuilder.apply(
+        query,
+        (query) => query.addSortBy(
+          sort.field as String,
+          sort.descending ? Sort.desc : Sort.asc,
+        ),
+      );
+    }
+
+    if (_startAfterId != null) {
+      throw UnimplementedError();
+    }
+
+    if (_limitNum != null) {
+      return query.limit(_limitNum);
+    }
 
     return query;
   }
@@ -183,11 +363,17 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
     e.CountOptions? options,
   }) async {
     final query = await _buildQuery();
-    final allItems = await query.findAll();
-
-    // Apply filters in memory (simplified implementation)
-    final filteredItems = _applyFiltersInMemory(allItems);
-    return filteredItems.length;
+    if (query is QueryBuilder<IsarModel, IsarModel, QAfterLimit>) {
+      final result = await query.count();
+      return result;
+    } else if (query is QueryBuilder<IsarModel, IsarModel, QWhere>) {
+      final result = await query.count();
+      return result;
+    } else {
+      throw UnsupportedError(
+        'Query type ${query.runtimeType} is not supported for count',
+      );
+    }
   }
 
   @override
@@ -196,25 +382,21 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
     TransactionContext? transaction,
   }) async {
     final query = await _buildQuery();
-    final allModels = await query.findAll();
-
-    // Apply filters in memory (simplified implementation)
-    var filteredModels = _applyFiltersInMemory(allModels);
-
-    // Apply sorting
-    if (_sorts.isNotEmpty) {
-      filteredModels = _applySorting(filteredModels);
+    if (query is QueryBuilder<IsarModel, IsarModel, QAfterLimit>) {
+      final result = await query.findAll();
+      final entities = result.map((e) => _repository.toEntity(e)).toList();
+      _repository.notifyListComplete(entities);
+      return entities;
+    } else if (query is QueryBuilder<IsarModel, IsarModel, QWhere>) {
+      final result = await query.findAll();
+      final entities = result.map((e) => _repository.toEntity(e)).toList();
+      _repository.notifyListComplete(entities);
+      return entities;
+    } else {
+      throw UnsupportedError(
+        'Query type ${query.runtimeType} is not supported for findAll',
+      );
     }
-
-    // Apply limit
-    if (_limitNum != null && filteredModels.length > _limitNum) {
-      filteredModels = filteredModels.take(_limitNum).toList();
-    }
-
-    final entities =
-        filteredModels.map((model) => _repository.toEntity(model)).toList();
-    _repository.notifyListComplete(entities);
-    return entities;
   }
 
   @override
@@ -222,27 +404,12 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
     e.FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
-    final result = await limit(1).findAll(transaction: transaction);
-    return result.isEmpty ? null : result.first;
-  }
+    final result = await this.limit(1).findAll();
+    if (result.isEmpty) {
+      return null;
+    }
 
-  // Helper method to apply filters in memory
-  List<IsarModel> _applyFiltersInMemory(List<IsarModel> models) {
-    if (_filters.isEmpty) return models;
-
-    // This is a simplified implementation
-    // In production, you would need to properly convert IsarModel to Map
-    // and apply filters based on the actual model structure
-    return models;
-  }
-
-  // Helper method to apply sorting in memory
-  List<IsarModel> _applySorting(List<IsarModel> models) {
-    if (_sorts.isEmpty) return models;
-
-    // This is a simplified implementation
-    // In production, you would need to properly sort based on model properties
-    return models;
+    return result.firstOrNull;
   }
 
   @override
@@ -255,8 +422,7 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
   Stream<List<e.EntityChange<E>>> observeAll({
     e.ObserveAllOptions? options,
   }) {
-    throw UnimplementedError(
-        'observeAll is not yet implemented for IsarRepositoryQuery');
+    throw UnimplementedError();
   }
 
   @override

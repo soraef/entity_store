@@ -1,6 +1,6 @@
 name: entity_store_isar
 description: "Isar database integration for EntityStore state management ecosystem"
-version: 6.0.1
+version: 6.0.2
 homepage: https://github.com/soraef/entity_store
 
 environment:

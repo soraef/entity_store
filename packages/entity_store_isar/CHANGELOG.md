@@ -1,3 +1,21 @@
+## 6.0.2
+
+### Bug Fixes & Improvements
+* **FIXED**: Implemented missing filter operators in IsarRepositoryQuery
+* **FIXED**: `isLessThanOrEqualTo` now correctly uses FilterGroup.or with lessThan and equalTo
+* **FIXED**: `isGreaterThanOrEqualTo` now correctly uses FilterGroup.or with greaterThan and equalTo
+* **FIXED**: `arrayContainsAny` now properly supports multiple values with FilterGroup.or
+* **FIXED**: `whereIn` now properly supports multiple values with FilterGroup.or
+* **FIXED**: `whereNotIn` now properly uses FilterGroup.not with FilterGroup.or
+* **FIXED**: `isNull` filter now properly supports both null and not null conditions
+* **FIXED**: `startAfter` method now returns proper IsarRepositoryQuery instance
+* **FIXED**: `startAfterId` getter now returns the correct value instead of throwing exception
+
+### Dependencies
+- entity_store: ^6.0.0
+- isar_community: ^3.2.0-dev.2
+- isar_community_flutter_libs: ^3.2.0-dev.2
+
 ## 6.0.1
 
 ### Updated Dependencies
