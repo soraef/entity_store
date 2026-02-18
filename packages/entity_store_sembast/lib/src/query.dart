@@ -156,6 +156,7 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
       }
 
       final entity = fromJson(Map<String, dynamic>.from(record.value));
+      repository.notifyGetComplete(entity);
       return entity;
     } catch (e) {
       throw QueryException('Failed to find one entity: $e');

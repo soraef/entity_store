@@ -9,6 +9,11 @@
 * BREAKING CHANGE: before callback options is removed.
 * BREAKING CHANGE: load entity options is removed.
 
+## 6.0.1
+* FIX: `findAll` がEntityStoreに通知せず、UIが更新されないバグを修正
+* FIX: `findOne` がEntityStoreに通知しないバグを修正
+* FIX: `findAll` / `findOne` にFetchPolicyサポートを追加
+
 ## 6.0.0
 * BREAKING CHANGE: Updated to entity_store 6.0.0 with all breaking changes
 * FEAT: Full Sembast local database integration

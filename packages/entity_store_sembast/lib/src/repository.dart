@@ -64,10 +64,22 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
     TransactionContext? transaction,
   }) async {
     try {
+      final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+
+      final storeEntities = controller.getAll<Id, E>();
+      if (fetchPolicy == FetchPolicy.storeOnly) {
+        return storeEntities;
+      }
+
+      if (fetchPolicy == FetchPolicy.storeFirst && storeEntities.isNotEmpty) {
+        return storeEntities;
+      }
+
       final records = await store.find(db);
       final entities = records
           .map((r) => fromJson(Map<String, dynamic>.from(r.value)))
           .toList();
+      notifyListComplete(entities);
       return entities;
     } catch (e) {
       throw RepositoryException('Failed to find all entities: $e');
@@ -143,12 +155,25 @@ abstract class SembastRepository<Id, E extends Entity<Id>>
     TransactionContext? transaction,
   }) async {
     try {
+      final fetchPolicy = FetchPolicyOptions.getFetchPolicy(options);
+
+      final storeEntities = controller.getAll<Id, E>();
+      if (fetchPolicy == FetchPolicy.storeOnly) {
+        return storeEntities.firstOrNull;
+      }
+
+      if (fetchPolicy == FetchPolicy.storeFirst &&
+          storeEntities.isNotEmpty) {
+        return storeEntities.first;
+      }
+
       final record = await store.findFirst(db);
       if (record == null) {
         return null;
       }
 
       final entity = fromJson(Map<String, dynamic>.from(record.value));
+      notifyGetComplete(entity);
       return entity;
     } catch (e) {
       throw RepositoryException('Failed to find one entity: $e');

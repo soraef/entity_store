@@ -1,6 +1,6 @@
 name: entity_store_sembast
 description: sembast operations for entity_store package
-version: 6.0.0
+version: 6.0.1
 homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_sembast
 
 environment:
