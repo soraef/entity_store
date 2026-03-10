@@ -1,4 +1,3 @@
-// Entity操作に関連する基本イベントクラス
 part of '../entity_store.dart';
 
 abstract class EntityEvent<Id, E extends Entity<Id>> {
@@ -8,17 +7,14 @@ abstract class EntityEvent<Id, E extends Entity<Id>> {
   Type get entityType => E;
 }
 
-// Entity追加イベント
 class EntityCreatedEvent<Id, E extends Entity<Id>> extends EntityEvent<Id, E> {
   EntityCreatedEvent(super.entity);
 }
 
-// Entity変更イベント
 class EntityUpdatedEvent<Id, E extends Entity<Id>> extends EntityEvent<Id, E> {
   EntityUpdatedEvent(super.entity);
 }
 
-// Entity削除イベント
 class EntityDeletedEvent<Id, E extends Entity<Id>> extends EntityEvent<Id, E> {
   EntityDeletedEvent(super.entity);
 }

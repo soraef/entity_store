@@ -64,27 +64,6 @@ class EntityStoreController {
   }
 }
 
-class StoreEventCache {
-  final Map<Type, List<PersistenceEvent>> _cache = {};
-
-  Future<void> put(PersistenceEvent event) async {
-    _cache[event.entityType] ??= [];
-    _cache[event.entityType]!.add(event);
-  }
-
-  Future<void> clear<Id, E extends Entity<Id>>() async {
-    _cache[E] = [];
-  }
-
-  Future<void> clearAll() async {
-    _cache.clear();
-  }
-
-  Future<List<PersistenceEvent>> getEvents<Id, E extends Entity<Id>>() async {
-    return _cache[E] ?? [];
-  }
-}
-
 mixin EntityChangeNotifier<Id, E extends Entity<Id>> {
   EntityStoreController get controller;
 

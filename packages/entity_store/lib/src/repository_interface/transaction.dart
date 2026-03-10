@@ -26,9 +26,9 @@ abstract class TransactionRunner<
     return result;
   }
 
-  /// ハンドルトランザクション
+  /// Handles the transaction execution.
   ///
-  /// トランザクションを処理し、結果とトランザクションコンテキストを返す
+  /// Processes the transaction and returns the result along with the transaction context.
   Future<(T, TTransactionContext)> handleTransaction<T>(
     Future<T> Function(TTransactionContext context) fn,
     TransactionOptions? options,
@@ -38,7 +38,7 @@ abstract class TransactionRunner<
 abstract class TransactionContext {
   TransactionContext();
 
-  /// トランザクションが成功された場合に実行する関数のリスト
+  /// List of functions to execute when the transaction commits successfully.
   final List<Function()> _onCommitFunctions = [];
 
   void addOnCommitFunction(Function() fn) {

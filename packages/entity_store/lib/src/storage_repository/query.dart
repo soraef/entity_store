@@ -13,11 +13,6 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
   @override
   final Id? startAfterId;
 
-  List<RepositoryFilter> get getFilters => filters;
-  List<RepositorySort> get getSorts => sorts;
-  int? get getLimit => limitNum;
-  Id? get getStartAfterId => startAfterId;
-
   StorageRepositoryQuery._(
     this._repository,
     this.filters,
@@ -206,7 +201,6 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
       final result = await _repository.dataSourceHandler.loadAll();
       var entities = result.where((e) => test(_repository.toJson(e))).toList();
 
-      final sorts = getSorts;
       for (final sort in sorts.reversed) {
         entities = entities.sorted(
           (a, b) {
@@ -221,13 +215,12 @@ class StorageRepositoryQuery<Id, E extends Entity<Id>>
         );
       }
 
-      final startAfterId = getStartAfterId;
       if (startAfterId != null) {
         entities =
             entities.skipWhile((e) => e.id != startAfterId).skip(1).toList();
       }
 
-      final limit = getLimit;
+      final limit = limitNum;
       if (limit != null) {
         entities = entities.take(limit).toList();
       }

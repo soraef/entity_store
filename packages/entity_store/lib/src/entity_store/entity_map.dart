@@ -111,7 +111,11 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
   }
 
   /// Returns a new [EntityMap] with [other] merged.
-  EntityMap<Id, E> marge(EntityMap<Id, E> other) {
+  @Deprecated('Use merge instead')
+  EntityMap<Id, E> marge(EntityMap<Id, E> other) => merge(other);
+
+  /// Returns a new [EntityMap] with [other] merged.
+  EntityMap<Id, E> merge(EntityMap<Id, E> other) {
     return EntityMap<Id, E>({..._entities, ...other._entities});
   }
 
@@ -124,7 +128,7 @@ class EntityMap<Id, E extends Entity<Id>> extends Equatable {
     EntityMap<Id, E> Function(EntityMap<Id, E> entityMap) f1,
     EntityMap<Id, E> Function(EntityMap<Id, E> entityMap) f2,
   ) {
-    return f1(this).marge(f2(this));
+    return f1(this).merge(f2(this));
   }
 
   /// The current elements of this iterable modified by convert.

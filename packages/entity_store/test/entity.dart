@@ -22,18 +22,17 @@ class User extends Entity<UserId> {
   }
 }
 
-final userConverter = EntityJsonConverter<UserId, User>(
-  fromJson: (json) => User(
-    id: UserId(json["id"]),
-    name: json["name"],
-    age: json["age"],
-  ),
-  toJson: (e) => {
-    "id": e.id.value,
-    "name": e.name,
-    "age": e.age,
-  },
-);
+User userFromJson(Map<String, dynamic> json) => User(
+      id: UserId(json["id"]),
+      name: json["name"],
+      age: json["age"],
+    );
+
+Map<String, dynamic> userToJson(User e) => {
+      "id": e.id.value,
+      "name": e.name,
+      "age": e.age,
+    };
 
 class Store with EntityStoreMixin {
   EntityStore state = EntityStore.empty();

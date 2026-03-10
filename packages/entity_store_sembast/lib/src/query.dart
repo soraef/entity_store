@@ -11,10 +11,10 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
   final Map<String, dynamic> Function(E entity) toJson;
   final E Function(Map<String, dynamic> json) fromJson;
 
-  final List<Filter> _filters = [];
-  final List<SortOrder> _sorts = [];
-  int? _limit;
-  Id? _startAfterId;
+  final List<Filter> _filters;
+  final List<SortOrder> _sorts;
+  final int? _limit;
+  final Id? _startAfterId;
 
   SembastRepositoryQuery({
     required this.repository,
@@ -22,7 +22,30 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
     required this.store,
     required this.toJson,
     required this.fromJson,
-  });
+    List<Filter>? filters,
+    List<SortOrder>? sorts,
+    int? limit,
+    Id? startAfterId,
+  })  : _filters = filters ?? const [],
+        _sorts = sorts ?? const [],
+        _limit = limit,
+        _startAfterId = startAfterId;
+
+  SembastRepositoryQuery._copyWith(
+    SembastRepositoryQuery<Id, E> other, {
+    List<Filter>? filters,
+    List<SortOrder>? sorts,
+    int? limit,
+    Id? startAfterId,
+  })  : repository = other.repository,
+        db = other.db,
+        store = other.store,
+        toJson = other.toJson,
+        fromJson = other.fromJson,
+        _filters = filters ?? other._filters,
+        _sorts = sorts ?? other._sorts,
+        _limit = limit ?? other._limit,
+        _startAfterId = startAfterId ?? other._startAfterId;
 
   @override
   List<RepositoryFilter> get filters => [];
@@ -38,14 +61,15 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
 
   @override
   IRepositoryQuery<Id, E> limit(int limit) {
-    _limit = limit;
-    return this;
+    return SembastRepositoryQuery._copyWith(this, limit: limit);
   }
 
   @override
   IRepositoryQuery<Id, E> orderBy(Object field, {bool descending = false}) {
-    _sorts.add(SortOrder(field.toString(), !descending));
-    return this;
+    return SembastRepositoryQuery._copyWith(
+      this,
+      sorts: [..._sorts, SortOrder(field.toString(), !descending)],
+    );
   }
 
   @override
@@ -63,35 +87,36 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
     List<Object?>? whereNotIn,
     bool? isNull,
   }) {
+    final newFilters = <Filter>[..._filters];
     final fieldStr = field.toString();
     if (isEqualTo != null) {
-      _filters.add(Filter.equals(fieldStr, isEqualTo));
+      newFilters.add(Filter.equals(fieldStr, isEqualTo));
     }
     if (isNotEqualTo != null) {
-      _filters.add(Filter.notEquals(fieldStr, isNotEqualTo));
+      newFilters.add(Filter.notEquals(fieldStr, isNotEqualTo));
     }
     if (isLessThan != null) {
-      _filters.add(Filter.lessThan(fieldStr, isLessThan));
+      newFilters.add(Filter.lessThan(fieldStr, isLessThan));
     }
     if (isLessThanOrEqualTo != null) {
-      _filters.add(Filter.lessThanOrEquals(fieldStr, isLessThanOrEqualTo));
+      newFilters.add(Filter.lessThanOrEquals(fieldStr, isLessThanOrEqualTo));
     }
     if (isGreaterThan != null) {
-      _filters.add(Filter.greaterThan(fieldStr, isGreaterThan));
+      newFilters.add(Filter.greaterThan(fieldStr, isGreaterThan));
     }
     if (isGreaterThanOrEqualTo != null) {
-      _filters.add(
+      newFilters.add(
         Filter.greaterThanOrEquals(fieldStr, isGreaterThanOrEqualTo),
       );
     }
     if (isNull != null) {
       if (isNull) {
-        _filters.add(Filter.isNull(fieldStr));
+        newFilters.add(Filter.isNull(fieldStr));
       } else {
-        _filters.add(Filter.notNull(fieldStr));
+        newFilters.add(Filter.notNull(fieldStr));
       }
     }
-    return this;
+    return SembastRepositoryQuery._copyWith(this, filters: newFilters);
   }
 
   Finder _createFinder() {
@@ -197,8 +222,7 @@ class SembastRepositoryQuery<Id, E extends Entity<Id>>
 
   @override
   IRepositoryQuery<Id, E> startAfter(Id id) {
-    _startAfterId = id;
-    return this;
+    return SembastRepositoryQuery._copyWith(this, startAfterId: id);
   }
 
   @override
