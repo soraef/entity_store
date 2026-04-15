@@ -5,9 +5,10 @@ abstract class EntityStoreDebugger {
 
   EntityStoreDebugger(this.eventStream) {
     eventStream.listen((event) {
-      if (kDebugMode) {
+      assert(() {
         onEvent(event);
-      }
+        return true;
+      }());
     });
   }
 
@@ -24,28 +25,28 @@ class EntityStorePrintDebugger extends EntityStoreDebugger {
   @override
   void onEvent(PersistenceEvent<dynamic, Entity> event) {
     if (event is GetEvent) {
-      debugPrint(
+      print(
         "[GetEvent:${event.entityType}] ${_entityString(
           event.entity,
           showEntityDetail: showEntityDetail,
         )}",
       );
     } else if (event is ListEvent) {
-      debugPrint(
+      print(
         "[ListEvent:${event.entityType}] ${_entitiesString(
           event.entities,
           showEntityDetail: showEntityDetail,
         )}",
       );
     } else if (event is SaveEvent) {
-      debugPrint(
+      print(
         "[SaveEvent:${event.entityType}] ${_entityString(
           event.entity,
           showEntityDetail: showEntityDetail,
         )}",
       );
     } else if (event is DeleteEvent) {
-      debugPrint(
+      print(
         "[DeleteEvent:${event.entityType}] ${event.entityId}",
       );
     }

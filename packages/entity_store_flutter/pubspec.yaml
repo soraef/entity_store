@@ -1,0 +1,19 @@
+name: entity_store_flutter
+description: Flutter integration for the EntityStore core package
+version: 7.0.0
+homepage: https://github.com/soraef/entity_store/tree/main/packages/entity_store_flutter
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  entity_store: ^7.0.0
+  flutter:
+    sdk: flutter
+  provider: ^6.1.1
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+  flutter_test:
+    sdk: flutter

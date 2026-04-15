@@ -1,3 +1,8 @@
+## 7.0.0
+
+- Updated for `entity_store` 7.0.0.
+- Migrated the package manifest and tests to Dart-only tooling.
+
 ## 0.0.1
 
 * TODO: Describe initial release.

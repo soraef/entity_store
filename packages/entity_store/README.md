@@ -4,6 +4,9 @@
 
 ## Overview
 
+`entity_store` now contains only the pure Dart core. Flutter UI integration
+APIs moved to `entity_store_flutter`.
+
 **EntityStore** is a comprehensive state management ecosystem for Flutter application development based on entity-centric design philosophy. It encapsulates business logic within immutable entities, provides abstracted data access through repository patterns, and achieves reactive UI synchronization.
 
 ### 🎯 Design Philosophy
@@ -21,7 +24,7 @@ The EntityStore ecosystem consists of three packages that can be selected based 
 ### 🏛️ entity_store (Core Package)
 ```yaml
 dependencies:
-  entity_store: ^6.0.0-dev.13
+  entity_store: ^7.0.0
 ```
 - **Role**: Foundation for entity-based state management
 - **Features**: Entity abstraction, reactive UI synchronization, basic repository patterns
@@ -30,7 +33,7 @@ dependencies:
 ### 🔥 entity_store_firestore
 ```yaml
 dependencies:
-  entity_store_firestore: ^6.0.0-dev.15
+  entity_store_firestore: ^7.0.0
 ```
 - **Role**: Integration with Firebase Firestore
 - **Features**: Cloud synchronization, real-time updates, offline support, transaction processing
@@ -39,7 +42,7 @@ dependencies:
 ### 💾 entity_store_sembast  
 ```yaml
 dependencies:
-  entity_store_sembast: ^6.0.0-dev.13
+  entity_store_sembast: ^7.0.0
 ```
 - **Role**: Integration with Sembast (NoSQL local database)
 - **Features**: High-performance local storage, complex queries, data encryption support
@@ -274,11 +277,11 @@ dependencies:
     sdk: flutter
   
   # Core package (required)
-  entity_store: ^6.0.0-dev.13
+  entity_store: ^7.0.0
   
   # Choose based on your needs
-  entity_store_firestore: ^6.0.0-dev.15  # Cloud sync
-  entity_store_sembast: ^6.0.0-dev.13    # Local DB
+  entity_store_firestore: ^7.0.0  # Cloud sync
+  entity_store_sembast: ^7.0.0    # Local DB
 ```
 
 ### 2. Basic Setup

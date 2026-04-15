@@ -1,5 +1,5 @@
 import 'package:entity_store/entity_store.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 class Todo extends Entity<String> {
   @override
@@ -244,10 +244,8 @@ void main() {
     });
 
     test('query where filters entities', () async {
-      final result = await repository
-          .query()
-          .where('done', isEqualTo: true)
-          .findAll();
+      final result =
+          await repository.query().where('done', isEqualTo: true).findAll();
       expect(result.length, 1);
       expect(result.first.title, 'Beta');
     });
@@ -258,27 +256,21 @@ void main() {
     });
 
     test('query orderBy sorts entities', () async {
-      final result = await repository
-          .query()
-          .orderBy('title', descending: true)
-          .findAll();
+      final result =
+          await repository.query().orderBy('title', descending: true).findAll();
       expect(result.first.title, 'Gamma');
       expect(result.last.title, 'Alpha');
     });
 
     test('query findOne returns first match', () async {
-      final result = await repository
-          .query()
-          .where('done', isEqualTo: false)
-          .findOne();
+      final result =
+          await repository.query().where('done', isEqualTo: false).findOne();
       expect(result, isNotNull);
     });
 
     test('query count returns number of matches', () async {
-      final count = await repository
-          .query()
-          .where('done', isEqualTo: false)
-          .count();
+      final count =
+          await repository.query().where('done', isEqualTo: false).count();
       expect(count, 2);
     });
 

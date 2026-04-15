@@ -1,3 +1,9 @@
+## 7.0.0
+
+- Updated for `entity_store` 7.0.0.
+- Removed Flutter-specific package dependencies from the package manifest.
+- Kept the repository/query implementation focused on pure Dart usage.
+
 ## 6.0.2
 
 ### Bug Fixes & Improvements

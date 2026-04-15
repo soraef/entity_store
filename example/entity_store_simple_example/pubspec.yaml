@@ -37,6 +37,8 @@ dependencies:
 
   entity_store:
     path: ../../packages/entity_store
+  entity_store_flutter:
+    path: ../../packages/entity_store_flutter
 
 dev_dependencies:
   flutter_test:

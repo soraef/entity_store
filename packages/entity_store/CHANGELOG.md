@@ -1,3 +1,9 @@
+## 7.0.0
+
+- Breaking change: moved Flutter UI integration out of `entity_store` into `entity_store_flutter`.
+- `entity_store` is now the pure Dart core package.
+- Migrated tests and analysis to Dart-only tooling.
+
 ## 0.0.1-dev.1
 
 * init

@@ -2,6 +2,9 @@
 
 # EntityStoreパッケージ
 ## はじめに
+`entity_store` は pure Dart のコア package で、Flutter UI 連携は
+`entity_store_flutter` に分離されています。
+
 EntityStoreは、エンティティを中心とした状態管理を提供することで、Flutterアプリケーションの開発を強化します。このライブラリは、アプリケーションのビジネスロジックをイミュータブルなエンティティにカプセル化し、一元化された状態管理を通じてUIの整合性を保ちます。
 
 以下のTodoTileコンポーネントの例は、EntityStoreがどのようにしてUIコンポーネントと状態を結びつけるかを示しています。
@@ -430,4 +433,3 @@ if (result.isSuccess) {
 
 ## ライセンス
 このプロジェクトはMITライセンスのもとで公開されています。詳細はLICENSEファイルをご覧ください。
-

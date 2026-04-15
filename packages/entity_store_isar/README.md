@@ -23,8 +23,8 @@ Add `entity_store_isar` to your `pubspec.yaml`:
 isar_version: &isar_version 3.2.0-dev.2
 
 dependencies:
-  entity_store_isar: ^6.0.0
-  entity_store: ^6.0.0
+  entity_store_isar: ^7.0.0
+  entity_store: ^7.0.0
   isar_community: *isar_version
   isar_community_flutter_libs: *isar_version
 

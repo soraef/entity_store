@@ -1,5 +1,5 @@
 import 'package:entity_store/entity_store.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('RepositoryFilter', () {
@@ -12,7 +12,8 @@ void main() {
     };
 
     test('isEqualTo matches equal value', () {
-      final filter = RepositoryFilter('name', FilterOperator.isEqualTo, 'Alice');
+      final filter =
+          RepositoryFilter('name', FilterOperator.isEqualTo, 'Alice');
       expect(filter.test(object), true);
     });
 
@@ -90,12 +91,12 @@ void main() {
     });
 
     test('whereIn checks value in list', () {
-      final filter = RepositoryFilter(
-          'name', FilterOperator.whereIn, ['Alice', 'Bob']);
+      final filter =
+          RepositoryFilter('name', FilterOperator.whereIn, ['Alice', 'Bob']);
       expect(filter.test(object), true);
 
-      final filter2 = RepositoryFilter(
-          'name', FilterOperator.whereIn, ['Bob', 'Charlie']);
+      final filter2 =
+          RepositoryFilter('name', FilterOperator.whereIn, ['Bob', 'Charlie']);
       expect(filter2.test(object), false);
     });
 
@@ -104,8 +105,8 @@ void main() {
           'name', FilterOperator.whereNotIn, ['Bob', 'Charlie']);
       expect(filter.test(object), true);
 
-      final filter2 = RepositoryFilter(
-          'name', FilterOperator.whereNotIn, ['Alice', 'Bob']);
+      final filter2 =
+          RepositoryFilter('name', FilterOperator.whereNotIn, ['Alice', 'Bob']);
       expect(filter2.test(object), false);
     });
 

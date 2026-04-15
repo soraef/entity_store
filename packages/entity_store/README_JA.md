@@ -2,6 +2,10 @@
 
 ## 概要
 
+`entity_store` は pure Dart のコアのみを持つ構成に変更され、Flutter
+向けの `EntityStoreNotifier` / `EntityStoreProviderScope` / `BuildContext`
+拡張は `entity_store_flutter` に移動しました。
+
 **EntityStore**は、エンティティ中心の設計思想に基づく、Flutter アプリケーション開発のための包括的な状態管理エコシステムです。ビジネスロジックを不変なエンティティに封じ込め、リポジトリパターンによる抽象化されたデータアクセス、そしてリアクティブなUI同期を実現します。
 
 ### 🎯 設計思想
@@ -19,7 +23,7 @@ EntityStoreエコシステムは、用途に応じて選択できる3つのパ�
 ### 🏛️ entity_store (コアパッケージ)
 ```yaml
 dependencies:
-  entity_store: ^6.0.0-dev.13
+  entity_store: ^7.0.0
 ```
 - **役割**: エンティティベース状態管理の基盤機能
 - **機能**: Entity抽象化、リアクティブUI同期、基本的なリポジトリパターン
@@ -28,7 +32,7 @@ dependencies:
 ### 🔥 entity_store_firestore
 ```yaml
 dependencies:
-  entity_store_firestore: ^6.0.0-dev.15
+  entity_store_firestore: ^7.0.0
 ```
 - **役割**: Firebase Firestore との統合
 - **機能**: クラウド同期、リアルタイム更新、オフライン対応、トランザクション処理
@@ -37,7 +41,7 @@ dependencies:
 ### 💾 entity_store_sembast  
 ```yaml
 dependencies:
-  entity_store_sembast: ^6.0.0-dev.13
+  entity_store_sembast: ^7.0.0
 ```
 - **役割**: Sembast（NoSQLローカルDB）との統合
 - **機能**: 高性能ローカルストレージ、複雑なクエリ、データ暗号化対応
@@ -272,11 +276,11 @@ dependencies:
     sdk: flutter
   
   # 基本パッケージ（必須）
-  entity_store: ^6.0.0-dev.13
+  entity_store: ^7.0.0
   
   # 用途に応じて選択
-  entity_store_firestore: ^6.0.0-dev.15  # クラウド同期
-  entity_store_sembast: ^6.0.0-dev.13    # ローカルDB
+  entity_store_firestore: ^7.0.0  # クラウド同期
+  entity_store_sembast: ^7.0.0    # ローカルDB
 ```
 
 ### 2. 基本セットアップ

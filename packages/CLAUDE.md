@@ -103,7 +103,7 @@ context.selectAll<String, TodoEntity, R>((entities) => ...)
 ## Version Requirements
 - Dart SDK: ≥3.3.0
 - Flutter: ≥1.17.0
-- Current package versions: 6.0.0-dev series (pre-release)
+- Current package versions: 7.0.0 series
 
 ## Important Notes
 - The project uses FVM (Flutter Version Manager) - SDK path is `.fvm/flutter_sdk`

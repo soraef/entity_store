@@ -34,6 +34,8 @@ dependencies:
 
   entity_store:
     path: ../../packages/entity_store
+  entity_store_flutter:
+    path: ../../packages/entity_store_flutter
 
   entity_store_firestore:
     path: ../../packages/entity_store_firestore
@@ -41,6 +43,8 @@ dependencies:
 dependency_overrides:
   entity_store:
     path: ../../packages/entity_store
+  entity_store_flutter:
+    path: ../../packages/entity_store_flutter
 
   entity_store_firestore:
     path: ../../packages/entity_store_firestore

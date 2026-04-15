@@ -1,4 +1,5 @@
 import 'package:entity_store/entity_store.dart';
+import 'package:entity_store_flutter/entity_store_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final entityStore = Provider(

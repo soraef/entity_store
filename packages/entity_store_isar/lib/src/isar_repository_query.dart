@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'package:entity_store/entity_store.dart' as e;
 import 'package:entity_store/entity_store.dart';
 import 'package:isar_community/isar.dart';
@@ -404,7 +406,7 @@ class IsarRepositoryQuery<Id, E extends e.Entity<Id>, IsarModel>
     e.FindOneOptions? options,
     TransactionContext? transaction,
   }) async {
-    final result = await this.limit(1).findAll();
+    final result = await limit(1).findAll();
     if (result.isEmpty) {
       return null;
     }

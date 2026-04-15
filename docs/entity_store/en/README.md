@@ -2,6 +2,9 @@
 
 # EntityStore Package
 ## Introduction
+`entity_store` is the pure Dart core package. Flutter UI integration now lives
+in `entity_store_flutter`.
+
 EntityStore enhances Flutter application development by offering state management centered around entities. This library encapsulates the application's business logic within immutable entities and maintains UI consistency through centralized state management.
 
 The following TodoTile component example demonstrates how EntityStore connects UI components with their state.

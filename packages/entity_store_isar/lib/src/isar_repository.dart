@@ -1,3 +1,5 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:entity_store/entity_store.dart' as e;
 import 'package:entity_store/entity_store.dart';
 import 'package:isar_community/isar.dart';

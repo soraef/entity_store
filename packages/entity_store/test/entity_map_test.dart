@@ -1,5 +1,5 @@
-import 'package:entity_store/src/entity_store.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:entity_store/entity_store.dart';
+import 'package:test/test.dart';
 
 class User extends Entity<String> {
   @override

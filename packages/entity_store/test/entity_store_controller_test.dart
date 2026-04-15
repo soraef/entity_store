@@ -1,5 +1,5 @@
-import 'package:entity_store/src/entity_store.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:entity_store/entity_store.dart';
+import 'package:test/test.dart';
 
 class User extends Entity<String> {
   @override
@@ -137,8 +137,8 @@ void main() {
       final events = <EntityEvent>[];
       controller.entityEventStream.listen(events.add);
 
-      controller.dispatch(
-          SaveEvent<String, User>.now(User(id: '1', name: 'Alice')));
+      controller
+          .dispatch(SaveEvent<String, User>.now(User(id: '1', name: 'Alice')));
       await Future.delayed(const Duration(milliseconds: 50));
 
       expect(events.length, 1);
@@ -176,8 +176,8 @@ void main() {
   group('EntityStoreController.empty', () {
     test('empty controller does not store entities', () {
       final emptyController = EntityStoreController.empty();
-      emptyController.dispatch(
-          SaveEvent<String, User>.now(User(id: '1', name: 'Alice')));
+      emptyController
+          .dispatch(SaveEvent<String, User>.now(User(id: '1', name: 'Alice')));
       expect(emptyController.getById<String, User>('1'), null);
     });
   });

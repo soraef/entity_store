@@ -1,8 +1,8 @@
 import 'package:entity_store/entity_store.dart';
 import 'package:entity_store_sembast/entity_store_sembast.dart';
 import 'package:entity_store_sembast/src/repository.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:sembast/sembast_memory.dart';
+import 'package:test/test.dart';
 
 class Store with EntityStoreMixin {
   EntityStore state = EntityStore.empty();

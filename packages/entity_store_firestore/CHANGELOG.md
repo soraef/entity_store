@@ -1,3 +1,8 @@
+## 7.0.0
+
+- Updated for `entity_store` 7.0.0.
+- Kept Firestore integration as a Flutter-based package.
+
 ## 0.0.1
 
 * TODO: Describe initial release.
