@@ -129,20 +129,23 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
 
     var entites = objects.where(test);
 
-    if (query.startAfterId != null) {
-      entites = entites.skipWhile((e) => e['id'] != query.startAfterId);
-    }
-
-    if (query.limitNum != null) {
-      entites = entites.take(query.limitNum!);
-    }
-
+    // Sort before paging, as the database backends do: `orderBy(...).limit(n)`
+    // is the first n in that order, and `startAfter` is a position in it.
+    // (Sorting after `limit` used to sort whichever n came first.)
     if (query.sorts.isNotEmpty) {
       final sort = query.sorts.first;
       entites = entites.toList()
         ..sort((a, b) => sort.descending
             ? _compareNullable(b[sort.field], a[sort.field])
             : _compareNullable(a[sort.field], b[sort.field]));
+    }
+
+    if (query.startAfterId != null) {
+      entites = entites.skipWhile((e) => e['id'] != query.startAfterId);
+    }
+
+    if (query.limitNum != null) {
+      entites = entites.take(query.limitNum!);
     }
 
     return entites.toList();
