@@ -1,0 +1,6 @@
+# Keep build output and tool state out of the published archive. These
+# directories are tracked in git by accident; 6.0.0 was published without
+# them (164 KB).
+build/
+.dart_tool/
+pubspec.lock
