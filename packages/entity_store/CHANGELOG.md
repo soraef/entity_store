@@ -86,3 +86,6 @@
 * FEAT: Count method support across all repositories
 * REFACTOR: Cleaner repository interface with consistent method signatures
 * REFACTOR: Improved documentation and type definitions
+## 6.0.1
+* FIX: Sorting the in-memory query results (`IRepositoryQuery.findEntities`) by a field that is null on some records no longer throws "Null check operator used on a null value". Nulls order like SQLite: first ascending, last descending.
+* FIX: `findEntities` now sorts before applying `startAfter` and `limit`, so `orderBy(...).limit(n)` returns the first n in that order (it used to take n in insertion order and then sort them), matching the database backends.
