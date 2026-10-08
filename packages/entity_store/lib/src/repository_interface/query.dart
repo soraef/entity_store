@@ -140,16 +140,22 @@ abstract class IRepositoryQuery<Id, E extends Entity<Id>> {
     if (query.sorts.isNotEmpty) {
       final sort = query.sorts.first;
       entites = entites.toList()
-        ..sort((a, b) {
-          if (sort.descending) {
-            return b[sort.field]!.compareTo(a[sort.field]);
-          } else {
-            return a[sort.field]!.compareTo(b[sort.field]);
-          }
-        });
+        ..sort((a, b) => sort.descending
+            ? _compareNullable(b[sort.field], a[sort.field])
+            : _compareNullable(a[sort.field], b[sort.field]));
     }
 
     return entites.toList();
+  }
+
+  /// Orders a missing (null) value before any present one, like SQLite does,
+  /// so the in-memory result agrees with the backends' SQL ordering: nulls
+  /// first ascending, last descending. Previously a null field threw
+  /// "Null check operator used on a null value" and failed the whole query.
+  static int _compareNullable(dynamic a, dynamic b) {
+    if (a == null) return b == null ? 0 : -1;
+    if (b == null) return 1;
+    return (a as Comparable<dynamic>).compareTo(b);
   }
 }
 

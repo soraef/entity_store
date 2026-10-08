@@ -8,7 +8,7 @@ EntityStore is a Dart/Flutter monorepo providing entity-centric state management
 
 ## Packages
 
-- **entity_store** (v6.0.0) — Core package: `Entity<Id>` interface, `EntityStore`, `EntityStoreController`, `EntityStoreNotifier`, `Repository` interface, `StorageRepository` with `IDataSourceHandler`, and Provider-based UI extensions (`watchOne`, `watchAll`, `selectOne`, `selectAll`, `readOne`, `readAll`).
+- **entity_store** (v6.0.1) — Core package: `Entity<Id>` interface, `EntityStore`, `EntityStoreController`, `EntityStoreNotifier`, `Repository` interface, `StorageRepository` with `IDataSourceHandler`, and Provider-based UI extensions (`watchOne`, `watchAll`, `selectOne`, `selectAll`, `readOne`, `readAll`).
 - **entity_store_firestore** (v6.0.0) — Firestore backend via `cloud_firestore`. Supports transactions.
 - **entity_store_sembast** (v6.0.1) — Sembast local database backend.
 - **entity_store_isar** (v6.0.2) — Isar database backend using `isar_community` packages.
